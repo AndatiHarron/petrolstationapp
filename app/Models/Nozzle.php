@@ -25,6 +25,10 @@ class Nozzle extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    public function station(): BelongsTo {
+        return $this->belongsTo(Station::class);
+    }
+
     public function tank(): BelongsTo {
         return $this->belongsTo(Tank::class);
     }

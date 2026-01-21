@@ -63,6 +63,7 @@ class DevSeeder extends Seeder
         Nozzle::create([
             'id' => str()->uuid(),
             'organization_id' => $org->id,
+            'station_id' => $station->id,
             'tank_id' => $tank->id,
             'name' => 'Pump 1 - Nozzle A',
             'digits' => 7,

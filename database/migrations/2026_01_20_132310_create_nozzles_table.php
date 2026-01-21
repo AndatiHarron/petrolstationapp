@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('nozzles', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('organization_id')->index();
+            $table->foreignUuid('station_id')->constrained('stations');
             $table->foreignUuid('tank_id')->constrained('tanks')->cascadeOnDelete();
             $table->string('name');
             $table->integer('digits')->default(7);
