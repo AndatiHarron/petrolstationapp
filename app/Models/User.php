@@ -40,7 +40,6 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
-    protected mixed $organization_id;
 
     /**
      * Get the attributes that should be cast.

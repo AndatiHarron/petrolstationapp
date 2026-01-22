@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Filament\Resources\Shifts\RelationManagers\MeterReadingsRelationManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -26,6 +27,13 @@ class ShiftResource extends JsonResource
                 'variance' => (float) $this->cash_variance
             ],
             'readings' => $this->whenLoaded('meterReadings')
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            MeterReadingsRelationManager::class,
         ];
     }
 }

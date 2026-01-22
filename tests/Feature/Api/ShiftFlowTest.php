@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\seed;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
@@ -15,7 +17,9 @@ beforeEach(function () {
     seed(DevSeeder::class);
 });
 
-test('full shift lifecycle with perfect math', function () {
+test('full shift lifecycle with perfect math and image evidence', function () {
+    Storage::fake('public');
+
     $user = User::where('email', 'attendant@octane.com')->first();
     actingAs($user);
 
@@ -30,12 +34,17 @@ test('full shift lifecycle with perfect math', function () {
     // Price = 180. Expected Cash = 18,000.
     // Tank Dip should drop by 20mm (since 1mm = 5L in our Seeder).
     $payload = [
-        'cash_collected' => 18000,
+        'payments' => [
+            'cash' => 18000,
+            'mpesa' => 0,
+            'credit' => 0,
+        ],
         'meters' => [
             [
                 'nozzle_id' => $nozzle->id,
                 'opening_reading' => 5000,
                 'closing_reading' => 5100,
+                'evidence' => UploadedFile::fake()->image('pump_reading.jpg'),
             ]
         ],
         'dips' => [
@@ -51,7 +60,13 @@ test('full shift lifecycle with perfect math', function () {
     $lockResponse->assertStatus(200)
         ->assertJsonPath('data.status', 'LOCKED')
         ->assertJsonPath('data.financials.expected', 18000)
+        ->assertJsonPath('data.financials.collected', 18000)
         ->assertJsonPath('data.financials.variance', 0);
+
+    $evidencePath = $lockResponse->json('data.readings.0.evidence_path');
+    expect($evidencePath)->not->toBeNull();
+
+    Storage::disk('public')->assertExists($evidencePath);
 });
 
 test('detects theft variance', function () {
@@ -64,7 +79,9 @@ test('detects theft variance', function () {
     $tank = Tank::first();
 
     $payload = [
-        'cash_collected' => 13000,
+        'payments' => [
+            'cash' => 13000,
+        ],
         'meters' => [
             [
                 'nozzle_id' => $nozzle->id,

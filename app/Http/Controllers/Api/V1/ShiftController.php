@@ -73,31 +73,63 @@ class ShiftController extends Controller
         }
 
         $validated = $request->validate([
-            'cash_collected' => 'required|numeric|min:0',
+            'payments' => 'required|array',
+            'payments.cash' => 'nullable|numeric|min:0',
+            'payments.mpesa' => 'nullable|numeric|min:0',
+            'payments.credit' => 'nullable|numeric|min:0',
             'meters' => 'required|array',
             'meters.*.nozzle_id' => 'required|exists:nozzles,id',
             'meters.*.opening_reading' => 'required|numeric',
             'meters.*.closing_reading' => 'required|numeric',
+            'meters.*.evidence' => 'nullable|image|max:1520',
             'dips' => 'required|array',
             'dips.*.tank_id' => 'required|exists:tanks,id',
             'dips.*.dip_mm' => 'required|numeric',
         ]);
 
-//        try {
+        try {
+            $formattedMeters = [];
+            foreach ($request->input('meters') as $index => $meterData) {
+                $evidencePath = null;
+
+                if ($request->hasFile("meters.{$index}.evidence")) {
+                    $file = $request->file("meters.{$index}.evidence");
+                    $evidencePath = $file->store('meter-evidence', 'public');
+                }
+
+                $formattedMeters[] = [
+                    'nozzle_id' => $meterData['nozzle_id'],
+                    'closing_reading' => $meterData['closing_reading'],
+                    'evidence_path' => $evidencePath,
+                ];
+            }
+
+            $formattedDips = [];
+            foreach ($request->input('dips') as $dipData) {
+                $formattedDips[] = [
+                    'tank_id' => $dipData['tank_id'],
+                    'dip_mm' => $dipData['dip_mm'],
+                ];
+            }
+
+            $payments = $request->input('payments', []);
+
             $updatedShift = $this->reconciliationService->reconcile(
                 $shift,
-                $validated['meters'],
-                $validated['dips'],
-                $validated['cash_collected'],
+                $formattedMeters,
+                $formattedDips,
+                $payments
             );
+
+            $updatedShift->load(['meterReadings', 'dipReadings']);
 
             return new ShiftResource($updatedShift);
 
-//        } catch (\Exception $e) {
-//            return response()->json([
-//                'error' => $e->getMessage(),
-//            ], 500);
-//        }
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

@@ -15,6 +15,7 @@ class Payment extends Model
     public $incrementing = false;
 
     protected $keyType = 'string';
+    protected $guarded = [];
 
     public function organization(): BelongsTo
     {

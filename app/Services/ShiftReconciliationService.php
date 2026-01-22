@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\DipReading;
 use App\Models\MeterReading;
 use App\Models\Nozzle;
 use App\Models\Shift;
 use App\Models\Tank;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Throwable;
 
 class ShiftReconciliationService
@@ -14,68 +16,149 @@ class ShiftReconciliationService
     /**
      * @throws Throwable
      */
-    public function reconcile(Shift $shift, array $meterData, array $dipData, float $cashCollected)
+    public function reconcile(Shift $shift, array $meterData, array $dipData, array $payments)
     {
-        return DB::transaction(function () use ($shift, $meterData, $dipData, $cashCollected) {
-           $totalRevenue = 0;
-           $totalLitersSold = 0;
+        return DB::transaction(function () use ($shift, $meterData, $dipData, $payments) {
+            // Process Meter Readings (Calculate Expected Cash)
+            $financials = $this->processMeters($shift, $meterData);
 
-          foreach ($meterData as $reading) {
-              $nozzle = Nozzle::findOrFail($reading['nozzle_id']);
+            // Process Payments
+            $totalCollected = $this->savePayments($shift, $payments);
 
-              $volume = $this->calculateVolume(
-                  $reading['opening_reading'],
-                  $reading['closing_reading'],
-                  $nozzle->digits
-              );
+            // Process Dip Readings
+            $stockResults = $this->processDips($shift, $dipData, $financials['volume_sold_per_tank']);
 
-              $price = $nozzle->tank->product->current_price;
-              $value = $volume * $price;
+            $shift->update([
+                'status' => 'LOCKED',
+                'locked_at' => now(),
 
-              MeterReading::create([
-                  'shift_id' => $shift->id,
-                  'nozzle_id' => $nozzle->id,
-                  'opening_reading' => $reading['opening_reading'],
-                  'closing_reading' => $reading['closing_reading'],
-                  'volume_sold' => $volume,
-                  'price_per_liter' => $price,
-                  'total_value' => $value,
-              ]);
+                'total_expected_cash' => $financials['total_expected'],
+                'total_collected_cash' => $totalCollected,
+                'cash_variance' => $totalCollected - $financials['total_expected'],
 
-              $totalRevenue += $value;
-              $totalLitersSold += $volume;
-          }
+                'total_stock_sold_liters' => $financials['total_volume'],
+                'stock_variance_liters' => $stockResults['net_variance'],
+            ]);
 
-          $totalStockDiff = 0;
-
-          foreach ($dipData as $dip) {
-              $tank = Tank::findOrFail($dip['tank_id']);
-
-              $physicalVolume = $this->calculateTankVolume($tank, $dip['dip_mm']);
-
-              $expectedVolume = $tank->current_volume - $totalLitersSold;
-              $variance = $physicalVolume - $expectedVolume;
-
-              $tank->update([
-                  'current_volume' => $physicalVolume,
-                  'current_dip_mm' => $dip['dip_mm'],
-              ]);
-
-              $totalStockDiff += $variance;
-          }
-
-              $shift->update([
-                  'status' => 'LOCKED',
-                  'locked_at' => now(),
-                  'total_expected_cash' => $totalRevenue,
-                  'total_collected_cash' => $cashCollected,
-                  'cash_variance' => $cashCollected - $totalRevenue,
-                  'total_stock_sold_liters' => $totalLitersSold,
-                  'stock_variance_liters' => $totalStockDiff
-              ]);
-
-          return $shift;
+            return $shift;
         });
+    }
+
+    protected function processMeters(Shift $shift, array $meters) {
+        $totalExpected = 0;
+        $totalVolume = 0;
+        $volumePerTank = [];
+
+        foreach ($meters as $meter) {
+            $nozzle = Nozzle::with(['tank.product'])->find($meter['nozzle_id']);
+
+            $opening = (float) $nozzle->current_reading;
+            $closing = (float) $meter['closing_reading'];
+
+            $digits = (int) ($nozzle->digits ?? 7);
+            $maxLimit = pow(10, $digits);
+
+            if($opening > $closing) {
+                $threshold = $maxLimit * 0.9;
+
+                if($opening < $threshold) {
+                    throw new \Exception(
+                        "Error on Nozzle [{$nozzle->name}]: Closing reading ({$closing}) cannot be less than Opening reading ({$opening}). check for typos."
+                    );
+                }
+
+                $volume = ($maxLimit - $opening) + $closing;
+            } else {
+                $volume = $closing - $opening;
+            }
+
+            $price = (float) $nozzle->tank->product->current_price;
+            $value = $volume * $price;
+
+            MeterReading::create([
+                'id' => (string) Str::uuid(),
+                'organization_id' => $shift->organization_id,
+                'shift_id' => $shift->id,
+                'nozzle_id' => $nozzle->id,
+                'opening_reading' => $opening,
+                'closing_reading' => $closing,
+                'volume_sold' => $volume,
+                'price_per_liter' => $price,
+                'total_value' => $value,
+                'evidence_path' => $meter['evidence_path'] ?? null,
+            ]);
+
+            $nozzle->update([
+                'current_reading' => $closing
+            ]);
+
+            $totalExpected += $value;
+            $totalVolume += $volume;
+
+            $tankId = $nozzle->tank_id;
+            if (!isset($volumePerTank[$tankId])) $volumePerTank[$tankId] = 0;
+            $volumePerTank[$tankId] += $volume;
+        }
+
+        return [
+            'total_expected' => $totalExpected,
+            'total_volume' => $totalVolume,
+            'volume_sold_per_tank' => $volumePerTank
+        ];
+    }
+
+    protected function processDips (Shift $shift, array $dips, array $salesByTank) {
+        $netVariance = 0;
+
+        foreach ($dips as $dip) {
+            $tank = Tank::findOrFail($dip['tank_id']);
+
+            $currentVolume = $this->calculateTankVolume($tank, $dip['dip_mm']);
+
+            $soldFromTank = $salesByTank[$tank->id] ?? 0;
+            $expectedVolume = $tank->current_volume - $soldFromTank;
+
+            $variance = $currentVolume - $expectedVolume;
+
+            DipReading::create([
+                'id' => (string) Str::uuid(),
+                'organization_id' => $shift->organization_id,
+                'shift_id' => $shift->id,
+                'tank_id' => $tank->id,
+                'dip_mm' => $dip['dip_mm'],
+                'volume_liters' => $currentVolume
+            ]);
+
+            $tank->update([
+                'current_volume' => $currentVolume,
+                'current_dip_mm' => $dip['dip_mm'],
+            ]);
+
+            $netVariance += $variance;
+        }
+
+        return [
+          'net_variance' => $netVariance,
+        ];
+    }
+
+    protected function savePayments(Shift $shift, array $payments) {
+        $total = 0;
+
+        $shift->payments()->delete();
+
+        foreach ($payments as $method => $amount) {
+            if($amount > 0){
+                $shift->payments()->create([
+                    'organization_id' =>  $shift->organization_id,
+                    'method' => $method,
+                    'amount' => $amount,
+                ]);
+                $total += $amount;
+            }
+        }
+
+        return $total;
     }
 
     private function calculateVolume(float $open, float $close, int $digits): float
@@ -88,29 +171,41 @@ class ShiftReconciliationService
         return ($maxVal - $open) + $close;
     }
 
-    private function calculateTankVolume(Tank $tank, float $dipMm) : float {
-        if (empty($tank->calibration_chart)) {
-            return 0;
+    private function calculateTankVolume(Tank $tank, float $mm) : float {
+        $chart = $tank->calibration_chart;
+
+        if (empty($chart)) return 0;
+
+        // Force sort by mm asc
+        usort($chart, fn($a, $b) => $a['mm'] <=> $b['mm']);
+
+        // Check bounds
+        $minNode = $chart[0];
+        $maxNode = end($chart);
+
+        // If dip is BELOW the lowest chart point, it's empty
+        if ($mm < $minNode['mm']) return 0;
+
+        // If dip is ABOVE the highest chart point, cap it at Max Capacity
+        if ($mm > $maxNode['mm']) return $maxNode['liters'];
+
+        // Linear Interpolation
+        for ($i = 0; $i < count($chart) - 1; $i++) {
+            $lower = $chart[$i];
+            $upper = $chart[$i+1];
+
+            if ($mm >= $lower['mm'] && $mm <= $upper['mm']) {
+                $rangeMm = $upper['mm'] - $lower['mm'];
+                $rangeLiters = $upper['liters'] - $lower['liters'];
+
+                // Prevent division by zero
+                if ($rangeMm == 0) return $lower['liters'];
+
+                $ratio = ($mm - $lower['mm']) / $rangeMm;
+                return $lower['liters'] + ($ratio * $rangeLiters);
+            }
         }
 
-        $chart = collect($tank->calibration_chart)->sortBy('mm')->values();
-
-        $lower = $chart->where('mm', '<=', $dipMm)->last();
-        $upper = $chart->where('mm', '>=', $dipMm)->first();
-
-        if(!$lower) {
-            return 0;
-        }
-
-        if (!$upper || $lower['mm'] === $upper['mm']) {
-            return $lower['liters'];
-        }
-
-        // CORE MATH: Linear Interpolation Formula
-        // Y = Y1 + (X - X1) * ((Y2 - Y1) / (X2 - X1))
-        $slope = ($upper['liters'] - $lower['liters']) / ($upper['mm'] - $lower['mm']);
-        $interpolatedVolume = $lower['liters'] + ($dipMm - $lower['mm']) * $slope;
-
-        return round($interpolatedVolume, 2);
+        return $maxNode['liters'];
     }
 }

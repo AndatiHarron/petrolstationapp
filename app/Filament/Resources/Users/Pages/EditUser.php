@@ -3,17 +3,17 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Resources\Users\UserResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ManageUsers extends ManageRecords
+class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

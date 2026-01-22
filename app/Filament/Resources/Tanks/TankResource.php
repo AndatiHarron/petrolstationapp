@@ -63,7 +63,7 @@ class TankResource extends Resource
                         ->default(0),
 
                     TextInput::make('current_dip_mm')
-                        ->label('Current Dip Minutes (mm)')
+                        ->label('Current Dip Reading (mm)')
                         ->numeric()
                         ->default(0),
                 ])->columns(2),
