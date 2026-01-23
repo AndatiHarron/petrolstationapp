@@ -36,6 +36,7 @@ class ShiftReconciliationService
                 'total_expected_cash' => $financials['total_expected'],
                 'total_collected_cash' => $totalCollected,
                 'cash_variance' => $totalCollected - $financials['total_expected'],
+                'total_tax_collected' => $financials['total_tax'],
 
                 'total_stock_sold_liters' => $financials['total_volume'],
                 'stock_variance_liters' => $stockResults['net_variance'],
@@ -48,6 +49,7 @@ class ShiftReconciliationService
     protected function processMeters(Shift $shift, array $meters) {
         $totalExpected = 0;
         $totalVolume = 0;
+        $totalTaxLiability = 0;
         $volumePerTank = [];
 
         foreach ($meters as $meter) {
@@ -75,6 +77,17 @@ class ShiftReconciliationService
 
             $price = (float) $nozzle->tank->product->current_price;
             $value = $volume * $price;
+
+            $vatRate = (float) $nozzle->tank->product->vat_rate;
+
+            if ($vatRate > 0) {
+                $rawTax = $value - ($value / (1 + ($vatRate / 100)));
+                $taxComponent = round($rawTax, 2);
+            } else {
+                $taxComponent = 0;
+            }
+
+            $totalTaxLiability += $taxComponent;
 
             MeterReading::create([
                 'id' => (string) Str::uuid(),
@@ -104,6 +117,7 @@ class ShiftReconciliationService
         return [
             'total_expected' => $totalExpected,
             'total_volume' => $totalVolume,
+            'total_tax' => $totalTaxLiability,
             'volume_sold_per_tank' => $volumePerTank
         ];
     }

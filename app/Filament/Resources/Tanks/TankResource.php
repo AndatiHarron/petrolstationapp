@@ -34,7 +34,6 @@ class TankResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-
             Section::make('Details')
                 ->schema([
                     Select::make('station_id')

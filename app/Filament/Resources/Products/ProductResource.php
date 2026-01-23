@@ -13,6 +13,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ColorColumn;
@@ -31,15 +32,27 @@ class ProductResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            TextInput::make('name')
-            ->required()
-            ->placeholder('Premium Petrol'),
+            Section::make('Product Details')->schema([
+                TextInput::make('name')
+                    ->required()
+                    ->placeholder('Premium Petrol'),
+            ]),
 
-            TextInput::make('current_price')
-            ->label('Price Per Liter (KES)')
-            ->numeric()
-            ->prefix('KES')
-            ->required(),
+            Section::make('Pricing & Tax')->schema([
+                TextInput::make('current_price')
+                    ->label('Selling Price / Liter')
+                    ->numeric()
+                    ->prefix('KES')
+                    ->required(),
+
+                TextInput::make('vat_rate')
+                    ->label('VAT Rate (%)')
+                    ->numeric()
+                    ->default(16)
+                    ->suffix('%')
+                    ->helperText('Standard fuel tax rate is 16%. Input 0 for exempt products.')
+                    ->required(),
+            ]),
         ]);
     }
 
