@@ -8,6 +8,7 @@ use App\Models\Shift;
 use App\Services\ShiftReconciliationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ShiftController extends Controller
 {
@@ -54,7 +55,13 @@ class ShiftController extends Controller
         }
 
         // 2. Create the Shift
-        $stationId = Auth::user()->station_id ?? 1;
+        $stationId = Auth::user()->station_id;
+
+        if(!$stationId) {
+            return response()->json([
+                'message' => 'User is not assigned to a station.'
+            ], 400);
+        }
 
         $shift = Shift::create([
             'station_id' => $stationId,
@@ -73,18 +80,24 @@ class ShiftController extends Controller
         }
 
         $validated = $request->validate([
-            'payments' => 'required|array',
-            'payments.cash' => 'nullable|numeric|min:0',
-            'payments.mpesa' => 'nullable|numeric|min:0',
-            'payments.credit' => 'nullable|numeric|min:0',
             'meters' => 'required|array',
             'meters.*.nozzle_id' => 'required|exists:nozzles,id',
             'meters.*.opening_reading' => 'required|numeric',
             'meters.*.closing_reading' => 'required|numeric',
-            'meters.*.evidence' => 'nullable|image|max:1520',
+            'meters.*.evidence' => 'nullable|image|max:2048',
+
             'dips' => 'required|array',
             'dips.*.tank_id' => 'required|exists:tanks,id',
             'dips.*.dip_mm' => 'required|numeric',
+
+            'payments' => 'required|array',
+            'payments.cash' => 'nullable|numeric|min:0',
+            'payments.mpesa' => 'nullable|numeric|min:0',
+
+            'payments.credit' => 'nullable|array',
+            'payments.credit.*.customer_id' => 'required|exists:customers,id',
+            'payments.credit.*.amount' => 'required|numeric|min:0',
+            'payments.credit.*.vehicle_reg' => 'nullable|string',
         ]);
 
         try {
@@ -121,11 +134,13 @@ class ShiftController extends Controller
                 $payments
             );
 
-            $updatedShift->load(['meterReadings', 'dipReadings']);
+            $updatedShift->load(['meterReadings', 'dipReadings', 'payments', 'creditSales']);
 
             return new ShiftResource($updatedShift);
 
         } catch (\Exception $e) {
+            Log::error('Shift Lock Error: ' . $e->getMessage());
+
             return response()->json([
                 'error' => $e->getMessage(),
             ], 500);

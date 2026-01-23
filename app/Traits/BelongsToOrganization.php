@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
  */
 trait BelongsToOrganization
 {
-    protected static function booted(): void
+    public static function bootBelongsToOrganization(): void
     {
         static::addGlobalScope(new OrganizationScope);
 

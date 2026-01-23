@@ -33,7 +33,7 @@ class DevSeeder extends Seeder
 
         $user = User::create([
             'name' => 'John Doe',
-            'email' => 'attendant@octane.com',
+            'email' => 'admin@octane.com',
             'password' => Hash::make('password'),
             'organization_id' => $org->id,
             'station_id' => $station->id,

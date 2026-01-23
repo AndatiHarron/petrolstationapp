@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Customer;
 use App\Models\Nozzle;
 use App\Models\Tank;
 use App\Models\User;
@@ -10,6 +11,7 @@ use function Pest\Laravel\postJson;
 use function Pest\Laravel\seed;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use \Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -37,7 +39,7 @@ test('full shift lifecycle with perfect math and image evidence', function () {
         'payments' => [
             'cash' => 18000,
             'mpesa' => 0,
-            'credit' => 0,
+            'credit' => [],
         ],
         'meters' => [
             [
@@ -103,4 +105,64 @@ test('detects theft variance', function () {
     expect($res->json('data.financials.variance'))->toBe(-5000)
         ->and($res->json('data.variance_alert'))->toBeTrue();
 
+});
+
+test('locks shift with specific customer credit debt', function () {
+    $user = User::where('email', 'attendant@octane.com')->first();
+    actingAs($user);
+
+    $customer = Customer::create([
+        'id' => Str::uuid(),
+        'organization_id' => $user->organization_id,
+        'name' => 'Kabras Transport',
+        'email' => 'accounts@kabras.com',
+        'credit_limit' => 100000,
+        'current_balance' => 0
+    ]);
+
+    $start = postJson('/api/v1/shifts/start');
+    $shiftId = $start->json('data.id');
+    $nozzle = Nozzle::first();
+    $tank = Tank::first();
+
+    $payload = [
+        'payments' => [
+            'cash' => 10000,
+            'credit' => [
+                [
+                    'customer_id' => $customer->id,
+                    'amount' => 8000,
+                    'vehicle_reg' => 'KBA 123X'
+                ]
+            ]
+        ],
+        'meters' => [
+            [
+                'nozzle_id' => $nozzle->id,
+                'opening_reading' => 5000,
+                'closing_reading' => 5100,
+            ]
+        ],
+        'dips' => [
+            [
+                'tank_id' => $tank->id,
+                'dip_mm' => 1980
+            ]
+        ]
+    ];
+
+    $res = postJson("/api/v1/shifts/{$shiftId}/lock", $payload);
+    $res->assertStatus(200);
+
+    expect($res->json('data.financials.collected'))->toBe(18000)
+        ->and($res->json('data.financials.variance'))->toBe(0);
+
+    $this->assertDatabaseHas('credit_sales', [
+        'shift_id' => $shiftId,
+        'customer_id' => $customer->id,
+        'amount' => 8000,
+        'vehicle_reg' => 'KBA 123X'
+    ]);
+
+    expect($customer->refresh()->current_balance)->toBe(8000);
 });

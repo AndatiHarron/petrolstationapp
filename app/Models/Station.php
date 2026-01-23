@@ -24,6 +24,10 @@ class Station extends Model
         return $this->belongsTo(Organization::class);
     }
 
+    public function liftings(): HasMany {
+        return $this->hasMany(Lifting::class);
+    }
+
     public function nozzles(): HasMany
     {
         return $this->hasMany(Nozzle::class);

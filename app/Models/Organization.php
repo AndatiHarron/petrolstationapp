@@ -20,6 +20,18 @@ class Organization extends Model
         return $this->hasMany(User::class);
     }
 
+    public function customers(): HasMany {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function liftings(): HasMany {
+        return $this->hasMany(Lifting::class);
+    }
+
+    public function creditSales(): HasMany {
+        return $this->hasMany(CreditSale::class);
+    }
+
     public function stations(): HasMany {
         return $this->hasMany(Station::class);
     }

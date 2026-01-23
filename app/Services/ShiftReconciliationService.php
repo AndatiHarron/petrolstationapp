@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\CreditSale;
 use App\Models\DipReading;
 use App\Models\MeterReading;
 use App\Models\Nozzle;
@@ -146,16 +147,48 @@ class ShiftReconciliationService
         $total = 0;
 
         $shift->payments()->delete();
+        $shift->creditSales()->delete();
 
-        foreach ($payments as $method => $amount) {
-            if($amount > 0){
-                $shift->payments()->create([
-                    'organization_id' =>  $shift->organization_id,
-                    'method' => $method,
-                    'amount' => $amount,
-                ]);
-                $total += $amount;
-            }
+        foreach ($payments as $method => $data) {
+          if (in_array($method, ['cash', 'mpesa']) && is_numeric($data)) {
+              if ($data > 0) {
+                  $shift->payments()->create([
+                      'organization_id' => $shift->organization_id,
+                      'method' => $method,
+                      'amount' => $data
+                  ]);
+
+                  $total += $data;
+              }
+          }
+
+          if ($method === 'credit' && is_array($data)) {
+              $creditTotal = 0;
+
+              foreach ($data as $creditEntry) {
+                  if($creditEntry['amount'] > 0) {
+                      CreditSale::create([
+                          'organization_id' => $shift->organization_id,
+                          'shift_id' => $shift->id,
+                          'customer_id' => $creditEntry['customer_id'],
+                          'amount' => $creditEntry['amount'],
+                          'vehicle_reg' => $creditEntry['vehicle_reg'] ?? null,
+                      ]);
+
+                      $creditTotal += $creditEntry['amount'];
+                  }
+              }
+
+              if($creditTotal > 0) {
+                  $shift->payments()->create([
+                      'organization_id' => $shift->organization_id,
+                      'method' => 'credit',
+                      'amount' => $creditTotal
+                  ]);
+
+                  $total += $creditTotal;
+              }
+          }
         }
 
         return $total;
