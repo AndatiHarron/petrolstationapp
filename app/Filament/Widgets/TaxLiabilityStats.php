@@ -10,6 +10,11 @@ use Illuminate\Support\Facades\Auth;
 
 class TaxLiabilityStats extends StatsOverviewWidget
 {
+    public static function canView(): bool
+    {
+        return Auth::user()->hasRole(['admin', 'super-admin']);
+    }
+
     protected function getStats(): array
     {
         $orgId = Auth::user()->organization_id;

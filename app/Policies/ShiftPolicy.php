@@ -43,7 +43,7 @@ class ShiftPolicy
 
         return $user->hasRole('manager')
             && $shift->started_by_user_id === $user->id
-            && $shift->status === 'OPEN';
+            && in_array($shift->status, ['OPEN', 'LOCKED']);
     }
 
     public function approve(User $user, Shift $shift): bool

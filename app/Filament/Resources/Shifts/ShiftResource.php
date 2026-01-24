@@ -8,6 +8,7 @@ use App\Filament\Resources\Shifts\Pages\EditShift;
 use App\Filament\Resources\Shifts\Pages\ListShifts;
 use App\Filament\Resources\Shifts\Schemas\ShiftForm;
 use App\Filament\Resources\Shifts\Tables\ShiftsTable;
+use App\Models\Customer;
 use App\Models\Nozzle;
 use App\Models\Shift;
 use App\Models\Tank;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
@@ -27,6 +29,7 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -68,39 +71,7 @@ class ShiftResource extends Resource
                 DateTimePicker::make('started_at')
                     ->default(now())
                     ->required()
-            ]),
-
-            Section::make('Credit Sales (Debtors)')
-            ->description('Record any fuel taken on credit during this shift')
-            ->schema([
-                Repeater::make('creditSales')
-                ->relationship('creditSales')
-                ->schema([
-                    Select::make('customer_id')
-                        ->label('Customer')
-                        ->relationship('customer', 'name')
-                        ->searchable()
-                        ->preload()
-                        ->required()
-                        ->createOptionForm([
-                            TextInput::make('name')->required(),
-                            TextInput::make('phone'),
-                        ]),
-
-                    TextInput::make('amount')
-                        ->label('Amount (KES)')
-                        ->numeric()
-                        ->required(),
-
-                    TextInput::make('vehicle_reg')
-                        ->label('Vehicle Registration')
-                        ->placeholder('KBA 123X'),
-
-                    TextInput::make('notes')
-                        ->label('Notes')
-                        ->columnSpanFull()
-                ])
-            ]),
+            ])
         ]);
     }
 
@@ -144,12 +115,20 @@ class ShiftResource extends Resource
                     ->visible(fn() => auth()->user()->hasRole('admin'))
                     ->toggleable(),
             ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'LOCKED' => 'Pending Approval',
+                        'APPROVED' => 'Approved',
+                    ])
+            ])
             ->recordActions([
                 Action::make('lock')
                     ->label('Lock Shift')
                     ->icon('heroicon-o-lock-closed')
                     ->color('warning')
                     ->requiresConfirmation()
+                    ->modalWidth('xl')
                     ->visible(fn(Shift $record) => $record->status === 'OPEN')
                     ->schema([
                         TextInput::make('total_collected_cash')
@@ -207,9 +186,40 @@ class ShiftResource extends Resource
                                     ->label('M-Pesa collections')
                                     ->numeric()->default(0)->prefix('KES'),
 
-                                TextInput::make('payments.credit')
-                                    ->label('Credit / Invoice')
-                                    ->numeric()->default(0)->prefix('KES'),
+                                Repeater::make('credit_breakdown')
+                                    ->label('Credit Sales Breakdown')
+                                    ->schema([
+                                        Select::make('customer_id')
+                                            ->label('Customer')
+                                            ->options(Customer::query()->pluck('name', 'id'))
+                                            ->searchable()
+                                            ->preload()
+                                            ->required()
+                                            ->columnSpanFull()
+                                            ->createOptionForm([
+                                                TextInput::make('name')->required(),
+                                                TextInput::make('email')->required(),
+                                                TextInput::make('phone')
+                                            ])
+                                            ->createOptionUsing(function (array $data) {
+                                                return Customer::create($data + [
+                                                    'organization_id' => auth()->user()->organization_id
+                                                    ])->id;
+                                            }),
+
+                                        TextInput::make('amount')
+                                            ->label('Amount')
+                                            ->numeric()
+                                            ->required()
+                                            ->prefix('KES')
+                                            ->columnSpan(1),
+
+                                        TextInput::make('vehicle_reg')
+                                            ->label('Vehicle Reg')
+                                            ->columnSpan(1)
+                                    ])
+                                ->columns(2)
+                                ->addActionLabel('Add Credit Customer')
                             ])
                     ])
                     ->action(function (Shift $record, array $data, ShiftReconciliationService $service) {
@@ -234,7 +244,11 @@ class ShiftResource extends Resource
                             ];
                         }
 
-                        $payments = $data['payments'];
+                        $payments = [
+                            'cash' => $data['payments']['cash'] ?? 0,
+                            'mpesa' => $data['payments']['mpesa'] ?? 0,
+                            'credit' => $data['credit_breakdown'] ?? 0,
+                        ];
 
                         $service->reconcile(
                             $record,
@@ -244,6 +258,8 @@ class ShiftResource extends Resource
                         );
 
                         $record->refresh();
+
+                        Notification::make()->title('Shift Locked & Reconciled')->success()->send();
                     }),
 
                 Action::make('approve')
@@ -254,6 +270,11 @@ class ShiftResource extends Resource
                     ->visible(fn(Shift $record) => auth()->user()->can('approve', $record))
                     ->action(function (Shift $record) {
                         $record->update(['status' => 'APPROVED']);
+
+                        Notification::make()
+                            ->title('Shift Approved')
+                            ->success()
+                            ->send();
                     })
             ])
             ->defaultSort('started_at', 'desc');

@@ -163,24 +163,23 @@ class ShiftReconciliationService
         $shift->payments()->delete();
         $shift->creditSales()->delete();
 
-        foreach ($payments as $method => $data) {
-          if (in_array($method, ['cash', 'mpesa']) && is_numeric($data)) {
-              if ($data > 0) {
-                  $shift->payments()->create([
-                      'organization_id' => $shift->organization_id,
-                      'method' => $method,
-                      'amount' => $data
-                  ]);
+        foreach (['cash', 'mpesa'] as $method) {
+            if (isset($payments[$method]) && is_numeric($payments[$method]) && $payments[$method] > 0) {
+                $shift->payments()->create([
+                    'organization_id' => $shift->organization_id,
+                    'method' => $method,
+                    'amount' => $payments[$method],
+                ]);
 
-                  $total += $data;
-              }
-          }
+                $total += $payments[$method];
+            }
+        }
 
-          if ($method === 'credit' && is_array($data)) {
+          if (isset($payments['credit']) && is_array($payments['credit'])) {
               $creditTotal = 0;
 
-              foreach ($data as $creditEntry) {
-                  if($creditEntry['amount'] > 0) {
+              foreach ($payments['credit'] as $creditEntry) {
+                  if(($creditEntry['amount'] ?? 0) > 0) {
                       CreditSale::create([
                           'organization_id' => $shift->organization_id,
                           'shift_id' => $shift->id,
@@ -203,7 +202,6 @@ class ShiftReconciliationService
                   $total += $creditTotal;
               }
           }
-        }
 
         return $total;
     }

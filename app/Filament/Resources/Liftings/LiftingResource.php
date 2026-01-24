@@ -26,7 +26,8 @@ class LiftingResource extends Resource
 {
     protected static ?string $model = Lifting::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedListBullet;
+    protected static string|null|\UnitEnum $navigationGroup = 'Inventory';
 
     public static function form(Schema $schema): Schema
     {

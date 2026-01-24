@@ -13,6 +13,9 @@ class Shift extends Model
     use BelongsToOrganization;
     use HasUuids;
     public $incrementing = false;
+    public const STATUS_OPEN = "OPEN";
+    public const STATUS_LOCKED = "LOCKED";
+    public const STATUS_APPROVED = "APPROVED";
 
     protected $keyType = 'string';
     protected $guarded = [];

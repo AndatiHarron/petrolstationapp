@@ -30,6 +30,50 @@ class Tank extends Model
         'current_volume' => 'decimal:2',
     ];
 
+    public function updateDipFromCurrentVolume():void {
+        $chart = collect($this->calibration_chart)->sortBy('liters')->values();
+        $volume = $this->current_volume;
+
+        if($chart->isEmpty()) {
+            return;
+        }
+
+        // 1. Handle Out of Bounds (Below Min
+        if ($volume <= $chart->first()['liters']) {
+            $this->current_dip_mm = $chart->first()['mm'];
+            return;
+        }
+
+        // 2. Handle Out of Bounds (Above Max)
+        if ($volume >= $chart->last()['liters']) {
+            $this->current_dip_mm = $chart->last()['mm'];
+            return;
+        }
+
+        // 3. Interpolate (Find the specific bracket)
+        for ($i = 0; $i < $chart->count() - 1; $i++) {
+            $lower = $chart[$i];
+            $upper = $chart[$i + 1];
+
+            if ($volume >= $lower['liters'] && $volume <= $upper['liters']) {
+                // Calculate the ratio of where the volume falls in this segment
+                $rangeLiters = $upper['liters'] - $lower['liters'];
+                $rangeMm = $upper['mm'] - $lower['mm'];
+
+                if ($rangeLiters == 0) {
+                    $this->current_dip_mm = $lower['mm'];
+                    return;
+                }
+
+                $fraction = ($volume - $lower['liters']) / $rangeLiters;
+
+                // Apply ratio to the mm height
+                $this->current_dip_mm = $lower['mm'] + ($fraction * $rangeMm);
+                return;
+            }
+        }
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

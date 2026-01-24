@@ -23,11 +23,29 @@ class Lifting extends Model
     protected static function booted()
     {
         static::created(function (Lifting $lifting) {
-            $lifting->tank->increment('current_volume', $lifting->volume_liters);
+            $tank = $lifting->tank;
+
+            // 1. Update the current volume
+            $tank->increment('current_volume', $lifting->volume_liters);
+
+            // 2. Recalculate the current dip reading
+            $tank->updateDipFromCurrentVolume();
+
+            // 3. Save the changes
+            $tank->save();
         });
 
         static::deleted(function (Lifting $lifting) {
+            $tank = $lifting->tank;
+
+            // 1. Update the current volume
             $lifting->tank->decrement('current_volume', $lifting->volume_liters);
+
+            // 2. Recalculate the current dip reading
+            $tank->updateDipFromCurrentVolume();
+
+            // 3. Save the changes
+            $tank->save();
         });
     }
 
