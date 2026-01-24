@@ -275,7 +275,13 @@ class ShiftResource extends Resource
                             ->title('Shift Approved')
                             ->success()
                             ->send();
-                    })
+                    }),
+
+                Action::make('download_report')
+                ->label('Download Report')
+                ->icon('heroicon-o-document-arrow-down')
+                ->url(fn (Shift $record) => route('shift.report', $record))
+                ->openUrlInNewTab(),
             ])
             ->defaultSort('started_at', 'desc');
     }

@@ -24,9 +24,10 @@ class VarianceTrendChart extends ChartWidget
     {
         $data = Trend::query(
             Shift::query()
-            ->where('organization_id', Auth::user()->organization_id)
-            ->whereIn('status', ['LOCKED', 'APPROVED'])
+                ->where('organization_id', Auth::user()->organization_id)
+                ->whereIn('status', ['LOCKED', 'APPROVED'])
         )
+            ->dateColumn('started_at')
             ->between(
                 start: now()->subDays(7),
                 end: now(),
@@ -35,14 +36,14 @@ class VarianceTrendChart extends ChartWidget
             ->sum('cash_variance');
 
         return [
-            'database' => [
+            'datasets' => [
                 [
-                    'label' => 'Cash Shortage/Overage (KES)',
+                    'label' => 'Cash Variance (KES)',
                     'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
                     'borderColor' => '#ef4444',
                     'backgroundColor' => 'rgba(239, 68, 68, 0.1)',
                     'fill' => true,
-                    'tension' => 0.4
+                    'tension' => 0.4,
                 ],
             ],
             'labels' => $data->map(fn (TrendValue $value) => $value->date),
