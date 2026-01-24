@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Shifts;
 
+use App\Filament\Resources\Customers\RelationManagers\CreditSalesRelationManager;
 use App\Filament\Resources\Shifts\Pages\CreateShift;
 use App\Filament\Resources\Shifts\Pages\EditShift;
 use App\Filament\Resources\Shifts\Pages\ListShifts;
@@ -16,10 +17,12 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -49,20 +52,55 @@ class ShiftResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
-            Select::make('station_id')
-                ->relationship('station', 'name')
-                ->disabled(fn() => auth()->user()->hasRole('manager'))
-                ->default(fn() => auth()->user()->station_id)
-                ->dehydrated()
-                ->required(),
+            Section::make('Shift Details')
+            ->schema([
+                Select::make('station_id')
+                    ->relationship('station', 'name')
+                    ->disabled(fn() => auth()->user()->hasRole('manager'))
+                    ->default(fn() => auth()->user()->station_id)
+                    ->dehydrated()
+                    ->required(),
 
-            Hidden::make('started_by_user_id')
-            ->default(auth()->id())
-            ->required(),
+                Hidden::make('started_by_user_id')
+                    ->default(auth()->id())
+                    ->required(),
 
-            DateTimePicker::make('started_at')
-                ->default(now())
-                ->required()
+                DateTimePicker::make('started_at')
+                    ->default(now())
+                    ->required()
+            ]),
+
+            Section::make('Credit Sales (Debtors)')
+            ->description('Record any fuel taken on credit during this shift')
+            ->schema([
+                Repeater::make('creditSales')
+                ->relationship('creditSales')
+                ->schema([
+                    Select::make('customer_id')
+                        ->label('Customer')
+                        ->relationship('customer', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->createOptionForm([
+                            TextInput::make('name')->required(),
+                            TextInput::make('phone'),
+                        ]),
+
+                    TextInput::make('amount')
+                        ->label('Amount (KES)')
+                        ->numeric()
+                        ->required(),
+
+                    TextInput::make('vehicle_reg')
+                        ->label('Vehicle Registration')
+                        ->placeholder('KBA 123X'),
+
+                    TextInput::make('notes')
+                        ->label('Notes')
+                        ->columnSpanFull()
+                ])
+            ]),
         ]);
     }
 
@@ -224,7 +262,7 @@ class ShiftResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CreditSalesRelationManager::class
         ];
     }
 
@@ -233,7 +271,7 @@ class ShiftResource extends Resource
         return [
             'index' => ListShifts::route('/'),
             'create' => CreateShift::route('/create'),
-//            'edit' => EditShift::route('/{record}/edit'),
+            'edit' => EditShift::route('/{record}/edit'),
         ];
     }
 }

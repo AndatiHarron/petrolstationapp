@@ -22,6 +22,7 @@ class DevSeeder extends Seeder
             'id' => str()->uuid(),
             'name' => 'Octane Crop',
             'slug' => 'octane-crop',
+            'status' => 'active'
         ]);
 
         $station = Station::create([
@@ -31,19 +32,30 @@ class DevSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $user = User::create([
-            'name' => 'John Doe',
+        $admin = User::create([
+            'name' => 'Admin User',
             'email' => 'admin@octane.com',
+            'password' => Hash::make('password'),
+            'organization_id' => $org->id,
+            'station_id' => null,
+        ]);
+        $admin->assignRole('admin');
+
+        $manager = User::create([
+            'name' => 'Manager User',
+            'email' => 'manager@octane.com',
             'password' => Hash::make('password'),
             'organization_id' => $org->id,
             'station_id' => $station->id,
         ]);
+        $manager->assignRole('manager');
 
         $product = Product::create([
             'id' => str()->uuid(),
             'organization_id' => $org->id,
             'name' => 'Premium Petrol',
-            'current_price' => 180.00
+            'current_price' => 180.00,
+            'vat_rate' => 16.00
         ]);
 
         $tank = Tank::create([

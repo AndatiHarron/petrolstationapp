@@ -9,12 +9,14 @@ use App\Models\Tank;
 use App\Models\User;
 use App\Services\ShiftReconciliationService;
 use Database\Seeders\DevSeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\seed;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    seed(RolesAndPermissionsSeeder::class);
     seed(DevSeeder::class);
 });
 

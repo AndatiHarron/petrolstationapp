@@ -5,6 +5,7 @@ use App\Models\Nozzle;
 use App\Models\Tank;
 use App\Models\User;
 use Database\Seeders\DevSeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
@@ -16,13 +17,14 @@ use \Illuminate\Support\Str;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    seed(RolesAndPermissionsSeeder::class);
     seed(DevSeeder::class);
 });
 
 test('full shift lifecycle with perfect math and image evidence', function () {
     Storage::fake('public');
 
-    $user = User::where('email', 'attendant@octane.com')->first();
+    $user = User::where('email', 'manager@octane.com')->first();
     actingAs($user);
 
     $startResponse = postJson('/api/v1/shifts/start');
@@ -72,7 +74,7 @@ test('full shift lifecycle with perfect math and image evidence', function () {
 });
 
 test('detects theft variance', function () {
-    $user = User::where('email', 'attendant@octane.com')->first();
+    $user = User::where('email', 'manager@octane.com')->first();
     actingAs($user);
 
     $start = postJson('/api/v1/shifts/start');
@@ -108,7 +110,7 @@ test('detects theft variance', function () {
 });
 
 test('locks shift with specific customer credit debt', function () {
-    $user = User::where('email', 'attendant@octane.com')->first();
+    $user = User::where('email', 'manager@octane.com')->first();
     actingAs($user);
 
     $customer = Customer::create([

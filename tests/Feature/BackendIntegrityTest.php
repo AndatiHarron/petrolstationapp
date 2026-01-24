@@ -9,6 +9,7 @@ use App\Models\Station;
 use App\Models\Tank;
 use App\Models\User;
 use Database\Seeders\DevSeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
@@ -17,6 +18,7 @@ use function Pest\Laravel\seed;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    seed(RolesAndPermissionsSeeder::class);
     seed(DevSeeder::class);
 });
 
