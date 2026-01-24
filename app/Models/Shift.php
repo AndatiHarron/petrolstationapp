@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Shift extends Model
 {
+    use LogsActivity;
     use BelongsToOrganization;
     use HasUuids;
     public $incrementing = false;
@@ -19,6 +22,20 @@ class Shift extends Model
 
     protected $keyType = 'string';
     protected $guarded = [];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'status',
+                'cash_variance',
+                'total_collected_cash',
+                'stock_variance_liters'
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $eventName) => "Shift was {$eventName}");
+    }
 
     protected $casts = [
         'started_at' => 'datetime',

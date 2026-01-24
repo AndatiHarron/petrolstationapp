@@ -8,6 +8,7 @@ use App\Filament\Resources\Liftings\Pages\ListLiftings;
 use App\Filament\Resources\Liftings\Schemas\LiftingForm;
 use App\Filament\Resources\Liftings\Tables\LiftingsTable;
 use App\Models\Lifting;
+use App\Models\Tank;
 use BackedEnum;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -57,9 +58,26 @@ class LiftingResource extends Resource
                 ->prefix('KES')
                 ->required()
                 ->live()
-                ->afterStateUpdated(fn ($state, $get, $set) =>
-                    $set('total_cost', $state * (float)$get('volume_liters'))
-                ),
+                ->afterStateUpdated(function ($state, $get, $set) {
+                    // 1. Calculate Total Cost
+                    $volume = (float) $get('volume_liters');
+                    $cost = $state * $volume;
+                    $set('total_cost', $cost);
+
+                    // 2. Auto-Calculate VAT based on Product Rate
+                    if ($tankId = $get('tank_id')) {
+                        $tank = Tank::with('product')->find($tankId);
+                        $vatRate = $tank->product->vat_rate ?? 0;
+
+                        if ($vatRate > 0) {
+                            // Formula: Tax = Cost - (Cost / 1.16)
+                            $tax = $cost - ($cost / (1 + ($vatRate / 100)));
+                            $set('tax_paid', number_format($tax, 2, '.', ''));
+                        } else {
+                            $set('tax_paid', 0);
+                        }
+                    }
+                }),
 
             TextInput::make('total_cost')
                 ->numeric()
@@ -67,6 +85,13 @@ class LiftingResource extends Resource
                 ->disabled()
                 ->dehydrated()
                 ->readOnly(),
+
+            TextInput::make('tax_paid')
+                ->label('Input VAT (Paid)')
+                ->numeric()
+                ->prefix('KES')
+                ->required()
+                ->helperText('Auto-calculated based on product VAT rate, but editable')
         ]);
     }
 

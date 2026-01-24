@@ -34,7 +34,7 @@ class TaxLiabilityStats extends StatsOverviewWidget
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('warning'),
 
-            Stat::make('Input VAT (Purchases)', number_format($outputTax, 2, '.', ','))
+            Stat::make('Input VAT (Purchases)', number_format($inputTax, 2, '.', ','))
                 ->description('Tax paid on liftings')
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color('success'),

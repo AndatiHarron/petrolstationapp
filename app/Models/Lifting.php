@@ -7,18 +7,32 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Lifting extends Model
 {
     use HasFactory;
     use HasUuids;
     use BelongsToOrganization;
+    use LogsActivity;
 
     protected $guarded = [];
 
     protected $casts = [
         'lifting_date' => 'date',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'volume_liters',
+                'buying_price_per_liter',
+                'tank.name'
+            ])
+            ->setDescriptionForEvent(fn (string $eventName) => "Lifting {$eventName}");
+    }
 
     protected static function booted()
     {
