@@ -23,7 +23,6 @@ jobs:
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
-          --health-entries 5
 
     steps:
       - uses: actions/checkout@v4
