@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\LockShiftRequest;
 use App\Http\Resources\ShiftResource;
 use App\Models\Shift;
 use App\Services\ShiftReconciliationService;
@@ -73,33 +74,16 @@ class ShiftController extends Controller
         return new ShiftResource($shift);
     }
 
-    public function lock(Request $request, Shift $shift)
+    /**
+     * Lock a Shift
+     * * Submits final readings, evidence, and payments to close a shift.
+     * Calculates variance immediately.
+     */
+    public function lock(LockShiftRequest $request, Shift $shift)
     {
         if($shift->started_by_user_id != Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
-
-        $validated = $request->validate([
-            'meters' => 'required|array',
-            'meters.*.nozzle_id' => 'required|exists:nozzles,id',
-            'meters.*.opening_reading' => 'required|numeric',
-            'meters.*.closing_reading' => 'required|numeric',
-            'meters.*.evidence' => 'nullable|image|max:8192',
-            'meters.*.gps_coordinates' => 'nullable|json',
-
-            'dips' => 'required|array',
-            'dips.*.tank_id' => 'required|exists:tanks,id',
-            'dips.*.dip_mm' => 'required|numeric',
-
-            'payments' => 'required|array',
-            'payments.cash' => 'nullable|numeric|min:0',
-            'payments.mpesa' => 'nullable|numeric|min:0',
-
-            'payments.credit' => 'nullable|array',
-            'payments.credit.*.customer_id' => 'required|exists:customers,id',
-            'payments.credit.*.amount' => 'required|numeric|min:0',
-            'payments.credit.*.vehicle_reg' => 'nullable|string',
-        ]);
 
         try {
             $formattedMeters = [];
