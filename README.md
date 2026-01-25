@@ -1,59 +1,108 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Petrol Integrity System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Petrol Integrity System is a multi-tenant Laravel 12 application for fuel station operations. It reconciles shift sales against meter readings and tank dips, tracks cash and stock variance, and surfaces tax liability through a Filament 5 admin panel and a Sanctum-protected API for mobile workflows.
 
-## About Laravel
+## Key Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Shift lifecycle management (OPEN to LOCKED to APPROVED) with reconciliation logic for expected cash, variance, and tax.
+- Meter reading capture per nozzle, tank dip readings, and automatic tank/nozzle updates.
+- Payments split by cash, M-Pesa, and credit sales with customer and vehicle tracking.
+- Inventory liftings with VAT paid, total cost calculation, and tank destination.
+- Role-based access (admin and manager) with organization scoping and station-level visibility.
+- PDF shift reports and Filament dashboards for variance trends and tax liability.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Laravel 12, PHP 8.5.1
+- Filament 5 admin panel
+- Laravel Sanctum for API auth
+- spatie/laravel-permission and spatie/laravel-activitylog
+- DomPDF for shift reports
+- Flowframe Trend for dashboard charts
 
-## Learning Laravel
+## Project Structure
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- `app/Services/ShiftReconciliationService.php` handles meter, dip, and payment reconciliation.
+- `app/Filament/Resources` defines admin CRUD for stations, tanks, products, shifts, customers, and more.
+- `app/Filament/Widgets` includes variance trend and tax liability widgets.
+- `routes/api.php` exposes the mobile shift API.
+- `resources/views/reports/shift-summary.blade.php` is the PDF report template.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Local Setup
 
-## Laravel Sponsors
+Prereqs: PHP 8.2, Composer, Node.js, SQLite or your preferred DB.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+composer run setup
+```
 
-### Premium Partners
+This script installs dependencies, sets up `.env`, runs migrations, installs Node packages, and builds assets.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+If you want explicit steps instead:
 
-## Contributing
+```bash
+composer install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate
+npm install
+npm run build
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+For meter evidence uploads, ensure the public disk is linked:
 
-## Code of Conduct
+```bash
+php artisan storage:link
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Development
 
-## Security Vulnerabilities
+Run the stack (app server, queue listener, and Vite) via:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer run dev
+```
 
-## License
+The admin panel is available at `/admin`.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Seeding Demo Data
+
+```bash
+php artisan db:seed --class=RolesAndPermissionsSeeder
+php artisan db:seed --class=DevSeeder
+```
+
+The dev seeder provisions an organization, station, sample product, tank, nozzle, and two users:
+
+- admin: `admin@octane.com` / `password`
+- manager: `manager@octane.com` / `password`
+
+## API (Sanctum)
+
+All mobile endpoints live under `/api` and require a Bearer token unless stated.
+
+- `POST /api/login` returns a Sanctum token.
+- `GET /api/v1/shifts/current` returns the active shift for the authenticated user.
+- `POST /api/v1/shifts/start` opens a new shift if one is not already open.
+- `POST /api/v1/shifts/{shift}/lock` locks and reconciles a shift.
+
+`/api/v1/shifts/{shift}/lock` accepts:
+
+- `meters`: list of nozzle readings (with optional evidence image uploads).
+- `dips`: list of tank dip measurements.
+- `payments`: cash, mpesa, and credit sales.
+
+## Reports
+
+Shift PDFs are available at `/admin/shifts/{shift}/report` for authenticated users in the same organization.
+
+## Testing
+
+```bash
+composer test
+```
+
+## Notes
+
+- Default database is SQLite via `database/database.sqlite`.
+- Queue, cache, and sessions use the database driver by default.
