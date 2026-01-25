@@ -38,9 +38,14 @@ class Shift extends Model
     }
 
     protected $casts = [
+        'total_expected_cash' => 'float',
+        'total_collected_cash' => 'float',
+        'cash_variance' => 'float',
+        'total_tax_collected' => 'float',
+        'total_stock_sold_liters' => 'float',
+        'stock_variance_liters' => 'float',
         'started_at' => 'datetime',
         'locked_at' => 'datetime',
-        'cash_variance' => 'decimal:2'
     ];
 
     public function organization(): BelongsTo {

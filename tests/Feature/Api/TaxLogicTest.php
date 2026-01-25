@@ -71,7 +71,7 @@ test('calculates output vat correctly on shift lock', function () {
    $service->reconcile($shift, $meters, $dips, $payments);
 
    $lockedShift = $shift->refresh();
-   expect($lockedShift->total_tax_collected)->toBe(2482.76);
+   expect($lockedShift->total_tax_collected)->toEqual(2482.76);
 });
 
 test('calculates mixed tax rates correctly (petrol vs kerosene)', function () {
@@ -142,7 +142,7 @@ test('calculates mixed tax rates correctly (petrol vs kerosene)', function () {
     ]);
 
     $lockedShift = $shift->refresh();
-    expect($lockedShift->total_tax_collected)->toBe(1379.31);
+    expect($lockedShift->total_tax_collected)->toEqual(1379.31);
 });
 
 test('verifies net liability logic (sales tax - lifting tax)', function () {
@@ -181,5 +181,5 @@ test('verifies net liability logic (sales tax - lifting tax)', function () {
     $output = Shift::where('organization_id', $orgId)->sum('total_tax_collected');
     $input = Lifting::where('organization_id', $orgId)->sum('tax_paid');
 
-    expect($output - $input)->toBe(3000);
+    expect($output - $input)->toEqual(3000);
 });

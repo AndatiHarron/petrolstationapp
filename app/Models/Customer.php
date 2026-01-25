@@ -15,6 +15,11 @@ class Customer extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'current_balance' => 'float',
+        'credit_limit' => 'float',
+    ];
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

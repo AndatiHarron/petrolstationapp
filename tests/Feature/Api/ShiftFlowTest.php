@@ -166,5 +166,5 @@ test('locks shift with specific customer credit debt', function () {
         'vehicle_reg' => 'KBA 123X'
     ]);
 
-    expect($customer->refresh()->current_balance)->toBe(8000);
+    expect($customer->refresh()->current_balance)->toEqual(8000.00);
 });

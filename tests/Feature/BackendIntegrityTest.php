@@ -46,13 +46,13 @@ test('inventory updates automatically on lifting creation and deletion', functio
     ]);
 
     // 3. Assert: Tank should now have 6,000 Liters
-    expect(round($tank->refresh()->current_volume, 2))->toBe(6000.00);
+    expect(round($tank->refresh()->current_volume, 2))->toEqual(6000.00);
 
     // 4. Action: Delete the Lifting (Simulate "Ghost Delivery" / Undo)
     $lifting->delete();
 
     // 5. Assert: Tank should revert to 1,000 Liters
-    expect(round($tank->refresh()->current_volume, 2))->toBe(1000.00);
+    expect(round($tank->refresh()->current_volume, 2))->toEqual(1000.00);
 });
 
 // --- TEST GROUP 2: SECURITY & ISOLATION ---
@@ -162,7 +162,7 @@ test('credit sales strictly update customer balance', function () {
     ]);
 
     // Assert Balance increased
-    expect($customer->refresh()->current_balance)->toBe(5000);
+    expect($customer->refresh()->current_balance)->toEqual(5000);
 
     // Create another one
     CreditSale::create([
@@ -173,5 +173,5 @@ test('credit sales strictly update customer balance', function () {
     ]);
 
     //Assert accumulation
-    expect($customer->refresh()->current_balance)->toBe(7000);
+    expect($customer->refresh()->current_balance)->toEqual(7000);
 });
