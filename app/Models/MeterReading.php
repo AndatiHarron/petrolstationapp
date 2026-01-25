@@ -22,6 +22,10 @@ class MeterReading extends Model
     protected $keyType = 'string';
     protected $guarded = [];
 
+    protected $casts = [
+        'gps_coordinates' => 'array',
+    ];
+
     public function organization(): BelongsTo {
         return $this->belongsTo(Organization::class);
     }

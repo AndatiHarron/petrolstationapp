@@ -45,7 +45,7 @@ class ShiftController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Check if user already has an open shift
+        // 1. Check if a user already has an open shift
         $existing = Shift::where('started_by_user_id', Auth::id())
             ->where('status', 'OPEN')
             ->first();
@@ -84,7 +84,8 @@ class ShiftController extends Controller
             'meters.*.nozzle_id' => 'required|exists:nozzles,id',
             'meters.*.opening_reading' => 'required|numeric',
             'meters.*.closing_reading' => 'required|numeric',
-            'meters.*.evidence' => 'nullable|image|max:2048',
+            'meters.*.evidence' => 'nullable|image|max:8192',
+            'meters.*.gps_coordinates' => 'nullable|json',
 
             'dips' => 'required|array',
             'dips.*.tank_id' => 'required|exists:tanks,id',
@@ -114,6 +115,7 @@ class ShiftController extends Controller
                     'nozzle_id' => $meterData['nozzle_id'],
                     'closing_reading' => $meterData['closing_reading'],
                     'evidence_path' => $evidencePath,
+                    'gps_coordinates' => json_decode($meterData['gps_coordinates'] ?? '{}', true)
                 ];
             }
 

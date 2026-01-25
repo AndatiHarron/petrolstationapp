@@ -9,6 +9,7 @@ use App\Models\Nozzle;
 use App\Models\Shift;
 use App\Models\Tank;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -89,6 +90,25 @@ class ShiftReconciliationService
 
             $totalTaxLiability += $taxComponent;
 
+            $evidencePath = $meter['evidence_path'] ?? null;
+            $evidenceHash = null;
+
+            if ($evidencePath) {
+                $fullPath = Storage::disk('public')->path($evidencePath);
+
+                if (file_exists($fullPath)) {
+                    $evidenceHash = md5_file($fullPath);
+
+                    $is_duplicate = MeterReading::where('evidence_hash', $evidenceHash)
+                        ->where('shift_id', '!=', $shift->id)
+                        ->exists();
+
+                    if ($is_duplicate) {
+                        throw new \Exception("INTEGRITY ERROR: The photo for {$nozzle->name} has been used in a previous shift. Please take a new photo.");
+                    }
+                }
+            }
+
             MeterReading::create([
                 'id' => (string) Str::uuid(),
                 'organization_id' => $shift->organization_id,
@@ -99,7 +119,9 @@ class ShiftReconciliationService
                 'volume_sold' => $volume,
                 'price_per_liter' => $price,
                 'total_value' => $value,
-                'evidence_path' => $meter['evidence_path'] ?? null,
+                'evidence_path' => $evidencePath,
+                'evidence_hash' => $evidenceHash,
+                'gps_coordinates' => $meter['gps_coordinates'] ?? null
             ]);
 
             $nozzle->update([
