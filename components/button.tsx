@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, ActivityIndicator, TouchableOpacityProps } from 'react-native';
+import { TouchableOpacity, Text, ActivityIndicator, TouchableOpacityProps, StyleSheet, Platform } from 'react-native';
+import * as Haptics from 'expo-haptics';
 
 interface ButtonProps extends TouchableOpacityProps {
   title: string;
@@ -7,27 +8,69 @@ interface ButtonProps extends TouchableOpacityProps {
   variant?: 'primary' | 'secondary';
 }
 
-export const Button = ({ title, loading, variant = 'primary', className, ...props }: ButtonProps) => {
-  const baseStyles = "h-12 w-full items-center justify-center rounded-sm transition-opacity active:opacity-80";
-  const variantStyles = variant === 'primary' 
-    ? "bg-blue-600 shadow-sm" 
-    : "bg-slate-200 border-2 border-slate-300";
-  
-  const textStyles = variant === 'primary'
-    ? "text-white font-bold tracking-wide uppercase"
-    : "text-slate-700 font-bold tracking-wide uppercase";
+export const Button = ({ title, loading, variant = 'primary', style, onPress, ...props }: ButtonProps) => {
+  const handlePress = (e: any) => {
+    if (Platform.OS === 'ios') {
+      Haptics.selectionAsync();
+    }
+    onPress?.(e);
+  };
 
   return (
     <TouchableOpacity
-      className={`${baseStyles} ${variantStyles} ${loading ? 'opacity-70' : ''} ${className}`}
+      style={[
+        styles.base,
+        variant === 'primary' ? styles.primary : styles.secondary,
+        loading && styles.loading,
+        style
+      ]}
       disabled={loading || props.disabled}
+      onPress={handlePress}
+      activeOpacity={0.8}
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? 'white' : '#334155'} />
+        <ActivityIndicator color={variant === 'primary' ? '#fff' : '#94a3b8'} />
       ) : (
-        <Text className={textStyles}>{title}</Text>
+        <Text style={[styles.text, variant === 'primary' ? styles.textPrimary : styles.textSecondary]}>
+          {title}
+        </Text>
       )}
     </TouchableOpacity>
   );
 };
+
+const styles = StyleSheet.create({
+  base: {
+    height: 56,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    borderCurve: 'continuous',
+  },
+  primary: {
+    backgroundColor: '#f59e0b', // Amber 500
+    boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+  },
+  secondary: {
+    backgroundColor: '#334155', // Slate 700
+    borderWidth: 1,
+    borderColor: '#475569', // Slate 600
+  },
+  loading: {
+    opacity: 0.7,
+  },
+  text: {
+    fontWeight: '700',
+    fontSize: 16,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  textPrimary: {
+    color: '#FFFFFF',
+  },
+  textSecondary: {
+    color: '#e2e8f0', // Slate 200
+  },
+});

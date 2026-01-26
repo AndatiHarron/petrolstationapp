@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { InputField } from './input-field';
 import { Button } from './button';
 import { getEmailError, getPasswordError } from '../utils/validation';
@@ -33,7 +34,7 @@ export const LoginForm = () => {
   };
 
   return (
-    <View className="w-full">
+    <View style={styles.container}>
       <InputField
         label="Email Address"
         placeholder="Enter your email"
@@ -45,6 +46,7 @@ export const LoginForm = () => {
         error={errors.email}
         keyboardType="email-address"
         autoCapitalize="none"
+        delay={100}
       />
       <InputField
         label="Password"
@@ -56,15 +58,45 @@ export const LoginForm = () => {
         }}
         error={errors.password}
         secureTextEntry
+        delay={200}
       />
-      <View className="mt-6">
+      
+      <Animated.View 
+        entering={FadeInDown.delay(300).duration(400).springify()}
+        style={styles.buttonContainer}
+      >
         <Button title="Sign In" onPress={handleLogin} loading={loading} />
-      </View>
-      <View className="mt-4 items-center">
-        <Text className="text-sm text-slate-500">
-          Forgot your password? <Text className="font-bold text-blue-600">Reset here</Text>
+      </Animated.View>
+
+      <Animated.View 
+        entering={FadeInDown.delay(400).duration(400).springify()}
+        style={styles.footer}
+      >
+        <Text style={styles.footerText}>
+          Forgot your password? <Text style={styles.linkText}>Reset here</Text>
         </Text>
-      </View>
+      </Animated.View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+  },
+  buttonContainer: {
+    marginTop: 8,
+  },
+  footer: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 14,
+    color: '#94a3b8', // Slate 400
+  },
+  linkText: {
+    fontWeight: '700',
+    color: '#f59e0b', // Amber 500
+  },
+});
