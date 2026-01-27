@@ -17,19 +17,29 @@ api.interceptors.request.use(async (config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  // 👇 ADD THIS BLOCK TO SEE THE URL
+  console.log('------------------------------------------------');
+  console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL, config.url);
+  console.log('------------------------------------------------');
+
   return config;
 });
 
 // 2. Custom Mutator for Orval (Required for the next step)
 // This tells the generator how to actually execute the requests
 export const customInstance = <T>(
-  config: AxiosRequestConfig,
+  url: string,
   options?: AxiosRequestConfig,
 ): Promise<T> => {
   const source = axios.CancelToken.source();
+  const data = options?.data ?? options?.body;
+  console.log("data", data);
+  console.log("options", options);
   const promise = api({
-    ...config,
+    url,
     ...options,
+    data,
     cancelToken: source.token,
   }).then(({ data }) => data);
 
