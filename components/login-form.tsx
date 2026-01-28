@@ -3,13 +3,14 @@ import { useAuthStore } from '@/store/useAuthStore';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { View, Text } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from './button';
 import { InputField } from './input-field';
 import { getErrorMessage } from '@/lib/utils';
 import { usePostLogin } from '@/features/api/default/default';
 import { toast } from 'sonner-native';
+import { getApiErrorMessage } from '@/lib/api-error';
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -40,8 +41,9 @@ export const LoginForm = () => {
         }
       },
       onError: (error) => {
+        const message = getApiErrorMessage(error);
         toast.error('Login failed', {
-          description: error instanceof Error ? error.message : 'An unknown error occurred',
+          description: message,
         });
       }
     }
@@ -68,7 +70,7 @@ export const LoginForm = () => {
 
 
   return (
-    <View style={styles.container}>
+    <View className="w-full">
       <form.Field name="email">
         {(field) => (
           <InputField
@@ -100,40 +102,19 @@ export const LoginForm = () => {
 
       <Animated.View
         entering={FadeInDown.delay(300).duration(400).springify()}
-        style={styles.buttonContainer}
+        className="mt-2"
       >
         <Button title="Sign In" onPress={() => form.handleSubmit()} loading={form.state.isSubmitting || isLoginPending} />
       </Animated.View>
 
       <Animated.View
         entering={FadeInDown.delay(400).duration(400).springify()}
-        style={styles.footer}
+        className="mt-6 items-center"
       >
-        <Text style={styles.footerText}>
-          Forgot your password? <Text style={styles.linkText}>Reset here</Text>
+        <Text className="text-sm text-slate-400">
+          Forgot your password? <Text className="font-bold text-amber-500">Reset here</Text>
         </Text>
       </Animated.View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-  },
-  buttonContainer: {
-    marginTop: 8,
-  },
-  footer: {
-    marginTop: 24,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#94a3b8', // Slate 400
-  },
-  linkText: {
-    fontWeight: '700',
-    color: '#f59e0b', // Amber 500
-  },
-});

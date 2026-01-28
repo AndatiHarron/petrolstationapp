@@ -1,36 +1,38 @@
 import React, { forwardRef } from 'react';
-import { TextInput, View, Text, TextInputProps, StyleSheet } from 'react-native';
+import { TextInput, View, Text, TextInputProps } from 'react-native';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
 
 interface InputFieldProps extends TextInputProps {
   label: string;
   error?: string | null;
   delay?: number;
+  className?: string; // Add className prop for flexibility
 }
 
 export const InputField = forwardRef<TextInput, InputFieldProps>(
-  ({ label, error, style, delay = 0, ...props }, ref) => {
+  ({ label, error, style, delay = 0, className, ...props }, ref) => {
     return (
-      <Animated.View 
-        entering={FadeInDown.delay(delay).duration(400).springify()} 
-        style={[styles.container, style]}
+      <Animated.View
+        entering={FadeInDown.delay(delay).duration(400).springify()}
+        className={`mb-5 w-full ${className}`}
+        style={style}
       >
-        <Text style={styles.label}>
+        <Text className="mb-2 text-xs font-semibold text-slate-400 uppercase tracking-widest">
           {label}
         </Text>
         <TextInput
           ref={ref}
-          style={[
-            styles.input,
-            error ? styles.inputError : styles.inputDefault
-          ]}
+          className={`h-14 w-full rounded-2xl bg-slate-900/50 px-4 text-base text-white border ${error
+              ? 'border-red-500 bg-red-500/10'
+              : 'border-slate-700/50 focus:border-amber-500'
+            }`}
           placeholderTextColor="#64748b" // Slate 500
           {...props}
         />
         {error && (
-          <Animated.Text 
-            entering={FadeIn} 
-            style={styles.errorText}
+          <Animated.Text
+            entering={FadeIn}
+            className="mt-1.5 text-xs font-medium text-red-400"
           >
             {error}
           </Animated.Text>
@@ -39,42 +41,3 @@ export const InputField = forwardRef<TextInput, InputFieldProps>(
     );
   }
 );
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 20,
-    width: '100%',
-  },
-  label: {
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#94a3b8', // Slate 400
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
-  },
-  input: {
-    height: 52,
-    width: '100%',
-    borderRadius: 12,
-    borderCurve: 'continuous',
-    backgroundColor: '#0f172a', // Slate 900
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#FFFFFF', // White
-    borderWidth: 1,
-  },
-  inputDefault: {
-    borderColor: '#334155', // Slate 700
-  },
-  inputError: {
-    borderColor: '#ef4444', // Red 500
-    backgroundColor: 'rgba(239, 68, 68, 0.1)', // Red 500 with opacity
-  },
-  errorText: {
-    marginTop: 6,
-    fontSize: 13,
-    color: '#f87171', // Red 400
-    fontWeight: '500',
-  },
-});
