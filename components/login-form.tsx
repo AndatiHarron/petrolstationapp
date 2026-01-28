@@ -9,6 +9,7 @@ import { Button } from './button';
 import { InputField } from './input-field';
 import { getErrorMessage } from '@/lib/utils';
 import { usePostLogin } from '@/features/api/default/default';
+import { toast } from 'sonner-native';
 
 export const LoginForm = () => {
   const router = useRouter();
@@ -39,7 +40,9 @@ export const LoginForm = () => {
         }
       },
       onError: (error) => {
-        console.error("error", error.message);
+        toast.error('Login failed', {
+          description: error instanceof Error ? error.message : 'An unknown error occurred',
+        });
       }
     }
   });
