@@ -6,10 +6,10 @@ import { TransactionList } from './dashboard/transaction-list';
 import { QuickActionButton } from './dashboard/quick-action-button';
 import { StatusIndicator } from './dashboard/status-indicator';
 import { ChartCard } from './dashboard/chart-card';
-import { 
-  generateMockKPIs, 
-  generateMockAlerts, 
-  generateMockTransactions, 
+import {
+  generateMockKPIs,
+  generateMockAlerts,
+  generateMockTransactions,
   generateMockStatusIndicators,
   KPI,
   Alert,
@@ -60,10 +60,10 @@ export const Dashboard = () => {
       <View className="px-4 pt-4">
         {/* Alerts Section */}
         {alerts.map(alert => (
-          <AlertBanner 
-            key={alert.id} 
-            alert={alert} 
-            onDismiss={handleDismissAlert} 
+          <AlertBanner
+            key={alert.id}
+            alert={alert}
+            onDismiss={handleDismissAlert}
           />
         ))}
 
@@ -79,25 +79,25 @@ export const Dashboard = () => {
           Quick Actions
         </Text>
         <View className="mb-2 flex-row flex-wrap justify-between">
-          <QuickActionButton 
-            label="Start Shift" 
-            icon="clock.fill" 
-            color="#3b82f6" 
+          <QuickActionButton
+            label="Start Shift"
+            icon="clock.fill"
+            color="#3b82f6"
           />
-          <QuickActionButton 
-            label="Report Issue" 
-            icon="exclamationmark.triangle.fill" 
-            color="#ef4444" 
+          <QuickActionButton
+            label="Report Issue"
+            icon="exclamationmark.triangle.fill"
+            color="#ef4444"
           />
-          <QuickActionButton 
-            label="Inventory" 
-            icon="drop.fill" 
-            color="#f59e0b" 
+          <QuickActionButton
+            label="Inventory"
+            icon="drop.fill"
+            color="#f59e0b"
           />
-          <QuickActionButton 
-            label="Reports" 
-            icon="doc.text.fill" 
-            color="#10b981" 
+          <QuickActionButton
+            label="Reports"
+            icon="doc.text.fill"
+            color="#10b981"
           />
         </View>
 
@@ -110,10 +110,10 @@ export const Dashboard = () => {
         </Text>
         <View className="mb-6">
           {indicators.map((indicator, index) => (
-            <StatusIndicator 
-              key={indicator.id} 
-              indicator={indicator} 
-              index={index} 
+            <StatusIndicator
+              key={indicator.id}
+              indicator={indicator}
+              index={index}
             />
           ))}
         </View>
