@@ -8,9 +8,6 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\User;
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -108,6 +105,9 @@ class UserResource extends Resource
                         'manager' => 'info',
                         default => 'gray'
                     }),
+                TextColumn::make('organization.name')
+                    ->label("Organization")
+                    ->placeholder('Global Access'),
                 TextColumn::make('station.name')
                     ->label('Station')
                     ->placeholder('Global Access')
