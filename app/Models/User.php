@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Traits\BelongsToOrganization;
-use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,17 +11,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
     use BelongsToOrganization;
     use HasUuids;
     use HasRoles;
+    use HasApiTokens;
 
     /**
-     * The attributes that are mass-assignable.
+     * The attributes that are mass assignable.
      *
      * @var list<string>
      */
@@ -65,15 +66,8 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsTo(Station::class);
     }
 
-    public function canAccessPanel(Panel $panel): bool {
-        if ($this->hasRole('super-admin')) {
-            return true;
-        }
-
-        if($this->hasAnyRole(['admin', 'manager']) && $this->organization_id !== null) {
-            return true;
-        }
-
-        return false;
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->organization_id !== null && $this->hasAnyRole(['admin', 'manager', 'super-admin']);
     }
 }
