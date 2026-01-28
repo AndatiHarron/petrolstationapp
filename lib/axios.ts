@@ -1,13 +1,14 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL; 
+export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
+    'Except': ''
   },
 });
 

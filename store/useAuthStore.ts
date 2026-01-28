@@ -7,30 +7,30 @@ interface User {
     name: string;
     email: string;
     station_id?: number;
-  }
-  
-  interface AuthState {
+}
+
+interface AuthState {
     token: string | null;
     user: User | null;
     isLoading: boolean;
-    
+
     // Actions
     login: (token: string, user: User) => Promise<void>;
     logout: () => Promise<void>;
     checkSession: () => Promise<void>;
-  }
+}
 
-  export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set) => ({
     token: null,
     user: null,
-    isLoading: false,
+    isLoading: true,
 
     login: async (token, user) => {
         await SecureStore.setItemAsync('auth_token', token);
         await SecureStore.setItemAsync('auth_user', JSON.stringify(user));
 
         set({ token, user });
-        router.replace('/(app)/dashboard');
+        router.replace('/(main)');
     },
     logout: async () => {
         await SecureStore.deleteItemAsync('auth_token');
@@ -46,7 +46,7 @@ interface User {
 
             if (token && userStr) {
                 set({ token, user: JSON.parse(userStr), isLoading: false });
-                router.replace('/(app)/dashboard');
+                router.replace('/(main)');
             } else {
                 set({ token: null, user: null, isLoading: false });
             }
@@ -54,4 +54,4 @@ interface User {
             set({ isLoading: false });
         }
     },
-  }));
+}));
