@@ -31,7 +31,7 @@ class UserPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasRole('super-admin');
     }
 
     /**
@@ -39,7 +39,7 @@ class UserPolicy
      */
     public function update(User $user, $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasRole('super-admin');
     }
 
     /**
@@ -47,6 +47,6 @@ class UserPolicy
      */
     public function delete(User $user, $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasRole('super-admin');
     }
 }
