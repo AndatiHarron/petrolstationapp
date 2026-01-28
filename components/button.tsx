@@ -39,11 +39,11 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
   const getVariantStyle = () => {
     switch (variant) {
       case 'primary':
-        return 'bg-amber-500 shadow-lg shadow-amber-500/30 border-transparent';
+        return 'bg-amber-500 shadow-xl shadow-amber-500/20 border-transparent'; // Dashboard Amber
       case 'secondary':
-        return 'bg-slate-700 border-slate-600 border';
+        return 'bg-slate-800 border-slate-700 border';
       case 'outline':
-        return 'bg-transparent border-slate-600 border';
+        return 'bg-transparent border-slate-600 border-2';
       case 'ghost':
         return 'bg-transparent border-transparent';
       default:
@@ -54,11 +54,11 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
   const getTextStyle = () => {
     switch (variant) {
       case 'primary':
-        return 'text-white';
+        return 'text-white italic'; // Keep italic for velocity
       case 'secondary':
-        return 'text-slate-200';
+        return 'text-white';
       case 'outline':
-        return 'text-slate-300';
+        return 'text-white';
       case 'ghost':
         return 'text-slate-400';
       default:
@@ -72,14 +72,14 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       onPressOut={handlePressOut}
       onPress={handlePress}
       disabled={loading || props.disabled}
-      className={`h-14 w-full items-center justify-center rounded-2xl border ${getVariantStyle()} ${loading || props.disabled ? 'opacity-70' : ''} ${className}`}
+      className={`h-16 w-full items-center justify-center rounded-full ${getVariantStyle()} ${loading || props.disabled ? 'opacity-70' : ''} ${className}`}
       style={[animatedStyle, style as any]}
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#fff' : '#94a3b8'} />
+        <ActivityIndicator color={variant === 'outline' ? '#000' : '#fff'} />
       ) : (
-        <Text className={`text-base font-bold uppercase tracking-widest ${getTextStyle()}`}>
+        <Text className={`text-lg font-black uppercase tracking-wider ${getTextStyle()}`}>
           {title}
         </Text>
       )}

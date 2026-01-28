@@ -3,61 +3,53 @@ import { ScrollView, View, Text, KeyboardAvoidingView, Platform } from 'react-na
 import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LoginForm } from '../../components/login-form';
-import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   return (
-    <LinearGradient
-      colors={['#0f172a', '#1e293b', '#0f172a']}
-      locations={[0, 0.5, 1]}
-      className="flex-1"
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
-      >
-        <StatusBar style="light" />
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingVertical: 40, paddingHorizontal: 24 }}
-          keyboardShouldPersistTaps="handled"
-          contentInsetAdjustmentBehavior="automatic"
+    <View className="flex-1 bg-slate-900">
+      <StatusBar style="light" />
+      <SafeAreaView className="flex-1">
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1"
         >
-          <View className="mx-auto w-full max-w-md">
-            <Animated.View
-              entering={FadeInDown.duration(600).springify()}
-              className="mb-10"
-            >
-              <Text className="mb-3 text-4xl font-extrabold text-white tracking-tighter">
-                Petrol Integrity System
-              </Text>
-              <Text className="text-lg text-slate-400 leading-7">
-                Sign in to access the dashboard
-              </Text>
-            </Animated.View>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 }}
+            keyboardShouldPersistTaps="handled"
+            contentInsetAdjustmentBehavior="automatic"
+          >
+            <View className="flex-1 justify-end pb-12">
+              <Animated.View
+                entering={FadeInDown.duration(800).springify()}
+                className="mb-12"
+              >
+                <Text className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.9]">
+                  PETROL
+                </Text>
+                <Text className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.9]">
+                  INTEGRITY
+                </Text>
+                <Text className="mt-4 text-lg font-medium text-slate-400 max-w-[280px] leading-6">
+                  Secure access for station managers.
+                </Text>
+              </Animated.View>
 
-            <Animated.View
-              entering={FadeInDown.delay(200).duration(600).springify()}
-              className="relative overflow-hidden rounded-3xl border border-slate-700/50 bg-slate-800/50 p-8 shadow-2xl backdrop-blur-xl"
-            >
-              {/* Glassmorphism gradient overlay */}
-              <LinearGradient
-                colors={['rgba(255,255,255,0.05)', 'transparent']}
-                className="absolute inset-0"
-              />
-              <LoginForm />
-            </Animated.View>
+              <Animated.View
+                entering={FadeInDown.delay(200).duration(800).springify()}
+              >
+                <LoginForm />
 
-            <Animated.View
-              entering={FadeInDown.delay(400).duration(600).springify()}
-              className="mt-10 items-center"
-            >
-              <Text className="text-xs text-slate-500">
-                © 2026 Petrol Integrity System. All rights reserved.
-              </Text>
-            </Animated.View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </LinearGradient>
+                <View className="mt-8 items-center">
+                  <Text className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
+                    System v1.0.0
+                  </Text>
+                </View>
+              </Animated.View>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
