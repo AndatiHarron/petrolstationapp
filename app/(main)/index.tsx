@@ -11,10 +11,15 @@ export default function Home() {
       <Dashboard />
 
       {/* Dev Navigation */}
-      <View className="absolute bottom-10 right-10">
+      <View className="absolute bottom-10 right-10 gap-2">
         <Link href="/super-admin" asChild>
           <Pressable className="bg-orange-500 px-6 py-3 rounded-full shadow-lg">
             <Text className="text-white font-bold">Role: Super Admin</Text>
+          </Pressable>
+        </Link>
+        <Link href="/admin" asChild>
+          <Pressable className="bg-emerald-500 px-6 py-3 rounded-full shadow-lg">
+            <Text className="text-white font-bold">Role: Owner Admin</Text>
           </Pressable>
         </Link>
       </View>
