@@ -22,6 +22,11 @@ export default function Home() {
             <Text className="text-white font-bold">Role: Owner Admin</Text>
           </Pressable>
         </Link>
+        <Link href="/station-manager" asChild>
+          <Pressable className="bg-blue-500 px-6 py-3 rounded-full shadow-lg">
+            <Text className="text-white font-bold">Role: Station Manager</Text>
+          </Pressable>
+        </Link>
       </View>
     </View>
   );
