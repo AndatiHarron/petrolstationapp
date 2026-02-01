@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
+import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import { useShiftStore } from '@/features/api/shift/shift';
 import { useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@/lib/api-error';
@@ -38,7 +39,12 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
 
     if (activeShift) {
         return (
-            <View className="bg-slate-800 rounded-3xl p-6 mb-6 border border-slate-700 w-full shadow-lg shadow-blue-900/10">
+            <Animated.View
+                entering={FadeIn.duration(400)}
+                exiting={FadeOut.duration(200)}
+                layout={Layout.springify()}
+                className="bg-slate-800 rounded-3xl p-6 mb-6 border border-slate-700 w-full shadow-lg shadow-blue-900/10"
+            >
                 <View className="flex-row items-center justify-between mb-6">
                     <View className="flex-row items-center">
                         <View className="bg-emerald-500/20 p-2.5 rounded-xl mr-3">
@@ -68,12 +74,17 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                         <Text className="text-slate-200 text-sm">{new Date(activeShift.started_at).toLocaleDateString()}</Text>
                     </View>
                 </View>
-            </View>
+            </Animated.View>
         );
     }
 
     return (
-        <View className="bg-slate-800 rounded-3xl p-6 mb-6 border border-slate-700 w-full items-center shadow-lg shadow-blue-900/10">
+        <Animated.View
+            entering={FadeIn.duration(400)}
+            exiting={FadeOut.duration(200)}
+            layout={Layout.springify()}
+            className="bg-slate-800 rounded-3xl p-6 mb-6 border border-slate-700 w-full items-center shadow-lg shadow-blue-900/10"
+        >
             <View
                 className="bg-blue-900/30 p-6 rounded-full mb-6 border border-blue-500/20"
             >
@@ -87,24 +98,24 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                 Start a new shift to begin logging transactions and readings.
             </Text>
 
-            <TouchableOpacity
+            <Pressable
                 onPress={handleStart}
                 disabled={isCreateShiftPending}
                 className={`w-full bg-blue-600 py-4 rounded-xl items-center flex-row justify-center active:bg-blue-700 active:scale-95 transition-all shadow-lg shadow-blue-900/20 ${isCreateShiftPending ? 'opacity-70' : ''}`}
             >
                 {isCreateShiftPending ? (
-                    <View className="flex-row items-center justify-center space-x-2 gap-2">
+                    <Animated.View entering={FadeIn} className="flex-row items-center justify-center space-x-2 gap-2">
                         <ActivityIndicator color="white" />
                         <Text className="text-white text-lg font-bold uppercase tracking-wider">
                             Starting Shift...
                         </Text>
-                    </View>
+                    </Animated.View>
                 ) : (
                     <Text className="text-white text-lg font-bold uppercase tracking-wider">
                         Start New Shift
                     </Text>
                 )}
-            </TouchableOpacity>
-        </View>
+            </Pressable>
+        </Animated.View>
     );
 }

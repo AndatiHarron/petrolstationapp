@@ -11,6 +11,8 @@ import { CreditSaleModal } from '../../components/station-manager/credit-sale-mo
 import { StationManagerHeader } from '../../components/station-manager/header';
 import { StartShiftView } from '../../components/station-manager/start-shift-view';
 
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+
 export default function StationManagerDashboard() {
     const router = useRouter();
     const { data: activeShift, isLoading: isShiftFetchPending } = useShiftIndex({
@@ -27,15 +29,17 @@ export default function StationManagerDashboard() {
 
     if (isShiftFetchPending) {
         return (
-            <View className="flex-1 bg-slate-900 justify-center items-center">
+            <Animated.View
+                entering={FadeIn}
+                exiting={FadeOut}
+                className="flex-1 bg-slate-900 justify-center items-center"
+            >
                 <StatusBar barStyle="light-content" />
                 <ActivityIndicator size="large" color="#38bdf8" />
                 <Text className="text-slate-400 mt-4 font-medium">Loading station data...</Text>
-            </View>
+            </Animated.View>
         );
     }
-
-
 
     return (
         <View className="flex-1 bg-slate-900">
@@ -46,23 +50,25 @@ export default function StationManagerDashboard() {
                     contentContainerStyle={{ paddingBottom: 40 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    {/* Back Navigation */}
-                    <TouchableOpacity
-                        onPress={() => router.back()}
-                        className="flex-row items-center py-2 mb-2"
-                    >
-                        <SymbolView name={"chevron.left" as any} size={16} tintColor="#94a3b8" />
-                        <Text className="text-slate-400 ml-1 font-medium">Back to Roles</Text>
-                    </TouchableOpacity>
+                    <Animated.View entering={FadeIn.duration(500).delay(100)}>
+                        {/* Back Navigation */}
+                        <TouchableOpacity
+                            onPress={() => router.back()}
+                            className="flex-row items-center py-2 mb-2"
+                        >
+                            <SymbolView name={"chevron.left" as any} size={16} tintColor="#94a3b8" />
+                            <Text className="text-slate-400 ml-1 font-medium">Back to Roles</Text>
+                        </TouchableOpacity>
 
-                    <StationManagerHeader isShiftActive={!!shiftResource} />
+                        <StationManagerHeader isShiftActive={!!shiftResource} />
 
-                    <StartShiftView activeShift={shiftResource} />
+                        <StartShiftView activeShift={shiftResource} />
 
-                    <View className={!shiftResource ? "opacity-30 pointer-events-none" : ""}>
-                        {/* <QuickActionsHero /> */}
-                        <ActivityFeed />
-                    </View>
+                        <View className={!shiftResource ? "opacity-30 pointer-events-none" : ""}>
+                            {/* <QuickActionsHero /> */}
+                            <ActivityFeed />
+                        </View>
+                    </Animated.View>
                 </ScrollView>
             </SafeAreaView>
 
