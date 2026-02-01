@@ -35,8 +35,7 @@ export const customInstance = <T>(
 ): Promise<T> => {
   const source = axios.CancelToken.source();
   const data = options?.data ?? options?.body;
-  console.log("data", data);
-  console.log("options", options);
+
   const promise = api({
     url,
     ...options,

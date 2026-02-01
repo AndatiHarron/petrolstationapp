@@ -1,9 +1,11 @@
 import { useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useState } from 'react';
-import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useShiftIndex } from '@/features/api/shift/shift';
+import type { ShiftIndex200, AuthenticationExceptionResponse } from '@/features/api/model';
 import { ActivityFeed } from '../../components/station-manager/activity-feed';
 import { CreditSaleModal } from '../../components/station-manager/credit-sale-modal';
 import { StationManagerHeader } from '../../components/station-manager/header';
@@ -11,8 +13,29 @@ import { StartShiftView } from '../../components/station-manager/start-shift-vie
 
 export default function StationManagerDashboard() {
     const router = useRouter();
-    const [isShiftActive, setIsShiftActive] = useState(false);
+    const { data: activeShift, isLoading: isShiftFetchPending } = useShiftIndex({
+        query: {
+            queryKey: ['activeShift'],
+        }
+    });
+
+    // Cast to runtime type (unwrapped body) to fix type mismatch with generated hook types
+    const actualShiftData = activeShift as unknown as (ShiftIndex200 | AuthenticationExceptionResponse | undefined);
+    const shiftResource = (actualShiftData && 'data' in actualShiftData) ? actualShiftData.data : undefined;
+
     const [creditModalVisible, setCreditModalVisible] = useState(false);
+
+    if (isShiftFetchPending) {
+        return (
+            <View className="flex-1 bg-slate-900 justify-center items-center">
+                <StatusBar barStyle="light-content" />
+                <ActivityIndicator size="large" color="#38bdf8" />
+                <Text className="text-slate-400 mt-4 font-medium">Loading station data...</Text>
+            </View>
+        );
+    }
+
+
 
     return (
         <View className="flex-1 bg-slate-900">
@@ -32,17 +55,12 @@ export default function StationManagerDashboard() {
                         <Text className="text-slate-400 ml-1 font-medium">Back to Roles</Text>
                     </TouchableOpacity>
 
-                    <StationManagerHeader isShiftActive={isShiftActive} />
+                    <StationManagerHeader isShiftActive={!!shiftResource} />
 
-                    {!isShiftActive && (
-                        <StartShiftView onStart={() => setIsShiftActive(true)} />
-                    )}
+                    <StartShiftView activeShift={shiftResource} />
 
-                    {/* Dashboard Content - Always visible but dimmed if inactive */}
-                    <View className={!isShiftActive ? "opacity-30 pointer-events-none" : ""}>
+                    <View className={!shiftResource ? "opacity-30 pointer-events-none" : ""}>
                         {/* <QuickActionsHero /> */}
-
-
                         <ActivityFeed />
                     </View>
                 </ScrollView>

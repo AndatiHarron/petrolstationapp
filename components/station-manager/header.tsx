@@ -20,9 +20,9 @@ export function StationManagerHeader({ isShiftActive = false }: StationManagerHe
                 <Text className="text-slate-400 text-sm font-medium uppercase tracking-wider">
                     {currentDate}
                 </Text>
-                <Text className="text-white text-2xl font-bold mt-1">
-                    {isShiftActive ? 'Shift ID: #1234' : 'Overview'}
-                </Text>
+                {!isShiftActive && <Text className="text-white text-2xl font-bold mt-1">
+                    Overview
+                </Text>}
             </View>
 
             {isShiftActive ? (
