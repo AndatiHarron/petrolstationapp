@@ -16,7 +16,7 @@ export default defineConfig({
     },
     input: {
       // Use the docs URL from your running Laravel backend
-      target: 'http://petrol-integrity-system.test/docs/api.json', 
+      target: 'http://localhost:8000/docs/api.json',
     },
   },
 });

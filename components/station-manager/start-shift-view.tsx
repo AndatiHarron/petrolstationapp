@@ -3,10 +3,11 @@ import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
-import { useShiftStore } from '@/features/api/shift/shift';
+import { useShiftLock, useShiftStore } from '@/features/api/shift/shift';
 import { useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@/lib/api-error';
 import { toast } from 'sonner-native';
+import { LockShiftModal } from './lock-shift-modal';
 
 import type { ShiftResource } from '@/features/api/model';
 
@@ -32,9 +33,33 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
         }
     });
 
+    const { mutateAsync: lockShift, isPending: isLockShiftPending } = useShiftLock({
+        mutation: {
+            onSuccess: async () => {
+                await queryClient.invalidateQueries({
+                    queryKey: ['activeShift'],
+                });
+            },
+            onError: (error) => {
+                const message = getApiErrorMessage(error);
+                toast.error('Lock shift failed', {
+                    description: message,
+                });
+            }
+        }
+    });
+
     const handleStart = () => {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         startShift();
+    };
+
+    const [lockModalVisible, setLockModalVisible] = React.useState(false);
+
+    const handleLockShiftSubmit = (data: any) => {
+        // Here we would call the actual API
+        lockShift(data);
+        setLockModalVisible(false); // Close for now
     };
 
     if (activeShift) {
@@ -64,7 +89,7 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                     </View>
                 </View>
 
-                <View className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 mb-2">
+                <View className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 mb-6">
                     <View className="flex-row justify-between items-center mb-2">
                         <Text className="text-slate-400 text-xs font-medium uppercase">Shift ID</Text>
                         <Text className="text-slate-200 text-sm font-mono">{activeShift.id.slice(0, 8)}...</Text>
@@ -74,6 +99,23 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                         <Text className="text-slate-200 text-sm">{new Date(activeShift.started_at).toLocaleDateString()}</Text>
                     </View>
                 </View>
+
+                <Pressable
+                    onPress={() => setLockModalVisible(true)}
+                    className="w-full bg-red-500/10 border border-red-500/30 py-4 rounded-xl items-center flex-row justify-center active:bg-red-500/20 active:scale-95 transition-all"
+                >
+                    <SymbolView name="stop.circle.fill" size={16} tintColor="#f87171" style={{ marginRight: 8 }} />
+                    <Text className="text-red-400 text-sm font-bold uppercase tracking-wider">
+                        Stop & Lock Shift
+                    </Text>
+                </Pressable>
+
+                <LockShiftModal
+                    visible={lockModalVisible}
+                    activeShift={activeShift}
+                    onClose={() => setLockModalVisible(false)}
+                    onSubmit={handleLockShiftSubmit}
+                />
             </Animated.View>
         );
     }

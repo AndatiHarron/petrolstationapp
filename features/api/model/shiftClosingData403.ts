@@ -5,8 +5,7 @@
  * OpenAPI spec version: 0.0.1
  */
 
-export type ShiftResourceFinancials = {
-  expected: number;
-  collected: number;
-  variance: number;
+export type ShiftClosingData403 = {
+  /** Error overview. */
+  message: string;
 };

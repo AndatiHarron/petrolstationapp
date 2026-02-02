@@ -5,7 +5,10 @@
  * OpenAPI spec version: 0.0.1
  */
 
-export type LockShiftRequestDipsItem = {
+export interface ClosingTankResource {
   tank_id: string;
-  dip_mm: number;
-};
+  tank_name: string;
+  product_name: string | 'Unknown';
+  opening_volume: number;
+  capacity: number;
+}

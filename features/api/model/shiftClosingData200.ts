@@ -4,9 +4,8 @@
  * Petrol Integrity System API Documentation
  * OpenAPI spec version: 0.0.1
  */
+import type { ClosingShiftResource } from './closingShiftResource';
 
-export type ShiftResourceFinancials = {
-  expected: number;
-  collected: number;
-  variance: number;
+export type ShiftClosingData200 = {
+  data: ClosingShiftResource;
 };
