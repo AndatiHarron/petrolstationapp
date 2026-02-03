@@ -23,6 +23,10 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                 await queryClient.invalidateQueries({
                     queryKey: ['activeShift'],
                 });
+
+                await queryClient.invalidateQueries({
+                    queryKey: ['audit-logs'],
+                });
             },
             onError: (error) => {
                 const message = getApiErrorMessage(error);
@@ -41,6 +45,10 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
 
                 await queryClient.invalidateQueries({
                     queryKey: ['activeShift'],
+                });
+
+                await queryClient.invalidateQueries({
+                    queryKey: ['audit-logs'],
                 });
             },
             onError: (error) => {

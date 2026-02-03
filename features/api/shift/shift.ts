@@ -63,7 +63,7 @@ export type shiftIndexResponse404 = {
   data: ShiftIndex404
   status: 404
 }
-
+    
 export type shiftIndexResponseSuccess = (shiftIndexResponse200) & {
   headers: Headers;
 };
@@ -76,50 +76,49 @@ export type shiftIndexResponse = (shiftIndexResponseSuccess | shiftIndexResponse
 export const getShiftIndexUrl = () => {
 
 
-
+  
 
   return `/v1/shifts/current`
 }
 
-export const shiftIndex = async (options?: RequestInit): Promise<shiftIndexResponse> => {
-
+export const shiftIndex = async ( options?: RequestInit): Promise<shiftIndexResponse> => {
+  
   return customInstance<shiftIndexResponse>(getShiftIndexUrl(),
-    {
-      ...options,
-      method: 'GET'
-
-
-    }
-  );
-}
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
 
 
 
 
 
 export const getShiftIndexQueryKey = () => {
-  return [
+    return [
     `/v1/shifts/current`
-  ] as const;
-}
+    ] as const;
+    }
 
-
-export const getShiftIndexQueryOptions = <TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+    
+export const getShiftIndexQueryOptions = <TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getShiftIndexQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getShiftIndexQueryKey();
 
+  
 
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftIndex>>> = ({ signal }) => shiftIndex({ signal, ...requestOptions });
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftIndex>>> = ({ signal }) => shiftIndex({ signal, ...requestOptions });
+      
 
+      
 
-
-
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ShiftIndexQueryResult = NonNullable<Awaited<ReturnType<typeof shiftIndex>>>
@@ -127,45 +126,41 @@ export type ShiftIndexQueryError = AuthenticationExceptionResponse | ShiftIndex4
 
 
 export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
-  options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>> & Pick<
-      DefinedInitialDataOptions<
-        Awaited<ReturnType<typeof shiftIndex>>,
-        TError,
-        Awaited<ReturnType<typeof shiftIndex>>
-      >, 'initialData'
-    >, request?: SecondParameter<typeof customInstance>
-  }
-  , queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftIndex>>,
+          TError,
+          Awaited<ReturnType<typeof shiftIndex>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
-  options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>> & Pick<
-      UndefinedInitialDataOptions<
-        Awaited<ReturnType<typeof shiftIndex>>,
-        TError,
-        Awaited<ReturnType<typeof shiftIndex>>
-      >, 'initialData'
-    >, request?: SecondParameter<typeof customInstance>
-  }
-  , queryClient?: QueryClient
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftIndex>>,
+          TError,
+          Awaited<ReturnType<typeof shiftIndex>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
-  , queryClient?: QueryClient
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Display a listing of the resource
  */
 
 export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
-  options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
-  , queryClient?: QueryClient
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getShiftIndexQueryOptions(options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
@@ -190,7 +185,7 @@ export type shiftStoreResponse401 = {
   data: AuthenticationExceptionResponse
   status: 401
 }
-
+    
 export type shiftStoreResponseSuccess = (shiftStoreResponse200) & {
   headers: Headers;
 };
@@ -203,76 +198,74 @@ export type shiftStoreResponse = (shiftStoreResponseSuccess | shiftStoreResponse
 export const getShiftStoreUrl = () => {
 
 
-
+  
 
   return `/v1/shifts/start`
 }
 
-export const shiftStore = async (options?: RequestInit): Promise<shiftStoreResponse> => {
-
+export const shiftStore = async ( options?: RequestInit): Promise<shiftStoreResponse> => {
+  
   return customInstance<shiftStoreResponse>(getShiftStoreUrl(),
-    {
-      ...options,
-      method: 'POST'
-
-
-    }
-  );
-}
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
 
 
 
 
 export const getShiftStoreMutationOptions = <TError = ShiftStore400 | AuthenticationExceptionResponse,
-  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof shiftStore>>, TError, void, TContext>, request?: SecondParameter<typeof customInstance> }
-  ): UseMutationOptions<Awaited<ReturnType<typeof shiftStore>>, TError, void, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftStore>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftStore>>, TError,void, TContext> => {
 
-  const mutationKey = ['shiftStore'];
-  const { mutation: mutationOptions, request: requestOptions } = options ?
-    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+const mutationKey = ['shiftStore'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey, }, request: undefined };
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftStore>>, void> = () => {
+          
+
+          return  shiftStore(requestOptions)
+        }
 
 
 
-
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftStore>>, void> = () => {
-
-
-    return shiftStore(requestOptions)
-  }
+        
 
 
+  return  { mutationFn, ...mutationOptions }}
 
+    export type ShiftStoreMutationResult = NonNullable<Awaited<ReturnType<typeof shiftStore>>>
+    
+    export type ShiftStoreMutationError = ShiftStore400 | AuthenticationExceptionResponse
 
-
-
-  return { mutationFn, ...mutationOptions }
-}
-
-export type ShiftStoreMutationResult = NonNullable<Awaited<ReturnType<typeof shiftStore>>>
-
-export type ShiftStoreMutationError = ShiftStore400 | AuthenticationExceptionResponse
-
-/**
-* @summary Store a newly created resource in storage
-*/
+    /**
+ * @summary Store a newly created resource in storage
+ */
 export const useShiftStore = <TError = ShiftStore400 | AuthenticationExceptionResponse,
-  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof shiftStore>>, TError, void, TContext>, request?: SecondParameter<typeof customInstance> }
-    , queryClient?: QueryClient): UseMutationResult<
-      Awaited<ReturnType<typeof shiftStore>>,
-      TError,
-      void,
-      TContext
-    > => {
-  return useMutation(getShiftStoreMutationOptions(options), queryClient);
-}
-/**
-* @summary Lock a Shift
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftStore>>, TError,void, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftStore>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getShiftStoreMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Lock a Shift
 * Submits final readings, evidence, and payments to close a shift.
 Calculates variance immediately
-*/
+ */
 export type shiftLockResponse200 = {
   data: ShiftLock200
   status: 200
@@ -302,7 +295,7 @@ export type shiftLockResponse500 = {
   data: ShiftLock500
   status: 500
 }
-
+    
 export type shiftLockResponseSuccess = (shiftLockResponse200) & {
   headers: Headers;
 };
@@ -315,82 +308,80 @@ export type shiftLockResponse = (shiftLockResponseSuccess | shiftLockResponseErr
 export const getShiftLockUrl = (shift: string,) => {
 
 
-
+  
 
   return `/v1/shifts/${shift}/lock`
 }
 
 export const shiftLock = async (shift: string,
-  lockShiftRequest: LockShiftRequest, options?: RequestInit): Promise<shiftLockResponse> => {
-  const formData = new FormData();
-  formData.append(`payments`, JSON.stringify(lockShiftRequest.payments));
-  lockShiftRequest.meters.forEach(value => formData.append(`meters`, JSON.stringify(value)));
-  lockShiftRequest.dips.forEach(value => formData.append(`dips`, JSON.stringify(value)));
+    lockShiftRequest: LockShiftRequest, options?: RequestInit): Promise<shiftLockResponse> => {
+    const formData = new FormData();
+formData.append(`payments`, JSON.stringify(lockShiftRequest.payments));
+lockShiftRequest.meters.forEach(value => formData.append(`meters`, JSON.stringify(value)));
+lockShiftRequest.dips.forEach(value => formData.append(`dips`, JSON.stringify(value)));
 
   return customInstance<shiftLockResponse>(getShiftLockUrl(shift),
-    {
-      ...options,
-      method: 'POST'
-      ,
-      body:
-        formData,
-    }
-  );
-}
+  {      
+    ...options,
+    method: 'POST'
+    ,
+    body: 
+      formData,
+  }
+);}
 
 
 
 
 export const getShiftLockMutationOptions = <TError = AuthenticationExceptionResponse | ShiftLock403 | ModelNotFoundExceptionResponse | ValidationExceptionResponse | ShiftLock500,
-  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof shiftLock>>, TError, { shift: string; data: LockShiftRequest }, TContext>, request?: SecondParameter<typeof customInstance> }
-  ): UseMutationOptions<Awaited<ReturnType<typeof shiftLock>>, TError, { shift: string; data: LockShiftRequest }, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftLock>>, TError,{shift: string;data: LockShiftRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftLock>>, TError,{shift: string;data: LockShiftRequest}, TContext> => {
 
-  const mutationKey = ['shiftLock'];
-  const { mutation: mutationOptions, request: requestOptions } = options ?
-    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+const mutationKey = ['shiftLock'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey, }, request: undefined };
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftLock>>, {shift: string;data: LockShiftRequest}> = (props) => {
+          const {shift,data} = props ?? {};
+
+          return  shiftLock(shift,data,requestOptions)
+        }
 
 
 
-
-  const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftLock>>, { shift: string; data: LockShiftRequest }> = (props) => {
-    const { shift, data } = props ?? {};
-
-    return shiftLock(shift, data, requestOptions)
-  }
+        
 
 
+  return  { mutationFn, ...mutationOptions }}
 
+    export type ShiftLockMutationResult = NonNullable<Awaited<ReturnType<typeof shiftLock>>>
+    export type ShiftLockMutationBody = LockShiftRequest
+    export type ShiftLockMutationError = AuthenticationExceptionResponse | ShiftLock403 | ModelNotFoundExceptionResponse | ValidationExceptionResponse | ShiftLock500
 
-
-
-  return { mutationFn, ...mutationOptions }
-}
-
-export type ShiftLockMutationResult = NonNullable<Awaited<ReturnType<typeof shiftLock>>>
-export type ShiftLockMutationBody = LockShiftRequest
-export type ShiftLockMutationError = AuthenticationExceptionResponse | ShiftLock403 | ModelNotFoundExceptionResponse | ValidationExceptionResponse | ShiftLock500
-
-/**
-* @summary Lock a Shift
+    /**
+ * @summary Lock a Shift
 * Submits final readings, evidence, and payments to close a shift.
 Calculates variance immediately
-*/
+ */
 export const useShiftLock = <TError = AuthenticationExceptionResponse | ShiftLock403 | ModelNotFoundExceptionResponse | ValidationExceptionResponse | ShiftLock500,
-  TContext = unknown>(options?: { mutation?: UseMutationOptions<Awaited<ReturnType<typeof shiftLock>>, TError, { shift: string; data: LockShiftRequest }, TContext>, request?: SecondParameter<typeof customInstance> }
-    , queryClient?: QueryClient): UseMutationResult<
-      Awaited<ReturnType<typeof shiftLock>>,
-      TError,
-      { shift: string; data: LockShiftRequest },
-      TContext
-    > => {
-  return useMutation(getShiftLockMutationOptions(options), queryClient);
-}
-/**
-* @summary Get closing data for the purpose of closing a shift
-*/
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftLock>>, TError,{shift: string;data: LockShiftRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftLock>>,
+        TError,
+        {shift: string;data: LockShiftRequest},
+        TContext
+      > => {
+      return useMutation(getShiftLockMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Get closing data for the purpose of closing a shift
+ */
 export type shiftClosingDataResponse200 = {
   data: ShiftClosingData200
   status: 200
@@ -410,7 +401,7 @@ export type shiftClosingDataResponse404 = {
   data: ModelNotFoundExceptionResponse
   status: 404
 }
-
+    
 export type shiftClosingDataResponseSuccess = (shiftClosingDataResponse200) & {
   headers: Headers;
 };
@@ -423,50 +414,49 @@ export type shiftClosingDataResponse = (shiftClosingDataResponseSuccess | shiftC
 export const getShiftClosingDataUrl = (shift: string,) => {
 
 
-
+  
 
   return `/v1/shifts/${shift}/closing-data`
 }
 
 export const shiftClosingData = async (shift: string, options?: RequestInit): Promise<shiftClosingDataResponse> => {
-
+  
   return customInstance<shiftClosingDataResponse>(getShiftClosingDataUrl(shift),
-    {
-      ...options,
-      method: 'GET'
-
-
-    }
-  );
-}
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
 
 
 
 
 
 export const getShiftClosingDataQueryKey = (shift: string,) => {
-  return [
+    return [
     `/v1/shifts/${shift}/closing-data`
-  ] as const;
-}
+    ] as const;
+    }
 
-
-export const getShiftClosingDataQueryOptions = <TData = Awaited<ReturnType<typeof shiftClosingData>>, TError = AuthenticationExceptionResponse | ShiftClosingData403 | ModelNotFoundExceptionResponse>(shift: string, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
+    
+export const getShiftClosingDataQueryOptions = <TData = Awaited<ReturnType<typeof shiftClosingData>>, TError = AuthenticationExceptionResponse | ShiftClosingData403 | ModelNotFoundExceptionResponse>(shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
-  const { query: queryOptions, request: requestOptions } = options ?? {};
+const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey = queryOptions?.queryKey ?? getShiftClosingDataQueryKey(shift);
+  const queryKey =  queryOptions?.queryKey ?? getShiftClosingDataQueryKey(shift);
 
+  
 
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftClosingData>>> = ({ signal }) => shiftClosingData(shift, { signal, ...requestOptions });
 
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftClosingData>>> = ({ signal }) => shiftClosingData(shift, { signal, ...requestOptions });
+      
 
+      
 
-
-
-
-  return { queryKey, queryFn, enabled: !!(shift), ...queryOptions } as UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(shift), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
 export type ShiftClosingDataQueryResult = NonNullable<Awaited<ReturnType<typeof shiftClosingData>>>
@@ -474,45 +464,41 @@ export type ShiftClosingDataQueryError = AuthenticationExceptionResponse | Shift
 
 
 export function useShiftClosingData<TData = Awaited<ReturnType<typeof shiftClosingData>>, TError = AuthenticationExceptionResponse | ShiftClosingData403 | ModelNotFoundExceptionResponse>(
-  shift: string, options: {
-    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>> & Pick<
-      DefinedInitialDataOptions<
-        Awaited<ReturnType<typeof shiftClosingData>>,
-        TError,
-        Awaited<ReturnType<typeof shiftClosingData>>
-      >, 'initialData'
-    >, request?: SecondParameter<typeof customInstance>
-  }
-  , queryClient?: QueryClient
-): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ shift: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftClosingData>>,
+          TError,
+          Awaited<ReturnType<typeof shiftClosingData>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useShiftClosingData<TData = Awaited<ReturnType<typeof shiftClosingData>>, TError = AuthenticationExceptionResponse | ShiftClosingData403 | ModelNotFoundExceptionResponse>(
-  shift: string, options?: {
-    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>> & Pick<
-      UndefinedInitialDataOptions<
-        Awaited<ReturnType<typeof shiftClosingData>>,
-        TError,
-        Awaited<ReturnType<typeof shiftClosingData>>
-      >, 'initialData'
-    >, request?: SecondParameter<typeof customInstance>
-  }
-  , queryClient?: QueryClient
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftClosingData>>,
+          TError,
+          Awaited<ReturnType<typeof shiftClosingData>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 export function useShiftClosingData<TData = Awaited<ReturnType<typeof shiftClosingData>>, TError = AuthenticationExceptionResponse | ShiftClosingData403 | ModelNotFoundExceptionResponse>(
-  shift: string, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
-  , queryClient?: QueryClient
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
  * @summary Get closing data for the purpose of closing a shift
  */
 
 export function useShiftClosingData<TData = Awaited<ReturnType<typeof shiftClosingData>>, TError = AuthenticationExceptionResponse | ShiftClosingData403 | ModelNotFoundExceptionResponse>(
-  shift: string, options?: { query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>>, request?: SecondParameter<typeof customInstance> }
-  , queryClient?: QueryClient
-): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftClosingData>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getShiftClosingDataQueryOptions(shift, options)
+  const queryOptions = getShiftClosingDataQueryOptions(shift,options)
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
