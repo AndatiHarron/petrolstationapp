@@ -14,11 +14,15 @@ trait BelongsToOrganization
 {
     public static function bootBelongsToOrganization(): void
     {
-        static::addGlobalScope(new OrganizationScope);
+        if (!auth()->check() || !auth()->user()->hasRole('super-admin')) {
+            static::addGlobalScope(new OrganizationScope);
+        }
 
         static::creating(function ($model) {
            if(auth()->check()) {
-               $model->organization_id = Auth::user()->organization_id;
+               if (is_null($model->organization_id)) {
+                    $model->organization_id = Auth::user()->organization_id;
+               }
            }
         });
     }

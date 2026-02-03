@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LockShiftRequest;
+use App\Http\Resources\ClosingShiftResource;
 use App\Http\Resources\ShiftResource;
 use App\Models\Shift;
 use App\Services\ShiftReconciliationService;
@@ -163,5 +164,24 @@ class ShiftController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Get closing data for the purpose of closing a shift
+     */
+    public function closingData(Request $request, Shift $shift)
+    {
+        if($shift->started_by_user_id != Auth::id()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+       $shift->load([
+           'station.nozzles.tank.product',
+           'station.tanks.product',
+           'meterReadings',
+           'dipReadings',
+       ]);
+
+        return new ClosingShiftResource($shift);
     }
 }

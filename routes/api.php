@@ -30,6 +30,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::get('/shifts/current', [ShiftController::class, 'index']);
     Route::post('/shifts/start', [ShiftController::class, 'store']);
     Route::post('/shifts/{shift}/lock', [ShiftController::class, 'lock']);
+    Route::get('/shifts/{shift}/closing-data', [ShiftController::class, 'closingData']);
 });
 
 

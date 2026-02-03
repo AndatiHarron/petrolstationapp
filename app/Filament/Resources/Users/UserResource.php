@@ -37,6 +37,10 @@ class UserResource extends Resource
     {
         $query = parent::getEloquentQuery();
 
+        if (auth()->user()->hasRole('super-admin')) {
+            return $query->withoutGlobalScopes();
+        }
+
         if(auth()->hasUser()) {
             $query->where('organization_id', auth()->user()->organization_id);
         }
@@ -65,7 +69,13 @@ class UserResource extends Resource
                         ->required(fn ($livewire) => $livewire instanceof CreateRecord)
                         ->maxLength(255),
 
-                    Hidden::make('organization_id')
+                    Select::make('organization_id')
+                        ->relationship('organization', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->visible(fn () => auth()->user()->hasRole('super-admin'))
+                        ->live()
                         ->default(auth()->user()->organization_id),
                 ])->columns(2),
 
@@ -80,9 +90,11 @@ class UserResource extends Resource
 
                     Select::make('station_id')
                         ->label('Assigned Station')
-                        ->relationship('station', 'name', fn (Builder $query) =>
-                        $query->where('organization_id', auth()->user()->organization_id)
-                        )
+                        ->relationship('station', 'name', function (Builder $query, Get $get) {
+                            $orgId = $get('organization_id') ?? auth()->user()->organization_id;
+
+                            return $query->where('organization_id', $orgId);
+                        })
                         ->searchable()
                         ->preload()
                         ->visible(fn (Get $get) => !empty($get('roles')))
