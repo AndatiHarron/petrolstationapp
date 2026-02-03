@@ -40,26 +40,33 @@ class Lifting extends Model
             $tank = $lifting->tank;
 
             // 1. Update the current volume
-            $tank->increment('current_volume', $lifting->volume_liters);
+           if ($tank) {
+               $tank->increment('current_volume', $lifting->volume_liters);
 
-            // 2. Recalculate the current dip reading
-            $tank->updateDipFromCurrentVolume();
-
-            // 3. Save the changes
-            $tank->save();
+               // 2. Recalculate the current dip reading
+               if (method_exists($tank, 'updateDipFromCurrentVolume')) {
+                   $tank->updateDipFromCurrentVolume();
+               }
+               // 3. Save the changes
+               $tank->save();
+           }
         });
 
         static::deleted(function (Lifting $lifting) {
             $tank = $lifting->tank;
 
-            // 1. Update the current volume
-            $lifting->tank->decrement('current_volume', $lifting->volume_liters);
+            if ($tank) {
+                // 1. Update the current volume
+                $lifting->tank->decrement('current_volume', $lifting->volume_liters);
 
-            // 2. Recalculate the current dip reading
-            $tank->updateDipFromCurrentVolume();
+                // 2. Recalculate the current dip reading
+                if (method_exists($tank, 'updateDipFromCurrentVolume')) {
+                    $tank->updateDipFromCurrentVolume();
+                }
 
-            // 3. Save the changes
-            $tank->save();
+                // 3. Save the changes
+                $tank->save();
+            }
         });
     }
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\LiftingController;
 use App\Http\Controllers\Api\V1\ShiftController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
@@ -37,6 +38,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
 
     Route::apiResource('customers', CustomerController::class);
+    Route::apiResource('liftings', LiftingController::class);
 });
 
 
