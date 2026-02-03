@@ -9,7 +9,7 @@ import { getApiErrorMessage } from '@/lib/api-error';
 import { toast } from 'sonner-native';
 import { LockShiftModal } from './lock-shift-modal';
 
-import type { ShiftResource } from '@/features/api/model';
+import type { LockShiftRequest, ShiftResource } from '@/features/api/model';
 
 interface StartShiftViewProps {
     activeShift?: ShiftResource;
@@ -36,12 +36,16 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
     const { mutateAsync: lockShift, isPending: isLockShiftPending } = useShiftLock({
         mutation: {
             onSuccess: async () => {
+                // Force UI update immediately to show "No Active Shift"
+                queryClient.setQueryData(['activeShift'], null);
+
                 await queryClient.invalidateQueries({
                     queryKey: ['activeShift'],
                 });
             },
             onError: (error) => {
                 const message = getApiErrorMessage(error);
+                console.log(error, message)
                 toast.error('Lock shift failed', {
                     description: message,
                 });
@@ -56,9 +60,10 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
 
     const [lockModalVisible, setLockModalVisible] = React.useState(false);
 
-    const handleLockShiftSubmit = (data: any) => {
-        // Here we would call the actual API
-        lockShift(data);
+    const handleLockShiftSubmit = (data: LockShiftRequest) => {
+        if (activeShift) {
+            lockShift({ shift: activeShift.id, data });
+        }
         setLockModalVisible(false); // Close for now
     };
 
@@ -102,12 +107,24 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
 
                 <Pressable
                     onPress={() => setLockModalVisible(true)}
-                    className="w-full bg-red-500/10 border border-red-500/30 py-4 rounded-xl items-center flex-row justify-center active:bg-red-500/20 active:scale-95 transition-all"
+                    disabled={isLockShiftPending}
+                    className={`w-full bg-red-500/10 border border-red-500/30 py-4 rounded-xl items-center flex-row justify-center active:bg-red-500/20 active:scale-95 transition-all ${isLockShiftPending ? 'opacity-70' : ''}`}
                 >
-                    <SymbolView name="stop.circle.fill" size={16} tintColor="#f87171" style={{ marginRight: 8 }} />
-                    <Text className="text-red-400 text-sm font-bold uppercase tracking-wider">
-                        Stop & Lock Shift
-                    </Text>
+                    {isLockShiftPending ? (
+                        <>
+                            <ActivityIndicator size="small" color="#f87171" style={{ marginRight: 8 }} />
+                            <Text className="text-red-400 text-sm font-bold uppercase tracking-wider">
+                                Locking Shift...
+                            </Text>
+                        </>
+                    ) : (
+                        <>
+                            <SymbolView name="stop.circle.fill" size={16} tintColor="#f87171" style={{ marginRight: 8 }} />
+                            <Text className="text-red-400 text-sm font-bold uppercase tracking-wider">
+                                Stop & Lock Shift
+                            </Text>
+                        </>
+                    )}
                 </Pressable>
 
                 <LockShiftModal

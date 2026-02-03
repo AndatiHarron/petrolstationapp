@@ -38,7 +38,7 @@ const MOCK_CUSTOMERS = [
  * ------------------------------------------------------------------------- */
 
 export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: LockShiftModalProps) {
-    const { data: shiftClosingRes, isLoading, error } = useShiftClosingData(activeShift.id);
+    const { data: shiftClosingRes, isLoading } = useShiftClosingData(activeShift.id);
 
     // Derived values with type safety
     const closingData = React.useMemo(() => {
@@ -72,6 +72,16 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     // 2. Tank Dips State
     const [tankDips, setTankDips] = useState<Record<string, string>>({});
 
+    // Reset form when activeShift changes
+    React.useEffect(() => {
+        setStep(1);
+        setMeterReadings({});
+        setTankDips({});
+        setCashAmount('');
+        setMpesaAmount('');
+        setCreditSales([]);
+    }, [activeShift.id]);
+
     // Initialize state when data loads
     React.useEffect(() => {
         if (closingData) {
@@ -104,8 +114,18 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     const handleSubmit = () => {
         // Collect all data
         const data = {
-            meters: Object.entries(meterReadings).map(([id, val]) => ({ id, reading: Number(val) })),
-            dips: Object.entries(tankDips).map(([id, val]) => ({ id, reading: Number(val) })),
+            meters: Object.entries(meterReadings).map(([id, val]) => {
+                const nozzle = closingData?.nozzles.find(n => n.nozzle_id === id);
+                return {
+                    nozzle_id: id,
+                    opening_reading: nozzle?.opening_reading || 0,
+                    closing_reading: Number(val)
+                };
+            }),
+            dips: Object.entries(tankDips).map(([id, val]) => ({
+                tank_id: id,
+                dip_mm: Number(val)
+            })),
             payments: {
                 cash: Number(cashAmount),
                 mpesa: Number(mpesaAmount),
