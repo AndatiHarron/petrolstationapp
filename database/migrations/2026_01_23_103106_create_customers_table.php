@@ -16,7 +16,10 @@ return new class extends Migration
             $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
 
             $table->string('name');
-            $table->string('email')->unique();
+
+            $table->string('email');
+            $table->unique(['organization_id', 'email']);
+
             $table->string('phone')->nullable();
             $table->string('tax_pin')->nullable();
 

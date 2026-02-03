@@ -19,6 +19,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $adminRole = Role::create(['name' => 'admin']);
         $managerRole = Role::create(['name' => 'manager']);
+        $superAdminRole = Role::create(['name' => 'super-admin']);
 
         $permissions = [
             'view_dashboard',
@@ -33,6 +34,7 @@ class RolesAndPermissionsSeeder extends Seeder
             Permission::create(['name' => $permission]);
         }
 
+        $superAdminRole->givePermissionTo(Permission::all());
         $adminRole->givePermissionTo(Permission::all());
         $managerRole->givePermissionTo([
             'view_dashboard',
