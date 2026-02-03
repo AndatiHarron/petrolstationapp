@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\ShiftController;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -25,7 +26,7 @@ Route::post('/login', function (Request $request) {
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
-        return $request->user();
+        return new UserResource($request->user());
     });
 
     Route::get('/shifts/current', [ShiftController::class, 'index']);
