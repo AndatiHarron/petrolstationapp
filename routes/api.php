@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\ShiftController;
-use App\Http\Controllers\ShiftReportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +31,8 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::post('/shifts/start', [ShiftController::class, 'store']);
     Route::post('/shifts/{shift}/lock', [ShiftController::class, 'lock']);
     Route::get('/shifts/{shift}/closing-data', [ShiftController::class, 'closingData']);
+
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
 });
 
 

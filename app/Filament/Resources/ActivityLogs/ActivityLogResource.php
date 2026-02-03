@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ActivityLogs;
 use App\Filament\Resources\ActivityLogs\Pages\ManageActivityLogs;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\KeyValue;
+use Filament\Schemas\Components\Section;
 use Spatie\Activitylog\Models\Activity;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -70,10 +71,19 @@ class ActivityLogResource extends Resource
             ])
             ->recordActions([
                 ViewAction::make()
-                ->schema([
-                    KeyValue::make('properties.attributes')->label('New Values'),
-                    KeyValue::make('properties.old')->label('Old Values'),
-                ])
+                    ->slideOver()
+                    ->schema([
+                        Section::make('Changes')->schema([
+                            KeyValue::make('properties.attributes')
+                                ->label('New Values')
+                                ->keyLabel('Field')
+                                ->valueLabel('Value'),
+                            KeyValue::make('properties.old')
+                                ->label('Old Values')
+                                ->keyLabel('Field')
+                                ->valueLabel('Value'),
+                        ])
+                    ])
             ]);
     }
 
