@@ -25,10 +25,10 @@ import type {
 
 import type {
   AuthenticationExceptionResponse,
+  GetV1User200,
   PostLogin200,
   PostLogin401,
   PostLoginBody,
-  User,
   ValidationExceptionResponse
 } from '.././model';
 
@@ -128,7 +128,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(getPostLoginMutationOptions(options), queryClient);
     }
     export type getV1UserResponse200 = {
-  data: User
+  data: GetV1User200
   status: 200
 }
 

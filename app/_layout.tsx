@@ -1,6 +1,6 @@
 import { Stack, Slot } from 'expo-router';
 import '../global.css';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
@@ -9,8 +9,9 @@ import { Toaster } from 'sonner-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-export default function RootLayout() {
-  const [queryClient] = useState(() => new QueryClient());
+const queryClient = new QueryClient();
+
+function InitialLayout() {
   const { checkSession, isLoading } = useAuthStore();
 
   useEffect(() => {
@@ -28,13 +29,20 @@ export default function RootLayout() {
   }
 
   return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(main)" />
+      <Stack.Screen name="(station-manager)" />
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
+  return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <QueryClientProvider client={queryClient}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(main)" />
-          </Stack>
+          <InitialLayout />
           <Toaster />
         </QueryClientProvider>
       </GestureHandlerRootView>
