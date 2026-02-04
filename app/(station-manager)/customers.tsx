@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 
 import { Ionicons } from '@expo/vector-icons';
-import { useCustomersIndex, useCustomersStore, useCustomersDestroy, getCustomersIndexQueryKey } from '../../features/api/customer/customer';
+import { useCustomersIndex, useCustomersStore, useCustomersDestroy, useCustomersUpdate, getCustomersIndexQueryKey } from '../../features/api/customer/customer';
 import { CustomersIndex200, StoreCustomerRequest } from '../../features/api/model';
 import { useQueryClient } from '@tanstack/react-query';
 import { InputField } from '../../components/input-field';
@@ -37,6 +37,8 @@ export default function CustomersScreen() {
 
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
+
     const [newItem, setNewItem] = useState<StoreCustomerRequest>({
         name: '',
         email: '',
@@ -47,6 +49,27 @@ export default function CustomersScreen() {
 
     // Details Modal State
     const [selectedCustomer, setSelectedCustomer] = useState<CustomersIndex200['data'][number] | null>(null);
+
+    const updateMutation = useCustomersUpdate({
+        mutation: {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: getCustomersIndexQueryKey() });
+                setIsCreateModalOpen(false);
+                setEditingId(null);
+                setNewItem({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    tax_pin: '',
+                    credit_limit: 0,
+                });
+                Alert.alert("Success", "Customer updated successfully.");
+            },
+            onError: (error: any) => {
+                Alert.alert("Error", error?.response?.data?.message || "Failed to update customer.");
+            }
+        }
+    });
 
     const createMutation = useCustomersStore({
         mutation: {
@@ -94,6 +117,14 @@ export default function CustomersScreen() {
     };
 
     const handleAddPress = () => {
+        setEditingId(null);
+        setNewItem({
+            name: '',
+            email: '',
+            phone: '',
+            tax_pin: '',
+            credit_limit: 0,
+        });
         setIsCreateModalOpen(true);
     };
 
@@ -102,7 +133,27 @@ export default function CustomersScreen() {
             Alert.alert("Validation Error", "Name and Email are required.");
             return;
         }
-        createMutation.mutate({ data: newItem });
+
+        if (editingId) {
+            updateMutation.mutate({ customer: editingId, data: newItem });
+        } else {
+            createMutation.mutate({ data: newItem });
+        }
+    };
+
+    const handleEditPress = () => {
+        if (!selectedCustomer) return;
+
+        setEditingId(selectedCustomer.id || null);
+        setNewItem({
+            name: selectedCustomer.name,
+            email: selectedCustomer.email,
+            phone: selectedCustomer.phone || '',
+            tax_pin: selectedCustomer.tax_pin || '',
+            credit_limit: selectedCustomer.credit_limit || 0,
+        });
+        setSelectedCustomer(null);
+        setIsCreateModalOpen(true);
     };
 
     const handleDeletePress = () => {
@@ -176,7 +227,7 @@ export default function CustomersScreen() {
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[85%] rounded-t-3xl shadow-2xl">
                         <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
-                            <Text className="text-xl font-bold text-white">New Customer</Text>
+                            <Text className="text-xl font-bold text-white">{editingId ? 'Edit Customer' : 'New Customer'}</Text>
                             <TouchableOpacity onPress={() => setIsCreateModalOpen(false)}>
                                 <Ionicons name="close-circle" size={28} color="#64748b" />
                             </TouchableOpacity>
@@ -225,9 +276,9 @@ export default function CustomersScreen() {
 
                             <View className="mt-6">
                                 <Button
-                                    title="Create Customer"
+                                    title={editingId ? "Update Customer" : "Create Customer"}
                                     onPress={handleCreateSubmit}
-                                    loading={createMutation.isPending}
+                                    loading={createMutation.isPending || updateMutation.isPending}
                                 />
                             </View>
                         </ScrollView>
@@ -276,7 +327,12 @@ export default function CustomersScreen() {
                             </View>
                         </View>
 
-                        <View className="mt-auto mb-6">
+                        <View className="mt-auto pt-6 mb-24 gap-3">
+                            <Button
+                                title="Edit Customer"
+                                onPress={handleEditPress}
+                                className="bg-slate-700"
+                            />
                             <Button
                                 title="Delete Customer"
                                 variant="outline"
