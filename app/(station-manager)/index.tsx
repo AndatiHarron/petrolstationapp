@@ -51,14 +51,6 @@ export default function StationManagerDashboard() {
                     showsVerticalScrollIndicator={false}
                 >
                     <Animated.View entering={FadeIn.duration(500).delay(100)}>
-                        {/* Back Navigation */}
-                        <TouchableOpacity
-                            onPress={() => router.back()}
-                            className="flex-row items-center py-2 mb-2"
-                        >
-                            <SymbolView name={"chevron.left" as any} size={16} tintColor="#94a3b8" />
-                            <Text className="text-slate-400 ml-1 font-medium">Back to Roles</Text>
-                        </TouchableOpacity>
 
                         <StationManagerHeader isShiftActive={!!shiftResource} />
 
