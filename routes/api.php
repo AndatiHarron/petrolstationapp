@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\LiftingController;
 use App\Http\Controllers\Api\V1\ShiftController;
 use App\Http\Controllers\Api\V1\StationController;
+use App\Http\Controllers\Api\V1\TankController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('liftings', LiftingController::class);
     Route::apiResource('stations', StationController::class);
+    Route::apiResource('tanks', TankController::class);
 });
 
 

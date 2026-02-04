@@ -16,7 +16,7 @@ class TankPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['super-admin','admin']);
+        return $user->hasAnyRole(['super-admin','admin', 'manager']);
     }
 
     /**
@@ -24,7 +24,7 @@ class TankPolicy
      */
     public function view(User $user, $model): bool
     {
-        return $user->hasAnyRole(['super-admin','admin']);
+        return $user->hasAnyRole(['super-admin','admin', 'manager']);
     }
 
     /**
