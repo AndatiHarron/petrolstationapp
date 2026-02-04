@@ -3,6 +3,8 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\LiftingController;
+use App\Http\Controllers\Api\V1\NozzleController;
+use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ShiftController;
 use App\Http\Controllers\Api\V1\StationController;
 use App\Http\Controllers\Api\V1\TankController;
@@ -43,6 +45,8 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('liftings', LiftingController::class);
     Route::apiResource('stations', StationController::class);
     Route::apiResource('tanks', TankController::class);
+    Route::apiResource('products', ProductController::class);
+    Route::apiResource('nozzles', NozzleController::class);
 });
 
 
