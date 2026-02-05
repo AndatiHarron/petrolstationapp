@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Users, Droplets, Clock } from 'lucide-react-native';
+import { LayoutDashboard, Users, Droplets, Clock } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 
 export default function StationManagerLayout() {
@@ -12,7 +12,7 @@ export default function StationManagerLayout() {
                         backgroundColor: '#0f172a',
                         borderTopColor: '#1e293b',
                     },
-                    tabBarActiveTintColor: '#3b82f6',
+                    tabBarActiveTintColor: '#10b981',
                     tabBarInactiveTintColor: '#64748b',
                     headerShown: false,
                 }}
@@ -21,7 +21,7 @@ export default function StationManagerLayout() {
                     name="index"
                     options={{
                         title: 'Dashboard',
-                        tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+                        tabBarIcon: ({ color, size }) => <LayoutDashboard size={size} color={color} />,
                     }}
                 />
                 <Tabs.Screen
