@@ -1,54 +1,45 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
-
-interface User {
-    id: number;
-    name: string;
-    email: string;
-    station_id?: number;
-}
+import { queryClient } from '@/lib/queryClient';
 
 interface AuthState {
     token: string | null;
-    user: User | null;
     isLoading: boolean;
 
     // Actions
-    login: (token: string, user: User) => Promise<void>;
+    login: (token: string) => Promise<void>;
     logout: () => Promise<void>;
     checkSession: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
     token: null,
-    user: null,
     isLoading: true,
 
-    login: async (token, user) => {
+    login: async (token) => {
         await SecureStore.setItemAsync('auth_token', token);
-        await SecureStore.setItemAsync('auth_user', JSON.stringify(user));
-
-        set({ token, user });
-        router.replace('/(main)');
+        // Don't route here - let useProtectedRoute handle role-based routing
+        set({ token, isLoading: false });
     },
     logout: async () => {
         await SecureStore.deleteItemAsync('auth_token');
-        await SecureStore.deleteItemAsync('auth_user');
 
-        set({ token: null, user: null });
+        // Clear all React Query cache to prevent stale role data
+        queryClient.clear();
+
+        set({ token: null });
         router.replace('/(auth)/login');
     },
     checkSession: async () => {
         try {
             const token = await SecureStore.getItemAsync('auth_token');
-            const userStr = await SecureStore.getItemAsync('auth_user');
 
-            if (token && userStr) {
-                set({ token, user: JSON.parse(userStr), isLoading: false });
-                router.replace('/(main)');
+            if (token) {
+                // Don't route here - let useProtectedRoute handle role-based routing
+                set({ token, isLoading: false });
             } else {
-                set({ token: null, user: null, isLoading: false });
+                set({ token: null, isLoading: false });
             }
         } catch (error) {
             set({ isLoading: false });

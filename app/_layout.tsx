@@ -1,15 +1,14 @@
 import { Stack, Slot } from 'expo-router';
 import '../global.css';
 import { useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import { View, ActivityIndicator } from 'react-native';
 import { Toaster } from 'sonner-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
-const queryClient = new QueryClient();
 
 function InitialLayout() {
   const { checkSession, isLoading } = useAuthStore();

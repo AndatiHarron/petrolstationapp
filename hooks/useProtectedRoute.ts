@@ -4,35 +4,35 @@ import { useSegments, useRouter, useRootNavigationState } from 'expo-router';
 import { useEffect } from 'react';
 
 export function useProtectedRoute() {
-    const { user, isLoading } = useAuthStore();
+    const { token, isLoading } = useAuthStore();
     const segments = useSegments();
     const router = useRouter();
     const rootNavigationState = useRootNavigationState();
 
-    const { data: userData, isLoading: isUserLoading, error: userError } = useGetV1User({
+    const { data: userData, isLoading: isUserLoading } = useGetV1User({
         query: {
-            enabled: !!user,
+            enabled: !!token,
         }
     });
 
     useEffect(() => {
         const navigationStateKey = rootNavigationState?.key;
 
-        if (isLoading || !navigationStateKey || (user && isUserLoading)) {
+        if (isLoading || !navigationStateKey || (token && isUserLoading)) {
             return;
         }
 
         const inAuthGroup = segments[0] === '(auth)';
 
-        if (!user && !inAuthGroup) {
+        if (!token && !inAuthGroup) {
             // Not signed in and not in auth group -> Redirect to login
             router.replace('/(auth)/login');
-        } else if (user) {
+        } else if (token) {
             // User is signed in
-            if (userData) {
-                // @ts-ignore
-                const userRoles = userData.data?.roles || userData.roles;
-                const roles = (userRoles as string[]) || [];
+            // API returns { data: UserResource } directly
+            const userResponse = userData as unknown as { data?: { roles?: string[] } };
+            if (userResponse?.data?.roles) {
+                const roles = userResponse.data.roles;
 
                 if (roles.includes('manager')) {
                     if (segments[0] !== '(station-manager)') {
@@ -57,5 +57,6 @@ export function useProtectedRoute() {
                 }
             }
         }
-    }, [user, segments, isLoading, rootNavigationState, userData, isUserLoading]);
+    }, [token, segments, isLoading, rootNavigationState, userData, isUserLoading]);
 }
+
