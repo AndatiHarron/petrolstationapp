@@ -1,9 +1,19 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, FlatList, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useTanksIndex } from '../../../features/api/tank/tank';
 import { useProductsIndex } from '../../../features/api/product/product';
 import { useStationsIndex } from '../../../features/api/station/station';
 import type { TanksIndex200, ProductsIndex200, StationsIndex200 } from '@/features/api/model';
+
+type TabType = 'stations' | 'products' | 'tanks';
+
+interface StatItem {
+    id: TabType;
+    title: string;
+    value: string;
+    subtitle: string;
+}
 
 // Skeleton loader for a single stat card
 function StatCardSkeleton() {
@@ -16,22 +26,27 @@ function StatCardSkeleton() {
     );
 }
 
-// Card component for consistent styling
-function StatCard({ title, value, subtitle }: {
+// Card component for consistent styling with navigation
+function StatCard({ title, value, subtitle, onPress }: {
     title: string;
     value: string;
     subtitle?: string;
+    onPress?: () => void;
 }) {
     return (
-        <View className="flex-1 min-w-[160px] bg-slate-800 border border-slate-700/50 rounded-xl p-4">
+        <Pressable
+            onPress={onPress}
+            className="flex-1 min-w-[160px] bg-slate-800 border border-slate-700/50 rounded-xl p-4 active:opacity-80"
+        >
             <Text className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">{title}</Text>
             <Text className="text-2xl font-bold text-white">{value}</Text>
             {subtitle ? <Text className="text-slate-500 text-xs mt-1">{subtitle}</Text> : null}
-        </View>
+        </Pressable>
     );
 }
 
 export function QuickStats() {
+    const router = useRouter();
     const { data: tanksResponse, isLoading: isTanksLoading } = useTanksIndex();
     const { data: productsResponse, isLoading: isProductsLoading } = useProductsIndex();
     const { data: stationsResponse, isLoading: isStationsLoading } = useStationsIndex();
@@ -39,9 +54,16 @@ export function QuickStats() {
     const isLoading = isTanksLoading || isProductsLoading || isStationsLoading;
 
     // Extract data safely with proper types
-    const tanks = (tanksResponse as unknown as TanksIndex200)?.data ?? [];
-    const products = (productsResponse as unknown as ProductsIndex200)?.data ?? [];
-    const stations = (stationsResponse as unknown as StationsIndex200)?.data ?? [];
+    const tanks = (tanksResponse as TanksIndex200 | undefined)?.data ?? [];
+    const products = (productsResponse as ProductsIndex200 | undefined)?.data ?? [];
+    const stations = (stationsResponse as StationsIndex200 | undefined)?.data ?? [];
+
+    const navigateToInfrastructure = useCallback((tab: TabType) => {
+        router.push({
+            pathname: '/admin/infrastructure',
+            params: { tab },
+        });
+    }, [router]);
 
     if (isLoading) {
         return (
@@ -53,11 +75,27 @@ export function QuickStats() {
         );
     }
 
+    const statsData: StatItem[] = [
+        { id: 'stations', title: "Stations", value: String(stations.length), subtitle: "Active" },
+        { id: 'products', title: "Products", value: String(products.length), subtitle: "Types" },
+        { id: 'tanks', title: "Tanks", value: String(tanks.length), subtitle: "Total" },
+    ];
+
     return (
-        <View className="flex-row gap-3 mb-6">
-            <StatCard title="Stations" value={String(stations.length)} subtitle="Active" />
-            <StatCard title="Products" value={String(products.length)} subtitle="Types" />
-            <StatCard title="Tanks" value={String(tanks.length)} subtitle="Total" />
-        </View>
+        <FlatList
+            data={statsData}
+            renderItem={({ item }) => (
+                <StatCard
+                    title={item.title}
+                    value={item.value}
+                    subtitle={item.subtitle}
+                    onPress={() => navigateToInfrastructure(item.id)}
+                />
+            )}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerClassName="flex-row gap-3 mb-6"
+        />
     );
 }
