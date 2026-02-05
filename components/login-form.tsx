@@ -18,9 +18,10 @@ export const LoginForm = () => {
   const { mutate: login, isPending: isLoginPending } = usePostLogin({
     mutation: {
       onSuccess: async (data) => {
-        if (data) {
-          // @ts-ignore - Assuming response structure for now to proceed
-          await setAuth(data.token || "mock-token", data.user || { id: 1, name: "Test User", email: "test@test.com" });
+        // API returns { token: "..." } directly
+        const response = data as unknown as { token?: string };
+        if (response?.token) {
+          await setAuth(response.token);
         }
       },
       onError: (error) => {
