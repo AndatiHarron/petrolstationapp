@@ -1,67 +1,43 @@
-import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import React, { useState } from 'react';
-import { ActivityIndicator, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { StatusBar, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated from 'react-native-reanimated';
 
-import { useShiftIndex } from '@/features/api/shift/shift';
-import type { ShiftIndex200, AuthenticationExceptionResponse } from '@/features/api/model';
 import { ActivityFeed } from '../../components/station-manager/activity-feed';
 import { CreditSaleModal } from '../../components/station-manager/credit-sale-modal';
-import { StationManagerHeader } from '../../components/station-manager/header';
-import { StartShiftView } from '../../components/station-manager/start-shift-view';
-
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { ShiftSection } from '../../components/station-manager/shift-section';
+import { ProductsSection } from '../../components/station-manager/products-section';
+import { TanksSection } from '../../components/station-manager/tanks-section';
+import { CustomersSection } from '../../components/station-manager/customers-section';
 
 export default function StationManagerDashboard() {
-    const router = useRouter();
-    const { data: activeShift, isLoading: isShiftFetchPending } = useShiftIndex({
-        query: {
-            queryKey: ['activeShift'],
-        }
-    });
-
-    // Cast to runtime type (unwrapped body) to fix type mismatch with generated hook types
-    const actualShiftData = activeShift as unknown as (ShiftIndex200 | AuthenticationExceptionResponse | undefined);
-    const shiftResource = (actualShiftData && 'data' in actualShiftData) ? actualShiftData.data : undefined;
-
     const [creditModalVisible, setCreditModalVisible] = useState(false);
+    const [isShiftActive, setIsShiftActive] = useState(false);
 
-    if (isShiftFetchPending) {
-        return (
-            <Animated.View
-                entering={FadeIn}
-                exiting={FadeOut}
-                className="flex-1 bg-slate-900 justify-center items-center"
-            >
-                <StatusBar barStyle="light-content" />
-                <ActivityIndicator size="large" color="#38bdf8" />
-                <Text className="text-slate-400 mt-4 font-medium">Loading station data...</Text>
-            </Animated.View>
-        );
-    }
+    const handleShiftChange = useCallback((active: boolean) => {
+        setIsShiftActive(active);
+    }, []);
 
     return (
         <View className="flex-1 bg-slate-900">
             <StatusBar barStyle="light-content" />
             <SafeAreaView className="flex-1">
-                <ScrollView
+                <Animated.ScrollView
                     className="flex-1 px-4"
                     contentContainerStyle={{ paddingBottom: 40 }}
                     showsVerticalScrollIndicator={false}
                 >
-                    <Animated.View entering={FadeIn.duration(500).delay(100)}>
+                    {/* Shift Section with header - fetches its own data */}
+                    <ShiftSection onShiftChange={handleShiftChange} />
 
-                        <StationManagerHeader isShiftActive={!!shiftResource} />
-
-                        <StartShiftView activeShift={shiftResource} />
-
-                        <View className={!shiftResource ? "opacity-30 pointer-events-none" : ""}>
-                            {/* <QuickActionsHero /> */}
-                            <ActivityFeed />
-                        </View>
-                    </Animated.View>
-                </ScrollView>
+                    {/* Station Overview Section */}
+                    <View className={!isShiftActive ? 'opacity-30' : ''}>
+                        <ProductsSection />
+                        <TanksSection />
+                        <CustomersSection />
+                        <ActivityFeed />
+                    </View>
+                </Animated.ScrollView>
             </SafeAreaView>
 
             <CreditSaleModal

@@ -1,19 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Ionicons } from '@expo/vector-icons';
-import { useLiftingsIndex, useLiftingsStore, useLiftingsDestroy, getLiftingsIndexQueryKey } from '../../features/api/lifting/lifting';
+import { useLiftingsStore, useLiftingsDestroy, getLiftingsIndexQueryKey } from '../../features/api/lifting/lifting';
 import { useGetV1User } from '../../features/api/default/default';
 import { useTanksIndex } from '../../features/api/tank/tank';
-import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200 } from '../../features/api/model';
-import { useQueryClient } from '@tanstack/react-query';
+import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200, LiftingsIndex200Meta, LiftingsIndex200Links } from '../../features/api/model';
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
+import { PaginationControls } from '../../components/pagination-controls';
+import { api } from '../../lib/axios';
 
 // Utility to format date as YYYY-MM-DD
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+// Custom fetch function for paginated liftings
+const fetchLiftings = async (page: number): Promise<LiftingsIndex200> => {
+    const response = await api.get<LiftingsIndex200>('/v1/liftings', {
+        params: { page },
+    });
+    return response.data;
+};
 
 // Separate component for list item
 const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item: LiftingResource) => void }) => {
@@ -44,11 +54,23 @@ const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item:
 
 export default function LiftingsScreen() {
     const queryClient = useQueryClient();
-    const { data: liftingsData, isLoading, refetch, error } = useLiftingsIndex();
+    const [page, setPage] = useState(1);
+
+    // Use custom paginated query
+    const { data: liftingsData, isLoading, isFetching, refetch, error } = useQuery({
+        queryKey: [...getLiftingsIndexQueryKey(), { page }],
+        queryFn: () => fetchLiftings(page),
+    });
+
     const { data: userData } = useGetV1User();
     const { data: tanksData, isLoading: isLoadingTanks } = useTanksIndex();
 
     const [refreshing, setRefreshing] = useState(false);
+
+    // Extract pagination info
+    const meta: LiftingsIndex200Meta | undefined = liftingsData?.meta;
+    const links: LiftingsIndex200Links | undefined = liftingsData?.links;
+    const liftingsList = liftingsData?.data ?? [];
 
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -108,18 +130,16 @@ export default function LiftingsScreen() {
         }
     });
 
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage);
+    }, []);
+
     // Move hooks before any conditional returns to satisfy Rules of Hooks
     const onRefresh = React.useCallback(async () => {
         setRefreshing(true);
         await refetch();
         setRefreshing(false);
     }, [refetch]);
-
-    const liftingsList = useMemo(() => {
-        if (!liftingsData) return [];
-        const res = liftingsData as unknown as LiftingsIndex200;
-        return res?.data || [];
-    }, [liftingsData]);
 
     // Auto-calculate total cost and tax
     const handleVolumeOrPriceChange = (field: 'volume_liters' | 'buying_price_per_liter', value: string) => {
@@ -167,7 +187,7 @@ export default function LiftingsScreen() {
     if (error) {
         return (
             <View className="flex-1 items-center justify-center bg-slate-900">
-                <Text className="text-white text-lg font-bold">Error fetching liftings: {error.message}</Text>
+                <Text className="text-white text-lg font-bold">Error fetching liftings: {(error as Error).message}</Text>
             </View>
         );
     }
@@ -228,7 +248,14 @@ export default function LiftingsScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-900" edges={['top']}>
             <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800 bg-slate-900">
-                <Text className="text-2xl font-bold text-white">Liftings</Text>
+                <View className="flex-row items-center gap-2">
+                    <Text className="text-2xl font-bold text-white">Liftings</Text>
+                    {meta && (
+                        <View className="bg-purple-500/20 px-2 py-0.5 rounded-full">
+                            <Text className="text-purple-400 text-xs font-bold">{meta.total}</Text>
+                        </View>
+                    )}
+                </View>
                 <TouchableOpacity onPress={handleAddPress}>
                     <Ionicons name="add-circle" size={32} color="#3b82f6" />
                 </TouchableOpacity>
@@ -254,6 +281,18 @@ export default function LiftingsScreen() {
                                 <Text className="text-slate-500 text-center">No liftings found.</Text>
                                 <Text className="text-slate-600 text-center text-sm mt-2">Tap + to record a new fuel delivery.</Text>
                             </View>
+                        )}
+                        ListFooterComponent={() => (
+                            meta && meta.last_page > 1 ? (
+                                <PaginationControls
+                                    currentPage={meta.current_page}
+                                    lastPage={meta.last_page}
+                                    onPageChange={handlePageChange}
+                                    loading={isFetching}
+                                    hasPrev={!!links?.prev}
+                                    hasNext={!!links?.next}
+                                />
+                            ) : null
                         )}
                         contentContainerStyle={{ paddingBottom: 20 }}
                     />

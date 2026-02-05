@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Ionicons } from '@expo/vector-icons';
-import { useCustomersIndex, useCustomersStore, useCustomersDestroy, useCustomersUpdate, getCustomersIndexQueryKey } from '../../features/api/customer/customer';
-import { CustomersIndex200, StoreCustomerRequest } from '../../features/api/model';
-import { useQueryClient } from '@tanstack/react-query';
+import { useCustomersStore, useCustomersDestroy, useCustomersUpdate, getCustomersIndexQueryKey } from '../../features/api/customer/customer';
+import { CustomersIndex200, StoreCustomerRequest, CustomersIndex200Meta, CustomersIndex200Links } from '../../features/api/model';
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
+import { PaginationControls } from '../../components/pagination-controls';
+import { api } from '../../lib/axios';
+
+// Custom fetch function for paginated customers
+const fetchCustomers = async (page: number): Promise<CustomersIndex200> => {
+    const response = await api.get<CustomersIndex200>('/v1/customers', {
+        params: { page },
+    });
+    return response.data;
+};
 
 // Separate component for list item to allow for memoization if needed later
 const CustomerItem = ({ item, onPress }: { item: CustomersIndex200['data'][number]; onPress: (item: CustomersIndex200['data'][number]) => void }) => {
@@ -31,9 +41,20 @@ const CustomerItem = ({ item, onPress }: { item: CustomersIndex200['data'][numbe
 
 export default function CustomersScreen() {
     const queryClient = useQueryClient();
-    const { data: customersData, isLoading, refetch, error } = useCustomersIndex();
+    const [page, setPage] = useState(1);
+
+    // Use custom paginated query
+    const { data: customersData, isLoading, isFetching, refetch, error } = useQuery({
+        queryKey: [...getCustomersIndexQueryKey(), { page }],
+        queryFn: () => fetchCustomers(page),
+    });
+
     const [refreshing, setRefreshing] = useState(false);
-    console.log("customerData", customersData?.data);
+
+    // Extract pagination info
+    const meta: CustomersIndex200Meta | undefined = customersData?.meta;
+    const links: CustomersIndex200Links | undefined = customersData?.links;
+    const customersList = customersData?.data ?? [];
 
     // Create Modal State
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -104,10 +125,14 @@ export default function CustomersScreen() {
         }
     });
 
+    const handlePageChange = useCallback((newPage: number) => {
+        setPage(newPage);
+    }, []);
+
     if (error) {
         return (
-            <View className="flex-1 items-center justify-center">
-                <Text className="text-white text-lg font-bold">Error fetching customers. : {error.message}</Text>
+            <View className="flex-1 items-center justify-center bg-slate-900">
+                <Text className="text-white text-lg font-bold">Error fetching customers: {(error as Error).message}</Text>
             </View>
         );
     }
@@ -182,7 +207,14 @@ export default function CustomersScreen() {
     return (
         <SafeAreaView className="flex-1 bg-slate-900" edges={['top']}>
             <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800 bg-slate-900">
-                <Text className="text-2xl font-bold text-white">Customers</Text>
+                <View className="flex-row items-center gap-2">
+                    <Text className="text-2xl font-bold text-white">Customers</Text>
+                    {meta && (
+                        <View className="bg-blue-500/20 px-2 py-0.5 rounded-full">
+                            <Text className="text-blue-400 text-xs font-bold">{meta.total}</Text>
+                        </View>
+                    )}
+                </View>
                 <TouchableOpacity onPress={handleAddPress}>
                     <Ionicons name="add-circle" size={32} color="#3b82f6" />
                 </TouchableOpacity>
@@ -195,7 +227,7 @@ export default function CustomersScreen() {
                     </View>
                 ) : (
                     <FlashList
-                        data={customersData?.data as unknown as CustomersIndex200['data']}
+                        data={customersList}
                         renderItem={({ item }) => (
                             <CustomerItem item={item} onPress={handleCustomerPress} />
                         )}
@@ -209,7 +241,19 @@ export default function CustomersScreen() {
                                 <Text className="text-slate-600 text-center text-sm mt-2">Tap + to add a new customer.</Text>
                             </View>
                         )}
-                        contentContainerStyle={{ paddingBottom: 20, }}
+                        ListFooterComponent={() => (
+                            meta && meta.last_page > 1 ? (
+                                <PaginationControls
+                                    currentPage={meta.current_page}
+                                    lastPage={meta.last_page}
+                                    onPageChange={handlePageChange}
+                                    loading={isFetching}
+                                    hasPrev={!!links?.prev}
+                                    hasNext={!!links?.next}
+                                />
+                            ) : null
+                        )}
+                        contentContainerStyle={{ paddingBottom: 20 }}
                     />
                 )}
             </View>
