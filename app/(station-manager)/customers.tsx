@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -10,6 +10,7 @@ import { CustomersIndex200, StoreCustomerRequest, CustomersIndex200Meta, Custome
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
+import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
 
 // Custom fetch function for paginated customers
@@ -222,8 +223,12 @@ export default function CustomersScreen() {
 
             <View className="flex-1 px-4 pt-4">
                 {isLoading ? (
-                    <View className="flex-1 justify-center items-center">
-                        <ActivityIndicator size="large" color="#3b82f6" />
+                    <View>
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <View key={i} className="mb-3 w-full">
+                                <SkeletonCard variant="customer" style={{ width: '100%' }} />
+                            </View>
+                        ))}
                     </View>
                 ) : (
                     <FlashList

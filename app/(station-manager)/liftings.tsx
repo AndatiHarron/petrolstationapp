@@ -12,6 +12,7 @@ import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200, 
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
+import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
 
 // Utility to format date as YYYY-MM-DD
@@ -263,8 +264,12 @@ export default function LiftingsScreen() {
 
             <View className="flex-1 px-4 pt-4">
                 {isLoading ? (
-                    <View className="flex-1 justify-center items-center">
-                        <ActivityIndicator size="large" color="#3b82f6" />
+                    <View>
+                        {[1, 2, 3, 4, 5, 6].map((i) => (
+                            <View key={i} className="mb-3 w-full">
+                                <SkeletonCard variant="lifting" />
+                            </View>
+                        ))}
                     </View>
                 ) : (
                     <FlashList

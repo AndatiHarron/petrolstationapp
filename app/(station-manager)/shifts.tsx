@@ -21,6 +21,7 @@ import {
     useShiftStore,
 } from '@/features/api/shift/shift';
 import { LockShiftModal } from '@/components/station-manager/lock-shift-modal';
+import { SkeletonCard } from '@/components/station-manager/skeleton-card';
 
 export default function ShiftsScreen() {
     const queryClient = useQueryClient();
@@ -105,20 +106,7 @@ export default function ShiftsScreen() {
         });
     };
 
-    // Loading state
-    if (isLoading) {
-        return (
-            <Animated.View
-                entering={FadeIn}
-                exiting={FadeOut}
-                className="flex-1 bg-slate-900 justify-center items-center"
-            >
-                <StatusBar barStyle="light-content" />
-                <ActivityIndicator size="large" color="#38bdf8" />
-                <Text className="text-slate-400 mt-4 font-medium">Loading shift data...</Text>
-            </Animated.View>
-        );
-    }
+    // Loading state removed - handled in UI
 
     return (
         <View className="flex-1 bg-slate-900">
@@ -126,19 +114,21 @@ export default function ShiftsScreen() {
             <SafeAreaView className="flex-1" edges={['top']}>
                 <ScrollView
                     className="flex-1"
-                    contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+                    contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 16 }}
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Header */}
                     <Animated.View entering={FadeInDown.duration(400).delay(100)} className="mb-6">
                         <Text className="text-white text-2xl font-bold">Shift Management</Text>
                         <Text className="text-slate-400 mt-1">
-                            {activeShift ? 'Active shift in progress' : 'No active shift'}
+                            {isLoading ? 'Checking status...' : (activeShift ? 'Active shift in progress' : 'No active shift')}
                         </Text>
                     </Animated.View>
 
-                    {/* Active Shift Card */}
-                    {activeShift ? (
+                    {/* Main Content */}
+                    {isLoading ? (
+                        <SkeletonCard variant="shift" />
+                    ) : activeShift ? (
                         <Animated.View
                             entering={FadeInDown.duration(400).delay(200)}
                             className="bg-slate-800/70 rounded-2xl border border-slate-700/50 overflow-hidden mb-6"
