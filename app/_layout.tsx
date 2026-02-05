@@ -33,6 +33,8 @@ function InitialLayout() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(main)" />
       <Stack.Screen name="(station-manager)" />
+      <Stack.Screen name="admin" />
+      <Stack.Screen name="super-admin" />
     </Stack>
   );
 }

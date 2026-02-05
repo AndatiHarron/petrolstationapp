@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, Modal, ScrollView, TextInput, TouchableOpacity, Pressable, ActivityIndicator } from 'react-native';
-import { SymbolView } from 'expo-symbols';
-import Animated, { FadeIn, FadeOut, SlideInDown, SlideOutDown } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useCustomersIndex } from '@/features/api/customer/customer';
+import type { ShiftClosingData200, ShiftResource } from '@/features/api/model';
 import { useShiftClosingData } from '@/features/api/shift/shift';
-import type { ShiftResource, ShiftClosingData200 } from '@/features/api/model';
+import { SymbolView } from 'expo-symbols';
+import React, { useState } from 'react';
+import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 interface ClosingNozzle {
     id: string;
@@ -26,12 +25,7 @@ interface LockShiftModalProps {
     activeShift: ShiftResource
 }
 
-const MOCK_CUSTOMERS = [
-    { id: 'cust_1', name: 'TransLine Safaris' },
-    { id: 'cust_2', name: 'EasyCoach Ltd' },
-    { id: 'cust_3', name: 'County Government' },
-    { id: 'cust_4', name: 'Local Matatu Sacco' },
-];
+
 
 /* -------------------------------------------------------------------------
  * Components
@@ -39,6 +33,16 @@ const MOCK_CUSTOMERS = [
 
 export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: LockShiftModalProps) {
     const { data: shiftClosingRes, isLoading } = useShiftClosingData(activeShift.id);
+    const { data: customersRes, isLoading: isLoadingCustomers } = useCustomersIndex();
+    const customersList = React.useMemo(() => {
+        if (customersRes && 'data' in customersRes && Array.isArray(customersRes.data)) {
+            return customersRes.data;
+        }
+        return [];
+    }, [customersRes]);
+
+    const hasCustomers = customersList.length > 0;
+
 
     // Derived values with type safety
     const closingData = React.useMemo(() => {
@@ -127,15 +131,20 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                 dip_mm: Number(val)
             })),
             payments: {
-                cash: Number(cashAmount),
-                mpesa: Number(mpesaAmount),
-                credit: creditSales.map(s => ({ ...s, amount: Number(s.amount) }))
+                cash: Number(cashAmount) || 0,
+                mpesa: Number(mpesaAmount) || 0,
+                credit: creditSales.length > 0 ? creditSales.map(s => ({
+                    customer_id: s.customerId,
+                    amount: Number(s.amount),
+                    vehicle_reg: s.vehicleReg || null
+                })) : null
             }
         };
         onSubmit(data);
     };
 
     const addCreditSale = () => {
+        if (!hasCustomers) return;
         const newId = Math.random().toString(36).substr(2, 9);
         setCreditSales([...creditSales, { id: newId, customerId: '', amount: '', vehicleReg: '' }]);
     };
@@ -324,10 +333,13 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                         <Text className="text-slate-200 font-bold text-lg">Credit Sales</Text>
                                         <TouchableOpacity
                                             onPress={addCreditSale}
-                                            className="bg-blue-600/20 px-3 py-1.5 rounded-full border border-blue-500/30 flex-row items-center gap-1"
+                                            disabled={!hasCustomers}
+                                            className={`px-3 py-1.5 rounded-full border flex-row items-center gap-1 ${hasCustomers ? 'bg-blue-600/20 border-blue-500/30' : 'bg-slate-800 border-slate-700 opacity-50'}`}
                                         >
-                                            <SymbolView name="plus" size={12} tintColor="#60a5fa" />
-                                            <Text className="text-blue-400 text-xs font-bold">Add Entry</Text>
+                                            <SymbolView name="plus" size={12} tintColor={hasCustomers ? "#60a5fa" : "#94a3b8"} />
+                                            <Text className={hasCustomers ? "text-blue-400 text-xs font-bold" : "text-slate-400 text-xs font-bold"}>
+                                                {isLoadingCustomers ? 'Loading...' : hasCustomers ? 'Add Entry' : 'No Customers'}
+                                            </Text>
                                         </TouchableOpacity>
                                     </View>
 
@@ -344,25 +356,33 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                             >
                                                 <View className="flex-row justify-between items-start mb-3">
                                                     <Text className="text-slate-400 text-xs font-bold uppercase">Entry #{index + 1}</Text>
-                                                    <TouchableOpacity onPress={() => removeCreditSale(sale.id)}>
-                                                        <SymbolView name="trash" size={16} tintColor="#ef4444" />
+                                                    <TouchableOpacity
+                                                        onPress={() => removeCreditSale(sale.id)}
+                                                        className="bg-red-500/10 px-2 py-1 rounded border border-red-500/20 flex-row items-center gap-1"
+                                                    >
+                                                        <SymbolView name="trash" size={12} tintColor="#ef4444" />
+                                                        <Text className="text-red-400 text-xs font-bold">Remove</Text>
                                                     </TouchableOpacity>
                                                 </View>
 
-                                                {/* Customer Dropdown Mock */}
+                                                {/* Customer Dropdown */}
                                                 <View className="mb-3">
                                                     <Text className="text-slate-500 text-xs mb-1">Customer</Text>
-                                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
-                                                        {MOCK_CUSTOMERS.map(cust => (
-                                                            <TouchableOpacity
-                                                                key={cust.id}
-                                                                onPress={() => updateCreditSale(sale.id, 'customerId', cust.id)}
-                                                                className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-blue-600 border-blue-500' : 'bg-slate-900 border-slate-700'}`}
-                                                            >
-                                                                <Text className={sale.customerId === cust.id ? 'text-white font-medium text-xs' : 'text-slate-400 text-xs'}>{cust.name}</Text>
-                                                            </TouchableOpacity>
-                                                        ))}
-                                                    </ScrollView>
+                                                    {isLoadingCustomers ? (
+                                                        <ActivityIndicator size="small" color="#3b82f6" />
+                                                    ) : (
+                                                        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
+                                                            {customersList.map(cust => (
+                                                                <TouchableOpacity
+                                                                    key={cust.id}
+                                                                    onPress={() => updateCreditSale(sale.id, 'customerId', cust.id)}
+                                                                    className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-blue-600 border-blue-500' : 'bg-slate-900 border-slate-700'}`}
+                                                                >
+                                                                    <Text className={sale.customerId === cust.id ? 'text-white font-medium text-xs' : 'text-slate-400 text-xs'}>{cust.name}</Text>
+                                                                </TouchableOpacity>
+                                                            ))}
+                                                        </ScrollView>
+                                                    )}
                                                 </View>
 
                                                 <View className="flex-row gap-3">
