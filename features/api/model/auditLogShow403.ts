@@ -4,8 +4,8 @@
  * Petrol Integrity System API Documentation
  * OpenAPI spec version: 0.0.1
  */
-import type { ShiftResource } from './shiftResource';
 
-export type ShiftLock200 = {
-  data: ShiftResource;
+export type AuditLogShow403 = {
+  /** Error overview. */
+  message: string;
 };
