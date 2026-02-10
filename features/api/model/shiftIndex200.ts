@@ -4,8 +4,12 @@
  * Petrol Integrity System API Documentation
  * OpenAPI spec version: 0.0.1
  */
+import type { ShiftIndex200Links } from './shiftIndex200Links';
+import type { ShiftIndex200Meta } from './shiftIndex200Meta';
 import type { ShiftResource } from './shiftResource';
 
 export type ShiftIndex200 = {
-  data: ShiftResource;
+  data: ShiftResource[];
+  links: ShiftIndex200Links;
+  meta: ShiftIndex200Meta;
 };

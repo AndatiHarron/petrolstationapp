@@ -4,7 +4,10 @@
  * Petrol Integrity System API Documentation
  * OpenAPI spec version: 0.0.1
  */
+import type { CreditSaleResource } from './creditSaleResource';
+import type { DipReading } from './dipReading';
 import type { MeterReading } from './meterReading';
+import type { Payment } from './payment';
 import type { ShiftResourceFinancials } from './shiftResourceFinancials';
 
 export interface ShiftResource {
@@ -15,4 +18,7 @@ export interface ShiftResource {
   variance_alert: boolean;
   financials: ShiftResourceFinancials;
   readings?: MeterReading[];
+  dips?: DipReading[];
+  payments?: Payment[];
+  credit_sales?: CreditSaleResource[];
 }

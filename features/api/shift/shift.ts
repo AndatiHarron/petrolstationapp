@@ -25,15 +25,18 @@ import type {
 
 import type {
   AuthenticationExceptionResponse,
+  AuthorizationExceptionResponse,
   LockShiftRequest,
   ModelNotFoundExceptionResponse,
   ShiftClosingData200,
   ShiftClosingData403,
+  ShiftCurrent200,
+  ShiftCurrent404,
   ShiftIndex200,
-  ShiftIndex404,
   ShiftLock200,
   ShiftLock403,
   ShiftLock500,
+  ShiftShow200,
   ShiftStore200,
   ShiftStore400,
   ValidationExceptionResponse
@@ -59,15 +62,15 @@ export type shiftIndexResponse401 = {
   status: 401
 }
 
-export type shiftIndexResponse404 = {
-  data: ShiftIndex404
-  status: 404
+export type shiftIndexResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
 }
     
 export type shiftIndexResponseSuccess = (shiftIndexResponse200) & {
   headers: Headers;
 };
-export type shiftIndexResponseError = (shiftIndexResponse401 | shiftIndexResponse404) & {
+export type shiftIndexResponseError = (shiftIndexResponse401 | shiftIndexResponse403) & {
   headers: Headers;
 };
 
@@ -78,7 +81,7 @@ export const getShiftIndexUrl = () => {
 
   
 
-  return `/v1/shifts/current`
+  return `/v1/shifts`
 }
 
 export const shiftIndex = async ( options?: RequestInit): Promise<shiftIndexResponse> => {
@@ -98,12 +101,12 @@ export const shiftIndex = async ( options?: RequestInit): Promise<shiftIndexResp
 
 export const getShiftIndexQueryKey = () => {
     return [
-    `/v1/shifts/current`
+    `/v1/shifts`
     ] as const;
     }
 
     
-export const getShiftIndexQueryOptions = <TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getShiftIndexQueryOptions = <TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -122,10 +125,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ShiftIndexQueryResult = NonNullable<Awaited<ReturnType<typeof shiftIndex>>>
-export type ShiftIndexQueryError = AuthenticationExceptionResponse | ShiftIndex404
+export type ShiftIndexQueryError = AuthenticationExceptionResponse | AuthorizationExceptionResponse
 
 
-export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
+export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof shiftIndex>>,
@@ -135,7 +138,7 @@ export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TE
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
+export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof shiftIndex>>,
@@ -145,7 +148,7 @@ export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TE
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
+export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
@@ -153,12 +156,261 @@ export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TE
  * @summary Display a listing of the resource
  */
 
-export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | ShiftIndex404>(
+export function useShiftIndex<TData = Awaited<ReturnType<typeof shiftIndex>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftIndex>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getShiftIndexQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * @summary Display the current active shift for the authenticated user
+ */
+export type shiftCurrentResponse200 = {
+  data: ShiftCurrent200
+  status: 200
+}
+
+export type shiftCurrentResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type shiftCurrentResponse404 = {
+  data: ShiftCurrent404
+  status: 404
+}
+    
+export type shiftCurrentResponseSuccess = (shiftCurrentResponse200) & {
+  headers: Headers;
+};
+export type shiftCurrentResponseError = (shiftCurrentResponse401 | shiftCurrentResponse404) & {
+  headers: Headers;
+};
+
+export type shiftCurrentResponse = (shiftCurrentResponseSuccess | shiftCurrentResponseError)
+
+export const getShiftCurrentUrl = () => {
+
+
+  
+
+  return `/v1/shifts/current`
+}
+
+export const shiftCurrent = async ( options?: RequestInit): Promise<shiftCurrentResponse> => {
+  
+  return customInstance<shiftCurrentResponse>(getShiftCurrentUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getShiftCurrentQueryKey = () => {
+    return [
+    `/v1/shifts/current`
+    ] as const;
+    }
+
+    
+export const getShiftCurrentQueryOptions = <TData = Awaited<ReturnType<typeof shiftCurrent>>, TError = AuthenticationExceptionResponse | ShiftCurrent404>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftCurrent>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getShiftCurrentQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftCurrent>>> = ({ signal }) => shiftCurrent({ signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftCurrent>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ShiftCurrentQueryResult = NonNullable<Awaited<ReturnType<typeof shiftCurrent>>>
+export type ShiftCurrentQueryError = AuthenticationExceptionResponse | ShiftCurrent404
+
+
+export function useShiftCurrent<TData = Awaited<ReturnType<typeof shiftCurrent>>, TError = AuthenticationExceptionResponse | ShiftCurrent404>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftCurrent>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftCurrent>>,
+          TError,
+          Awaited<ReturnType<typeof shiftCurrent>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftCurrent<TData = Awaited<ReturnType<typeof shiftCurrent>>, TError = AuthenticationExceptionResponse | ShiftCurrent404>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftCurrent>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftCurrent>>,
+          TError,
+          Awaited<ReturnType<typeof shiftCurrent>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftCurrent<TData = Awaited<ReturnType<typeof shiftCurrent>>, TError = AuthenticationExceptionResponse | ShiftCurrent404>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftCurrent>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Display the current active shift for the authenticated user
+ */
+
+export function useShiftCurrent<TData = Awaited<ReturnType<typeof shiftCurrent>>, TError = AuthenticationExceptionResponse | ShiftCurrent404>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftCurrent>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getShiftCurrentQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * @summary Display the specified resource
+ */
+export type shiftShowResponse200 = {
+  data: ShiftShow200
+  status: 200
+}
+
+export type shiftShowResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type shiftShowResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type shiftShowResponse404 = {
+  data: ModelNotFoundExceptionResponse
+  status: 404
+}
+    
+export type shiftShowResponseSuccess = (shiftShowResponse200) & {
+  headers: Headers;
+};
+export type shiftShowResponseError = (shiftShowResponse401 | shiftShowResponse403 | shiftShowResponse404) & {
+  headers: Headers;
+};
+
+export type shiftShowResponse = (shiftShowResponseSuccess | shiftShowResponseError)
+
+export const getShiftShowUrl = (shift: string,) => {
+
+
+  
+
+  return `/v1/shifts/${shift}`
+}
+
+export const shiftShow = async (shift: string, options?: RequestInit): Promise<shiftShowResponse> => {
+  
+  return customInstance<shiftShowResponse>(getShiftShowUrl(shift),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getShiftShowQueryKey = (shift: string,) => {
+    return [
+    `/v1/shifts/${shift}`
+    ] as const;
+    }
+
+    
+export const getShiftShowQueryOptions = <TData = Awaited<ReturnType<typeof shiftShow>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftShow>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getShiftShowQueryKey(shift);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftShow>>> = ({ signal }) => shiftShow(shift, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(shift), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftShow>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ShiftShowQueryResult = NonNullable<Awaited<ReturnType<typeof shiftShow>>>
+export type ShiftShowQueryError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse
+
+
+export function useShiftShow<TData = Awaited<ReturnType<typeof shiftShow>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftShow>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftShow>>,
+          TError,
+          Awaited<ReturnType<typeof shiftShow>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftShow<TData = Awaited<ReturnType<typeof shiftShow>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftShow>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftShow>>,
+          TError,
+          Awaited<ReturnType<typeof shiftShow>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftShow<TData = Awaited<ReturnType<typeof shiftShow>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftShow>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Display the specified resource
+ */
+
+export function useShiftShow<TData = Awaited<ReturnType<typeof shiftShow>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftShow>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getShiftShowQueryOptions(shift,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
