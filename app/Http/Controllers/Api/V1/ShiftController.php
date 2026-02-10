@@ -156,9 +156,13 @@ class ShiftController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Shift $shift): ShiftResource
     {
-        //
+        Gate::authorize('view', $shift);
+
+        $shift->load(['meterReadings', 'dipReadings', 'payments', 'creditSales', 'station']);
+
+        return new ShiftResource($shift);
     }
 
     /**

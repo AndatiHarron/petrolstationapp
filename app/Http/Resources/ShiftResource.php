@@ -24,9 +24,12 @@ class ShiftResource extends JsonResource
             'financials' => [
                 'expected' => (float) $this->total_expected_cash,
                 'collected' => (float) $this->total_collected_cash,
-                'variance' => (float) $this->cash_variance
+                'variance' => (float) $this->cash_variance,
             ],
-            'readings' => $this->whenLoaded('meterReadings')
+            'readings' => $this->whenLoaded('meterReadings'),
+            'dips' => $this->whenLoaded('dipReadings'),
+            'payments' => $this->whenLoaded('payments'),
+            'credit_sales' => CreditSaleResource::collection($this->whenLoaded('creditSales')),
         ];
     }
 

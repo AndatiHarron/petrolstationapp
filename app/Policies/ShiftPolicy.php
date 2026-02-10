@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Shift;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class ShiftPolicy
 {
@@ -21,7 +20,11 @@ class ShiftPolicy
      */
     public function view(User $user, Shift $shift): bool
     {
-        return false;
+        if ($user->hasAnyRole(['admin', 'super-admin'])) {
+            return true;
+        }
+
+        return $user->hasRole('manager') && $shift->station_id === $user->station_id;
     }
 
     /**
@@ -37,7 +40,7 @@ class ShiftPolicy
      */
     public function update(User $user, Shift $shift): bool
     {
-        if($user->hasRole('admin')) {
+        if ($user->hasRole('admin')) {
             return true;
         }
 
