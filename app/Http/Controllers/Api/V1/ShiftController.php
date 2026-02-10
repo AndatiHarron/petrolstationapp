@@ -10,6 +10,7 @@ use App\Models\Shift;
 use App\Services\ShiftReconciliationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 
 class ShiftController extends Controller
@@ -21,11 +22,29 @@ class ShiftController extends Controller
      */
     public function index(Request $request)
     {
+        Gate::authorize('viewAny', Shift::class);
+
+        $query = Shift::with('station');
+
+        if (Auth::user()->hasRole('manager') && Auth::user()->station_id) {
+            $query->where('station_id', Auth::user()->station_id);
+        }
+
+        $shifts = $query->latest()->paginate();
+
+        return ShiftResource::collection($shifts);
+    }
+
+    /**
+     * Display the current active shift for the authenticated user.
+     */
+    public function current(Request $request)
+    {
         $shift = Shift::where('started_by_user_id', Auth::id())
             ->where('status', 'OPEN')
             ->first();
 
-        if (!$shift) {
+        if (! $shift) {
             return response()->json([
                 'message' => 'No active shift found.',
             ], 404);
@@ -52,16 +71,16 @@ class ShiftController extends Controller
             ->where('status', 'OPEN')
             ->first();
 
-        if($existing) {
+        if ($existing) {
             return new ShiftResource($existing);
         }
 
         // 2. Create the Shift
         $stationId = Auth::user()->station_id;
 
-        if(!$stationId) {
+        if (! $stationId) {
             return response()->json([
-                'message' => 'User is not assigned to a station.'
+                'message' => 'User is not assigned to a station.',
             ], 400);
         }
 
@@ -82,7 +101,7 @@ class ShiftController extends Controller
      */
     public function lock(LockShiftRequest $request, Shift $shift)
     {
-        if($shift->started_by_user_id != Auth::id()) {
+        if ($shift->started_by_user_id != Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -100,7 +119,7 @@ class ShiftController extends Controller
                     'nozzle_id' => $meterData['nozzle_id'],
                     'closing_reading' => $meterData['closing_reading'],
                     'evidence_path' => $evidencePath,
-                    'gps_coordinates' => json_decode($meterData['gps_coordinates'] ?? '{}', true)
+                    'gps_coordinates' => json_decode($meterData['gps_coordinates'] ?? '{}', true),
                 ];
             }
 
@@ -126,7 +145,7 @@ class ShiftController extends Controller
             return new ShiftResource($updatedShift);
 
         } catch (\Exception $e) {
-            Log::error('Shift Lock Error: ' . $e->getMessage());
+            Log::error('Shift Lock Error: '.$e->getMessage());
 
             return response()->json([
                 'error' => $e->getMessage(),
@@ -171,16 +190,16 @@ class ShiftController extends Controller
      */
     public function closingData(Request $request, Shift $shift)
     {
-        if($shift->started_by_user_id != Auth::id()) {
+        if ($shift->started_by_user_id != Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
 
-       $shift->load([
-           'station.nozzles.tank.product',
-           'station.tanks.product',
-           'meterReadings',
-           'dipReadings',
-       ]);
+        $shift->load([
+            'station.nozzles.tank.product',
+            'station.tanks.product',
+            'meterReadings',
+            'dipReadings',
+        ]);
 
         return new ClosingShiftResource($shift);
     }
