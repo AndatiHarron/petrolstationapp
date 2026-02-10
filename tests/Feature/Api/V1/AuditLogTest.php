@@ -137,3 +137,90 @@ test('audit log response structure is correct', function () {
         ])
         ->assertJsonPath('data.0.changes.new.name', 'New Name');
 });
+
+test('super admin can see any specific audit log', function () {
+    $org = Organization::factory()->create();
+    $user = User::factory()->create(['organization_id' => $org->id]);
+
+    $activity = activity()->performedOn($user)->causedBy($user)->log('test log');
+    $activityId = Activity::latest()->first()->id;
+
+    $superAdmin = User::factory()->create();
+    $superAdmin->assignRole('super-admin');
+    Sanctum::actingAs($superAdmin);
+
+    getJson("/api/v1/audit-logs/{$activityId}")
+        ->assertOk()
+        ->assertJsonPath('data.id', $activityId);
+});
+
+test('manager can see specific logs from their station', function () {
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $station->id]);
+    $manager->assignRole('manager');
+
+    $activity = activity()->causedBy($manager)->log('manager log');
+    $activityId = Activity::latest()->first()->id;
+
+    Sanctum::actingAs($manager);
+
+    getJson("/api/v1/audit-logs/{$activityId}")
+        ->assertOk()
+        ->assertJsonPath('data.id', $activityId);
+});
+
+test('manager cannot see specific logs from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $managerA = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $managerA->assignRole('manager');
+
+    $managerB = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationB->id]);
+    $managerB->assignRole('manager');
+
+    $activityB = activity()->causedBy($managerB)->log('manager B log');
+    $activityIdB = Activity::latest()->first()->id;
+
+    Sanctum::actingAs($managerA);
+
+    getJson("/api/v1/audit-logs/{$activityIdB}")
+        ->assertForbidden();
+});
+
+test('admin can see specific logs from their organization', function () {
+    $org = Organization::factory()->create();
+    $admin = User::factory()->create(['organization_id' => $org->id]);
+    $admin->assignRole('admin');
+
+    $user = User::factory()->create(['organization_id' => $org->id]);
+    $activity = activity()->causedBy($user)->log('org user log');
+    $activityId = Activity::latest()->first()->id;
+
+    Sanctum::actingAs($admin);
+
+    getJson("/api/v1/audit-logs/{$activityId}")
+        ->assertOk()
+        ->assertJsonPath('data.id', $activityId);
+});
+
+test('admin cannot see specific logs from another organization', function () {
+    $orgA = Organization::factory()->create();
+    $orgB = Organization::factory()->create();
+
+    $adminA = User::factory()->create(['organization_id' => $orgA->id]);
+    $adminA->assignRole('admin');
+
+    $adminB = User::factory()->create(['organization_id' => $orgB->id]);
+    $adminB->assignRole('admin');
+
+    $activityB = activity()->causedBy($adminB)->log('org B log');
+    $activityIdB = Activity::latest()->first()->id;
+
+    Sanctum::actingAs($adminA);
+
+    getJson("/api/v1/audit-logs/{$activityIdB}")
+        ->assertForbidden();
+});

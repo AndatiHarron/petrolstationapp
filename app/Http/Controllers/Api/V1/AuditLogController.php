@@ -20,7 +20,7 @@ class AuditLogController extends Controller
     public function index(Request $request)
     {
         $query = Activity::with(['causer', 'subject'])->latest();
-        $user = auth()->user();
+        $user = $request->user();
 
         if ($user->hasRole('super-admin')) {
             return AuditLogResource::collection($query->paginate(20));
@@ -63,7 +63,63 @@ class AuditLogController extends Controller
         });
 
         return AuditLogResource::collection(
-            $query->latest()->paginate(20)
+            $query->paginate(20)
         );
+    }
+
+    /**
+     * Display a specific audit log
+     */
+    public function show(Request $request, Activity $activity)
+    {
+        $user = $request->user();
+
+        if ($user->hasRole('super-admin')) {
+            return new AuditLogResource($activity->load(['causer', 'subject']));
+        }
+
+        $query = Activity::where('id', $activity->id);
+
+        if ($user->hasRole('manager') && $user->station_id) {
+            $stationId = $user->station_id;
+
+            $query->where(function (Builder $q) use ($stationId) {
+                $q->whereHasMorph('causer', [User::class], function ($subQ) use ($stationId) {
+                    $subQ->where('station_id', $stationId);
+                });
+
+                $q->orWhereHasMorph(
+                    'subject',
+                    [Shift::class, Tank::class, Nozzle::class],
+                    function ($subQ) use ($stationId) {
+                        $subQ->where('station_id', $stationId);
+                    }
+                );
+            });
+        } else {
+            $orgId = $user->organization_id;
+
+            $query->where(function (Builder $q) use ($orgId) {
+                $q->whereHasMorph('causer', [User::class], function ($subQ) use ($orgId) {
+                    $subQ->where('organization_id', $orgId);
+                });
+
+                $q->orWhereHasMorph(
+                    'subject',
+                    [Shift::class, Tank::class, Nozzle::class],
+                    function ($subQ) use ($orgId) {
+                        $subQ->where('organization_id', $orgId);
+                    }
+                );
+            });
+        }
+
+        $authorizedActivity = $query->first();
+
+        if (! $authorizedActivity) {
+            abort(403);
+        }
+
+        return new AuditLogResource($authorizedActivity->load(['causer', 'subject']));
     }
 }

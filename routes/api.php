@@ -18,8 +18,9 @@ Route::post('/login', function (Request $request) {
         'password' => 'required',
     ]);
 
-    if(Auth::attempt($credentials)) {
+    if (Auth::attempt($credentials)) {
         $token = Auth::user()->createToken('mobile_app')->plainTextToken;
+
         return response()->json(
             ['token' => $token]
         );
@@ -27,7 +28,6 @@ Route::post('/login', function (Request $request) {
 
     return response()->json(['message' => 'Invalid credentials.'], 401);
 });
-
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::get('/shifts/{shift}/closing-data', [ShiftController::class, 'closingData']);
 
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/audit-logs/{activity}', [AuditLogController::class, 'show']);
 
     Route::apiResource('customers', CustomerController::class);
     Route::apiResource('liftings', LiftingController::class);
@@ -48,5 +49,3 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('products', ProductController::class);
     Route::apiResource('nozzles', NozzleController::class);
 });
-
-
