@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\CreditSaleController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\LiftingController;
 use App\Http\Controllers\Api\V1\NozzleController;
@@ -48,4 +49,8 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('tanks', TankController::class);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('nozzles', NozzleController::class);
+
+    // Credit Sales: index, create and show
+    Route::apiResource('credit-sales', CreditSaleController::class)
+        ->only(['index', 'store', 'show']);
 });

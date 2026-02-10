@@ -2,8 +2,8 @@
 
 namespace App\Traits;
 
-use App\Models\Scopes\OrganizationScope;
 use App\Models\Organization;
+use App\Models\Scopes\OrganizationScope;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,16 +14,13 @@ trait BelongsToOrganization
 {
     public static function bootBelongsToOrganization(): void
     {
-        if (!auth()->check() || !auth()->user()->hasRole('super-admin')) {
-            static::addGlobalScope(new OrganizationScope);
-        }
+        // Always add the global scope; the scope itself decides based on the current user/role
+        static::addGlobalScope(new OrganizationScope);
 
         static::creating(function ($model) {
-           if(auth()->check()) {
-               if (is_null($model->organization_id)) {
-                    $model->organization_id = Auth::user()->organization_id;
-               }
-           }
+            if (auth()->check() && is_null($model->organization_id)) {
+                $model->organization_id = Auth::user()->organization_id;
+            }
         });
     }
 

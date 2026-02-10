@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -12,15 +13,18 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Shift extends Model
 {
-    use LogsActivity;
-    use BelongsToOrganization;
-    use HasUuids;
+    use BelongsToOrganization, HasFactory, HasUuids, LogsActivity;
+
     public $incrementing = false;
-    public const STATUS_OPEN = "OPEN";
-    public const STATUS_LOCKED = "LOCKED";
-    public const STATUS_APPROVED = "APPROVED";
+
+    public const STATUS_OPEN = 'OPEN';
+
+    public const STATUS_LOCKED = 'LOCKED';
+
+    public const STATUS_APPROVED = 'APPROVED';
 
     protected $keyType = 'string';
+
     protected $guarded = [];
 
     public function getActivitylogOptions(): LogOptions
@@ -30,7 +34,7 @@ class Shift extends Model
                 'status',
                 'cash_variance',
                 'total_collected_cash',
-                'stock_variance_liters'
+                'stock_variance_liters',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
@@ -48,27 +52,33 @@ class Shift extends Model
         'locked_at' => 'datetime',
     ];
 
-    public function organization(): BelongsTo {
+    public function organization(): BelongsTo
+    {
         return $this->belongsTo(Organization::class);
     }
 
-    public function creditSales(): HasMany {
+    public function creditSales(): HasMany
+    {
         return $this->hasMany(CreditSale::class);
     }
 
-    public function station(): BelongsTo {
+    public function station(): BelongsTo
+    {
         return $this->belongsTo(Station::class);
     }
 
-    public function meterReadings(): HasMany {
+    public function meterReadings(): HasMany
+    {
         return $this->hasMany(MeterReading::class);
     }
 
-    public function dipReadings(): HasMany {
+    public function dipReadings(): HasMany
+    {
         return $this->hasMany(DipReading::class);
     }
 
-    public function payments() : HasMany {
+    public function payments(): HasMany
+    {
         return $this->hasMany(Payment::class);
     }
 }

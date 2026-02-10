@@ -13,8 +13,8 @@ class OrganizationScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        if(auth()->hasUser()) {
-            $builder->where('organization_id', auth()->user()->organization_id);
+        if (auth()->hasUser() && ! auth()->user()->hasRole('super-admin')) {
+            $builder->where($model->getTable().'.organization_id', auth()->user()->organization_id);
         }
     }
 }
