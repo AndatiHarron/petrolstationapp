@@ -11,7 +11,7 @@ import { SkeletonCard } from './skeleton-card';
 function hasData<T extends { data: unknown }>(
     response: T | AuthenticationExceptionResponse | undefined
 ): response is T {
-    return response !== undefined && 'data' in response;
+    return response !== undefined && typeof response === 'object' && response !== null && 'data' in response;
 }
 
 interface ShiftSectionProps {
