@@ -10,32 +10,32 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import Animated, { FadeIn, FadeInDown, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { AuthenticationExceptionResponse, LockShiftRequest, ShiftIndex200, ShiftResource } from '@/features/api/model';
+import { LockShiftModal } from '@/components/station-manager/lock-shift-modal';
+import { SkeletonCard } from '@/components/station-manager/skeleton-card';
+import type { AuthenticationExceptionResponse, LockShiftRequest, ShiftCurrent200, ShiftResource } from '@/features/api/model';
 import {
     getShiftIndexQueryKey,
-    useShiftIndex,
+    useShiftCurrent,
     useShiftLock,
     useShiftStore,
 } from '@/features/api/shift/shift';
-import { LockShiftModal } from '@/components/station-manager/lock-shift-modal';
-import { SkeletonCard } from '@/components/station-manager/skeleton-card';
 
 export default function ShiftsScreen() {
     const queryClient = useQueryClient();
     const [lockModalVisible, setLockModalVisible] = useState(false);
 
     // Fetch current active shift
-    const { data: shiftResponse, isLoading, refetch, isRefetching } = useShiftIndex({
+    const { data: shiftResponse, isLoading, refetch, isRefetching } = useShiftCurrent({
         query: {
             queryKey: ['activeShift'],
         },
     });
 
     // Unwrap response to get ShiftResource
-    const actualShiftData = shiftResponse as unknown as (ShiftIndex200 | AuthenticationExceptionResponse | undefined);
+    const actualShiftData = shiftResponse as unknown as (ShiftCurrent200 | AuthenticationExceptionResponse | undefined);
     const activeShift: ShiftResource | undefined =
         actualShiftData && 'data' in actualShiftData ? actualShiftData.data : undefined;
 

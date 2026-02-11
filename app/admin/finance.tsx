@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'react-native';
+import { CreditSalesList } from '@/components/admin/finance/credit-sales-list';
+import { ShiftsList } from '@/components/admin/finance/shifts-list';
+import { DebtorsList } from '@/components/admin/finance/debtors-list';
+import { CreditSaleDetailModal } from '@/components/admin/finance/credit-sale-detail-modal';
+import { ShiftDetailModal } from '@/components/admin/finance/shift-detail-modal';
 
 export default function FinanceTab() {
+    const [selectedCreditSaleId, setSelectedCreditSaleId] = useState<string | null>(null);
+    const [selectedShiftId, setSelectedShiftId] = useState<string | null>(null);
+
+    const handleCreditSalePress = useCallback((creditSaleId: string) => {
+        setSelectedCreditSaleId(creditSaleId);
+    }, []);
+
+    const handleShiftPress = useCallback((shiftId: string) => {
+        setSelectedShiftId(shiftId);
+    }, []);
+
+    const handleCloseCreditSaleModal = useCallback(() => {
+        setSelectedCreditSaleId(null);
+    }, []);
+
+    const handleCloseShiftModal = useCallback(() => {
+        setSelectedShiftId(null);
+    }, []);
+
     return (
         <View className="flex-1 bg-slate-900">
             <StatusBar barStyle="light-content" />
@@ -18,12 +42,21 @@ export default function FinanceTab() {
                         <Text className="text-slate-500 text-sm mt-1">Financial reporting and analysis</Text>
                     </View>
 
-                    <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-8 items-center justify-center">
-                        <Text className="text-slate-400 text-lg">Coming Soon</Text>
-                        <Text className="text-slate-500 text-sm mt-2">Financial reports and analytics</Text>
-                    </View>
+                    <DebtorsList />
+                    <CreditSalesList onItemPress={handleCreditSalePress} />
+                    <ShiftsList onItemPress={handleShiftPress} />
                 </ScrollView>
             </SafeAreaView>
+
+            {/* Modals */}
+            <CreditSaleDetailModal
+                creditSaleId={selectedCreditSaleId}
+                onClose={handleCloseCreditSaleModal}
+            />
+            <ShiftDetailModal
+                shiftId={selectedShiftId}
+                onClose={handleCloseShiftModal}
+            />
         </View>
     );
 }

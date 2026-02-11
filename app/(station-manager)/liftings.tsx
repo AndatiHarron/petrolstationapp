@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -8,7 +8,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLiftingsStore, useLiftingsDestroy, getLiftingsIndexQueryKey } from '../../features/api/lifting/lifting';
 import { useGetV1User } from '../../features/api/default/default';
 import { useTanksIndex } from '../../features/api/tank/tank';
-import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200, LiftingsIndex200Meta, LiftingsIndex200Links } from '../../features/api/model';
+import { useCreditorsIndex } from '../../features/api/creditor/creditor';
+import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200, LiftingsIndex200Meta, LiftingsIndex200Links, CreditorsIndex200, SupplierResource } from '../../features/api/model';
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
@@ -38,17 +39,29 @@ const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item:
                     <Text className="text-white text-lg font-bold">{item.tank_name}</Text>
                     <Text className="text-slate-400 text-sm">{item.product_name}</Text>
                 </View>
-                <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
-                    <Text className="text-emerald-400 font-bold text-sm">{item.volume_liters.toLocaleString()} L</Text>
+                <View className="items-end gap-1">
+                    <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
+                        <Text className="text-emerald-400 font-bold text-sm">{item.volume_liters.toLocaleString()} L</Text>
+                    </View>
+                    {item.is_credit ? (
+                        <View className="bg-amber-500/20 px-2 py-0.5 rounded-full">
+                            <Text className="text-amber-400 text-xs font-bold">Credit</Text>
+                        </View>
+                    ) : null}
                 </View>
             </View>
             <View className="flex-row justify-between items-center mt-2">
-                <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
+                <View>
+                    <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
+                    {item.supplier_name ? (
+                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier_name}</Text>
+                    ) : null}
+                </View>
                 <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
             </View>
-            {item.invoice_number && (
+            {item.invoice_number ? (
                 <Text className="text-slate-600 text-xs mt-1">Inv: {item.invoice_number}</Text>
-            )}
+            ) : null}
         </TouchableOpacity>
     );
 };
@@ -65,6 +78,7 @@ export default function LiftingsScreen() {
 
     const { data: userData } = useGetV1User();
     const { data: tanksData, isLoading: isLoadingTanks } = useTanksIndex();
+    const { data: creditorsData, isLoading: isLoadingCreditors } = useCreditorsIndex();
 
     const [refreshing, setRefreshing] = useState(false);
 
@@ -82,8 +96,10 @@ export default function LiftingsScreen() {
         buying_price_per_liter: 0,
         total_cost: 0,
         tax_paid: 0,
+        is_credit: false,
     });
     const [selectedTankId, setSelectedTankId] = useState<string | null>(null);
+    const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
 
     // Details Modal State
     const [selectedLifting, setSelectedLifting] = useState<LiftingResource | null>(null);
@@ -101,6 +117,13 @@ export default function LiftingsScreen() {
         const res = tanksData as unknown as TanksIndex200;
         return res?.data || [];
     }, [tanksData]);
+
+    // Get creditors list
+    const creditors: SupplierResource[] = useMemo(() => {
+        if (!creditorsData) return [];
+        const res = creditorsData as unknown as CreditorsIndex200;
+        return res?.data ?? [];
+    }, [creditorsData]);
 
     const createMutation = useLiftingsStore({
         mutation: {
@@ -181,8 +204,10 @@ export default function LiftingsScreen() {
             buying_price_per_liter: 0,
             total_cost: 0,
             tax_paid: 0,
+            is_credit: false,
         });
         setSelectedTankId(null);
+        setSelectedSupplierId(null);
     };
 
     if (error) {
@@ -225,6 +250,8 @@ export default function LiftingsScreen() {
             buying_price_per_liter: newItem.buying_price_per_liter,
             total_cost: newItem.total_cost || (newItem.volume_liters * newItem.buying_price_per_liter),
             tax_paid: newItem.tax_paid || null,
+            supplier_id: selectedSupplierId || undefined,
+            is_credit: newItem.is_credit || false,
         };
         createMutation.mutate({ data: payload });
     };
@@ -404,6 +431,47 @@ export default function LiftingsScreen() {
                                 </View>
                             </View>
 
+                            {/* Supplier Selector */}
+                            <View className="mb-4">
+                                <Text className="text-slate-400 text-sm font-medium mb-2">Supplier (Optional)</Text>
+                                {isLoadingCreditors ? (
+                                    <ActivityIndicator size="small" color="#38bdf8" />
+                                ) : creditors.length === 0 ? (
+                                    <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                                        <Text className="text-slate-500 text-sm">No suppliers found. Add one in Admin {'>'} Infrastructure.</Text>
+                                    </View>
+                                ) : (
+                                    <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
+                                        <TouchableOpacity
+                                            onPress={() => setSelectedSupplierId(null)}
+                                            className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-slate-800 border-slate-700'}`}
+                                        >
+                                            <Text className={selectedSupplierId === null ? 'text-white font-bold' : 'text-slate-300'}>None</Text>
+                                        </TouchableOpacity>
+                                        {creditors.map((creditor) => (
+                                            <TouchableOpacity
+                                                key={creditor.id}
+                                                onPress={() => setSelectedSupplierId(creditor.id)}
+                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === creditor.id ? 'bg-sky-600 border-sky-500' : 'bg-slate-800 border-slate-700'}`}
+                                            >
+                                                <Text className={selectedSupplierId === creditor.id ? 'text-white font-bold' : 'text-slate-300'}>{creditor.name}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </ScrollView>
+                                )}
+                            </View>
+
+                            {/* Credit Toggle */}
+                            <View className="mb-4 flex-row items-center justify-between bg-slate-800 border border-slate-700 rounded-xl p-4">
+                                <Text className="text-white font-medium">Bought on Credit?</Text>
+                                <Switch
+                                    value={newItem.is_credit || false}
+                                    onValueChange={(val) => setNewItem({ ...newItem, is_credit: val })}
+                                    trackColor={{ false: '#475569', true: '#f59e0b' }}
+                                    thumbColor={newItem.is_credit ? '#ffffff' : '#94a3b8'}
+                                />
+                            </View>
+
                             <View className="mt-6">
                                 <Button
                                     title="Record Lifting"
@@ -462,9 +530,21 @@ export default function LiftingsScreen() {
                                     <Text className="text-slate-300">Total Cost</Text>
                                     <Text className="text-emerald-400 font-mono font-bold">KES {selectedLifting?.total_cost.toLocaleString()}</Text>
                                 </View>
-                                <View className="flex-row justify-between">
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
                                     <Text className="text-slate-300">Tax Paid</Text>
                                     <Text className="text-white font-mono">KES {selectedLifting?.tax_paid.toLocaleString()}</Text>
+                                </View>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
+                                    <Text className="text-slate-300">Supplier</Text>
+                                    <Text className="text-sky-400 font-medium">{selectedLifting?.supplier_name || 'N/A'}</Text>
+                                </View>
+                                <View className="flex-row justify-between">
+                                    <Text className="text-slate-300">Payment</Text>
+                                    <View className={`px-2 py-0.5 rounded-full ${selectedLifting?.is_credit ? 'bg-amber-500/20' : 'bg-emerald-500/20'}`}>
+                                        <Text className={`text-xs font-bold ${selectedLifting?.is_credit ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                            {selectedLifting?.is_credit ? 'Credit' : 'Cash'}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                         </View>
