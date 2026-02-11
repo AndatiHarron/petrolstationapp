@@ -19,6 +19,8 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
         },
     });
 
+    if (!creditSaleId) return null;
+
 
     // Type guard to check if response has data
     const hasData = (res: unknown): res is { data: CreditSalesShow200 } => {

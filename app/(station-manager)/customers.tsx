@@ -26,15 +26,31 @@ const CustomerItem = ({ item, onPress }: { item: CustomersIndex200['data'][numbe
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
-            className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700 flex-row justify-between items-center"
+            className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700"
         >
-            <View className="flex-1">
-                <Text className="text-white text-lg font-bold">{item.name}</Text>
-                <Text className="text-slate-400 text-sm mt-1">{item.email}</Text>
-                {item.phone && <Text className="text-slate-500 text-xs mt-0.5">{item.phone}</Text>}
+            <View className="flex-row justify-between items-center">
+                <View className="flex-1">
+                    <Text className="text-white text-lg font-bold">{item.name}</Text>
+                    <Text className="text-slate-400 text-sm mt-1">{item.email}</Text>
+                    {item.phone && <Text className="text-slate-500 text-xs mt-0.5">{item.phone}</Text>}
+                </View>
+                <View className="bg-slate-700 p-2 rounded-full">
+                    <Ionicons name="chevron-forward" size={16} color="#94a3b8" />
+                </View>
             </View>
-            <View className="bg-slate-700 p-2 rounded-full">
-                <Ionicons name="chevron-forward" size={16} color="#94a3b8" />
+            <View className="flex-row flex-wrap gap-2 mt-3">
+                {item.current_balance > 0 && (
+                    <View className="bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-lg">
+                        <Text className="text-amber-400 text-xs font-semibold">
+                            Outstanding: KES {item.current_balance.toLocaleString()}
+                        </Text>
+                    </View>
+                )}
+                <View className="bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
+                    <Text className="text-emerald-400 text-xs font-semibold">
+                        Available Credit: KES {item.available_credit.toLocaleString()}
+                    </Text>
+                </View>
             </View>
         </TouchableOpacity>
     );

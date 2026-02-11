@@ -25,4 +25,6 @@ export interface MeterReading {
   evidence_hash: string | null;
   /** @nullable */
   gps_coordinates: unknown[] | null;
+  /** @nullable */
+  deleted_at: string | null;
 }

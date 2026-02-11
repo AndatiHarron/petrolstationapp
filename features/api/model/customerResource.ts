@@ -16,6 +16,7 @@ export interface CustomerResource {
   credit_limit: number;
   current_balance: number;
   available_credit: number;
+  last_sale_date: string;
   organization_id: string;
   created_at: string;
 }
