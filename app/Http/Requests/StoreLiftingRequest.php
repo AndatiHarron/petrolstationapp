@@ -33,7 +33,7 @@ class StoreLiftingRequest extends FormRequest
                     if ($user->hasRole('manager') && $user->station_id && $value !== $user->station_id) {
                         $fail('You can only record liftings for your assigned station.');
                     }
-                }
+                },
             ],
             'tank_id' => [
                 'required',
@@ -50,6 +50,7 @@ class StoreLiftingRequest extends FormRequest
             // Total cost is usually calculated, but if provided manually, validate it
             'total_cost' => 'required|numeric|min:0',
             'tax_paid' => 'nullable|numeric|min:0',
+            'supplier_name' => 'nullable|string|max:255',
         ];
     }
 }

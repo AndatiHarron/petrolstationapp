@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Lifting;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class LiftingPolicy
 {
@@ -24,6 +23,12 @@ class LiftingPolicy
         if ($user->hasRole('super-admin')) {
             return true;
         }
+
+        if ($user->hasRole('manager')) {
+            return $user->organization_id === $lifting->organization_id
+                && $user->station_id === $lifting->station_id;
+        }
+
         return $user->organization_id === $lifting->organization_id;
     }
 
@@ -40,6 +45,23 @@ class LiftingPolicy
      */
     public function update(User $user, Lifting $lifting): bool
     {
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        if ($user->hasRole('admin')) {
+            return $user->organization_id === $lifting->organization_id;
+        }
+
+        if ($user->hasRole('manager')) {
+            if ($user->organization_id !== $lifting->organization_id || $user->station_id !== $lifting->station_id) {
+                return false;
+            }
+
+            // Managers can only update recent liftings (<= 24 hours)
+            return $lifting->created_at->diffInHours(now()) <= 24;
+        }
+
         return false;
     }
 
@@ -52,9 +74,11 @@ class LiftingPolicy
             return true;
         }
 
-        // Prevent Managers from deleting OLD liftings (e.g., older than 24 hours)
-        // to prevent fraud/manipulation of past records.
         if ($user->hasRole('manager')) {
+            if ($user->station_id !== $lifting->station_id) {
+                return false;
+            }
+
             if ($lifting->created_at->diffInHours(now()) > 24) {
                 return false;
             }

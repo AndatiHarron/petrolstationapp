@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLiftingRequest;
+use App\Http\Requests\UpdateLiftingRequest;
 use App\Http\Resources\LiftingResource;
 use App\Models\Lifting;
 use Illuminate\Http\Request;
@@ -17,7 +18,13 @@ class LiftingController extends Controller
      */
     public function index(Request $request)
     {
+        $user = $request->user();
         $query = Lifting::with(['station', 'tank.product'])->latest('lifting_date');
+
+        // Filter: Manager's Station
+        if ($user->hasRole('manager') && $user->station_id) {
+            $query->where('station_id', $user->station_id);
+        }
 
         // Filter: Date Range
         if ($request->has(['from', 'to'])) {
@@ -41,7 +48,9 @@ class LiftingController extends Controller
 
         $lifting = Lifting::create($request->validated());
 
-        return new LiftingResource($lifting->load(['station', 'tank.product']));
+        return (new LiftingResource($lifting->load(['station', 'tank.product'])))
+            ->response()
+            ->setStatusCode(201);
     }
 
     /**
@@ -50,6 +59,19 @@ class LiftingController extends Controller
     public function show(Lifting $lifting)
     {
         Gate::authorize('view', $lifting);
+
+        return new LiftingResource($lifting->load(['station', 'tank.product']));
+    }
+
+    /**
+     * Update a lifting (currently only supports updating supplier_name)
+     */
+    public function update(UpdateLiftingRequest $request, Lifting $lifting)
+    {
+        Gate::authorize('update', $lifting);
+
+        $lifting->fill($request->validated());
+        $lifting->save();
 
         return new LiftingResource($lifting->load(['station', 'tank.product']));
     }

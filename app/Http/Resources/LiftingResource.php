@@ -18,6 +18,7 @@ class LiftingResource extends JsonResource
             'id' => $this->id,
             'lifting_date' => $this->lifting_date->format('Y-m-d'),
             'invoice_number' => $this->invoice_number,
+            'supplier_name' => $this->supplier_name,
             'volume_liters' => (float) $this->volume_liters,
             'buying_price_per_liter' => (float) $this->buying_price_per_liter,
             'total_cost' => (float) $this->total_cost,
