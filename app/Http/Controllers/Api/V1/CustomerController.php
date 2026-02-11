@@ -19,7 +19,14 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Customer::query()->latest();
+        $query = Customer::query()->with('latestCreditSale');
+
+        if ($request->boolean('has_debt')) {
+            $query->where('current_balance', '>', 0)
+                ->orderByDesc('current_balance');
+        } else {
+            $query->latest();
+        }
 
         if ($search = $request->input('search')) {
             $query->where(function ($q) use ($search) {
@@ -42,7 +49,7 @@ class CustomerController extends Controller
 
         $customer = Customer::create($request->validated());
 
-        return new CustomerResource($customer);
+        return new CustomerResource($customer->load('latestCreditSale'));
     }
 
     /**
@@ -52,7 +59,7 @@ class CustomerController extends Controller
     {
         Gate::authorize('view', $customer);
 
-        return new CustomerResource($customer);
+        return new CustomerResource($customer->load('latestCreditSale'));
     }
 
     /**
@@ -62,15 +69,15 @@ class CustomerController extends Controller
     {
         Gate::authorize('update', $customer);
 
-//        if ($request->has('credit_limit') && !Auth::user()->hasRole('admin')) {
-//            return response()->json([
-//                'message' => 'Only Admins can change credit limits.'
-//            ]);
-//        }
+        //        if ($request->has('credit_limit') && !Auth::user()->hasRole('admin')) {
+        //            return response()->json([
+        //                'message' => 'Only Admins can change credit limits.'
+        //            ]);
+        //        }
 
         $customer->update($request->validated());
 
-        return new CustomerResource($customer);
+        return new CustomerResource($customer->load('latestCreditSale'));
     }
 
     /**
