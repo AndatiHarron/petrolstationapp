@@ -72,11 +72,11 @@ test('deleting a lifting decreases tank volume', function () {
         'organization_id' => $org->id,
     ]);
 
-    $manager = User::factory()->create(['organization_id' => $org->id]);
-    $manager->assignRole('admin'); // Admins can delete anytime
-    Sanctum::actingAs($manager);
+    $super = User::factory()->create(['organization_id' => $org->id]);
+    $super->assignRole('super-admin');
+    Sanctum::actingAs($super);
 
-    // Act: Delete the lifting
+    // Act: Delete the lifting (soft delete)
     deleteJson("/api/v1/liftings/{$lifting->id}")->assertOk();
 
     // Assert: Tank volume should drop back to 1,000 (6000 - 5000)
@@ -127,11 +127,25 @@ test('manager cannot delete old liftings', function () {
         ->assertStatus(403);
 });
 
-test('admin can delete old liftings', function () {
+test('super admin can delete old liftings', function () {
     $org = Organization::factory()->create();
     $lifting = Lifting::factory()->create([
         'organization_id' => $org->id,
         'created_at' => now()->subHours(48),
+    ]);
+
+    $super = User::factory()->create(['organization_id' => $org->id]);
+    $super->assignRole('super-admin');
+    Sanctum::actingAs($super);
+
+    deleteJson("/api/v1/liftings/{$lifting->id}")
+        ->assertOk();
+});
+
+test('admin can delete liftings from their organization', function () {
+    $org = Organization::factory()->create();
+    $lifting = Lifting::factory()->create([
+        'organization_id' => $org->id,
     ]);
 
     $admin = User::factory()->create(['organization_id' => $org->id]);
@@ -140,6 +154,23 @@ test('admin can delete old liftings', function () {
 
     deleteJson("/api/v1/liftings/{$lifting->id}")
         ->assertOk();
+
+    $this->assertSoftDeleted('liftings', ['id' => $lifting->id]);
+});
+
+test('admin cannot delete liftings from another organization', function () {
+    $orgA = Organization::factory()->create();
+    $orgB = Organization::factory()->create();
+    $liftingB = Lifting::factory()->create([
+        'organization_id' => $orgB->id,
+    ]);
+
+    $adminA = User::factory()->create(['organization_id' => $orgA->id]);
+    $adminA->assignRole('admin');
+    Sanctum::actingAs($adminA);
+
+    deleteJson("/api/v1/liftings/{$liftingB->id}")
+        ->assertNotFound();
 });
 
 test('lifting date cannot be in the future', function () {

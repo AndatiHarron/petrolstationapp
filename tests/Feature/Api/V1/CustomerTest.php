@@ -6,7 +6,7 @@ use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Spatie\Permission\PermissionRegistrar;
+
 use function Pest\Laravel\deleteJson;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
@@ -102,7 +102,7 @@ test('manager cannot delete a customer', function () {
     $this->assertDatabaseHas('customers', ['id' => $customer->id]);
 });
 
-test('super admin can delete a customer', function () {
+test('super admin can delete a customer (soft delete)', function () {
     $admin = User::factory()->create();
     $admin->assignRole('super-admin');
     Sanctum::actingAs($admin);
@@ -112,7 +112,34 @@ test('super admin can delete a customer', function () {
     deleteJson("/api/v1/customers/{$customer->id}")
         ->assertStatus(200);
 
-    $this->assertDatabaseMissing('customers', ['id' => $customer->id]);
+    $this->assertSoftDeleted('customers', ['id' => $customer->id]);
+});
+
+test('admin can delete a customer from their organization (soft delete)', function () {
+    $org = Organization::factory()->create();
+    $admin = User::factory()->create(['organization_id' => $org->id]);
+    $admin->assignRole('admin');
+    Sanctum::actingAs($admin);
+
+    $customer = Customer::factory()->create(['organization_id' => $org->id]);
+
+    deleteJson("/api/v1/customers/{$customer->id}")
+        ->assertStatus(200);
+
+    $this->assertSoftDeleted('customers', ['id' => $customer->id]);
+});
+
+test('admin cannot delete a customer from another organization', function () {
+    $orgA = Organization::factory()->create();
+    $orgB = Organization::factory()->create();
+    $adminA = User::factory()->create(['organization_id' => $orgA->id]);
+    $adminA->assignRole('admin');
+    Sanctum::actingAs($adminA);
+
+    $customerB = Customer::factory()->create(['organization_id' => $orgB->id]);
+
+    deleteJson("/api/v1/customers/{$customerB->id}")
+        ->assertNotFound();
 });
 
 test('manager cannot view specific customer from another organization', function () {

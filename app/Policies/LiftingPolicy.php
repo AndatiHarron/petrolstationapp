@@ -70,21 +70,12 @@ class LiftingPolicy
      */
     public function delete(User $user, Lifting $lifting): bool
     {
+        // Per "No Deletions" requirement, only super-admins and admins (heads of organization) may perform deletes (soft deletes only)
         if ($user->hasRole('super-admin')) {
             return true;
         }
 
-        if ($user->hasRole('manager')) {
-            if ($user->station_id !== $lifting->station_id) {
-                return false;
-            }
-
-            if ($lifting->created_at->diffInHours(now()) > 24) {
-                return false;
-            }
-        }
-
-        return $user->organization_id === $lifting->organization_id;
+        return $user->hasRole('admin') && $user->organization_id === $lifting->organization_id;
     }
 
     /**

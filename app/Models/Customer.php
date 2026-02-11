@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends Model
 {
-    use HasFactory, BelongsToOrganization, HasUuids;
+    use BelongsToOrganization, HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
 
@@ -25,7 +26,8 @@ class Customer extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function creditSales(): HasMany {
+    public function creditSales(): HasMany
+    {
         return $this->hasMany(CreditSale::class);
     }
 }

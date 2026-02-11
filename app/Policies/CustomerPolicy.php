@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\Customer;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CustomerPolicy
 {
@@ -57,15 +56,12 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
+        // Per "No Deletions" requirement, only super-admins and admins (heads of organization) may perform deletes (soft deletes only)
         if ($user->hasRole('super-admin')) {
             return true;
         }
 
-        if ($user->hasRole('manager')) {
-            return false;
-        }
-
-        return $user->organization_id === $customer->organization_id;
+        return $user->hasRole('admin') && $user->organization_id === $customer->organization_id;
     }
 
     /**

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CreditSale extends Model
 {
-    use HasFactory, BelongsToOrganization, HasUuids;
+    use BelongsToOrganization, HasFactory, HasUuids, SoftDeletes;
 
     protected $guarded = [];
 
@@ -21,15 +22,18 @@ class CreditSale extends Model
         });
     }
 
-    public function organization(): BelongsTo {
+    public function organization(): BelongsTo
+    {
         return $this->belongsTo(Organization::class);
     }
 
-    public function shift(): BelongsTo {
+    public function shift(): BelongsTo
+    {
         return $this->belongsTo(Shift::class);
     }
 
-    public function customer(): BelongsTo {
+    public function customer(): BelongsTo
+    {
         return $this->belongsTo(Customer::class);
     }
 }
