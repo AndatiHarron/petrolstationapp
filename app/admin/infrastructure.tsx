@@ -3,24 +3,28 @@ import { View, Text, Pressable, StatusBar, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Package, Cylinder } from 'lucide-react-native';
+import { Building2, Package, Cylinder, Truck } from 'lucide-react-native';
 import { StationsList } from '@/components/admin/infrastructure/stations-list';
 import { ProductsList } from '@/components/admin/infrastructure/products-list';
 import { TanksList } from '@/components/admin/infrastructure/tanks-list';
+import { SuppliersList } from '@/components/admin/infrastructure/suppliers-list';
 import { StationModal } from '@/components/admin/infrastructure/station-modal';
 import { ProductModal } from '@/components/admin/infrastructure/product-modal';
 import { TankModal } from '@/components/admin/infrastructure/tank-modal';
+import { SupplierModal } from '@/components/admin/infrastructure/supplier-modal';
 import { useStationsDestroy, getStationsIndexQueryKey } from '@/features/api/station/station';
 import { useProductsDestroy, getProductsIndexQueryKey } from '@/features/api/product/product';
 import { useTanksDestroy, getTanksIndexQueryKey } from '@/features/api/tank/tank';
-import type { StationResource, ProductResource, TankResource } from '@/features/api/model';
+import { useCreditorsDestroy, getCreditorsIndexQueryKey } from '@/features/api/creditor/creditor';
+import type { StationResource, ProductResource, TankResource, SupplierResource } from '@/features/api/model';
 
-type TabType = 'stations' | 'products' | 'tanks';
+type TabType = 'stations' | 'products' | 'tanks' | 'suppliers';
 
 const TABS: { id: TabType; label: string; icon: typeof Building2 }[] = [
     { id: 'stations', label: 'Stations', icon: Building2 },
     { id: 'products', label: 'Products', icon: Package },
     { id: 'tanks', label: 'Tanks', icon: Cylinder },
+    { id: 'suppliers', label: 'Suppliers', icon: Truck },
 ];
 
 function TabButton({
@@ -59,6 +63,8 @@ export default function InfrastructureTab() {
     const [editingStation, setEditingStation] = useState<StationResource | undefined>(undefined);
     const [editingProduct, setEditingProduct] = useState<ProductResource | undefined>(undefined);
     const [editingTank, setEditingTank] = useState<TankResource | undefined>(undefined);
+    const [supplierModalVisible, setSupplierModalVisible] = useState(false);
+    const [editingSupplier, setEditingSupplier] = useState<SupplierResource | undefined>(undefined);
 
     // Delete mutations
     const stationDeleteMutation = useStationsDestroy({
@@ -90,6 +96,17 @@ export default function InfrastructureTab() {
             },
             onError: () => {
                 Alert.alert('Error', 'Failed to delete tank.');
+            },
+        },
+    });
+
+    const supplierDeleteMutation = useCreditorsDestroy({
+        mutation: {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: getCreditorsIndexQueryKey() });
+            },
+            onError: () => {
+                Alert.alert('Error', 'Failed to delete supplier.');
             },
         },
     });
@@ -191,6 +208,37 @@ export default function InfrastructureTab() {
         setEditingTank(undefined);
     }, []);
 
+    // Supplier handlers
+    const handleAddSupplier = useCallback(() => {
+        setEditingSupplier(undefined);
+        setSupplierModalVisible(true);
+    }, []);
+
+    const handleEditSupplier = useCallback((supplier: SupplierResource) => {
+        setEditingSupplier(supplier);
+        setSupplierModalVisible(true);
+    }, []);
+
+    const handleDeleteSupplier = useCallback((id: string) => {
+        Alert.alert(
+            'Delete Supplier',
+            'Are you sure you want to delete this supplier? This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => supplierDeleteMutation.mutate({ creditor: id }),
+                },
+            ]
+        );
+    }, [supplierDeleteMutation]);
+
+    const handleCloseSupplierModal = useCallback(() => {
+        setSupplierModalVisible(false);
+        setEditingSupplier(undefined);
+    }, []);
+
     const renderContent = () => {
         switch (activeTab) {
             case 'stations':
@@ -217,6 +265,14 @@ export default function InfrastructureTab() {
                         onDeleteTank={handleDeleteTank}
                     />
                 );
+            case 'suppliers':
+                return (
+                    <SuppliersList
+                        onAddSupplier={handleAddSupplier}
+                        onEditSupplier={handleEditSupplier}
+                        onDeleteSupplier={handleDeleteSupplier}
+                    />
+                );
             default:
                 return null;
         }
@@ -230,7 +286,7 @@ export default function InfrastructureTab() {
                 <View className="px-4 mb-4 mt-4">
                     <Text className="text-2xl font-bold text-white">Infrastructure</Text>
                     <Text className="text-slate-500 text-sm mt-1">
-                        Manage stations, products, and tanks
+                        Manage stations, products, tanks, and suppliers
                     </Text>
                 </View>
 
@@ -267,6 +323,11 @@ export default function InfrastructureTab() {
                 visible={tankModalVisible}
                 onClose={handleCloseTankModal}
                 tank={editingTank}
+            />
+            <SupplierModal
+                visible={supplierModalVisible}
+                onClose={handleCloseSupplierModal}
+                supplier={editingSupplier}
             />
         </View>
     );

@@ -4,12 +4,19 @@
  * Petrol Integrity System API Documentation
  * OpenAPI spec version: 0.0.1
  */
+import type { LiftingResourceSupplier } from './liftingResourceSupplier';
 
 export interface LiftingResource {
   id: string;
   lifting_date: string;
   /** @nullable */
   invoice_number: string | null;
+  /** @nullable */
+  supplier_name: string | null;
+  /** @nullable */
+  supplier_id: string | null;
+  supplier?: LiftingResourceSupplier;
+  is_credit: boolean;
   volume_liters: number;
   buying_price_per_liter: number;
   total_cost: number;

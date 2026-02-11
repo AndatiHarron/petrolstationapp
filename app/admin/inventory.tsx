@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLiftingsStore, useLiftingsDestroy, getLiftingsIndexQueryKey } from '../../features/api/lifting/lifting';
 import { useTanksIndex, getTanksIndexQueryKey } from '../../features/api/tank/tank';
 import { useStationsIndex } from '../../features/api/station/station';
+import { useCreditorsIndex } from '../../features/api/creditor/creditor';
 import { getAuditLogIndexQueryKey } from '../../features/api/audit-log/audit-log';
 import type {
     LiftingsIndex200,
@@ -17,8 +18,10 @@ import type {
     StoreLiftingRequest,
     TanksIndex200,
     StationsIndex200,
+    CreditorsIndex200,
     StationResource,
     TankResource,
+    SupplierResource,
 } from '../../features/api/model';
 import { api } from '../../lib/axios';
 import { LiftingsList } from '../../components/admin/inventory/liftings-list';
@@ -46,9 +49,10 @@ export default function InventoryTab() {
         queryFn: () => fetchLiftings(page),
     });
 
-    // Fetch stations and tanks for the add modal
+    // Fetch stations, tanks, and creditors for the add modal
     const { data: stationsData, isLoading: isLoadingStations } = useStationsIndex();
     const { data: tanksData, isLoading: isLoadingTanks } = useTanksIndex();
+    const { data: creditorsData, isLoading: isLoadingCreditors } = useCreditorsIndex();
 
     // Extract data
     const meta: LiftingsIndex200Meta | undefined = liftingsData?.meta;
@@ -56,6 +60,7 @@ export default function InventoryTab() {
     const liftingsList = liftingsData?.data ?? [];
     const stations: StationResource[] = (stationsData as unknown as StationsIndex200)?.data ?? [];
     const tanks: TankResource[] = (tanksData as unknown as TanksIndex200)?.data ?? [];
+    const creditors: SupplierResource[] = (creditorsData as unknown as CreditorsIndex200)?.data ?? [];
 
     // ─── Mutations ────────────────────────────────────────────
     const createMutation = useLiftingsStore({
@@ -179,8 +184,10 @@ export default function InventoryTab() {
                     isSubmitting={createMutation.isPending}
                     stations={stations}
                     tanks={tanks}
+                    creditors={creditors}
                     isLoadingStations={isLoadingStations}
                     isLoadingTanks={isLoadingTanks}
+                    isLoadingCreditors={isLoadingCreditors}
                 />
 
                 {/* Lifting Details Modal */}
@@ -217,7 +224,9 @@ export default function InventoryTab() {
                                 <Text className="text-slate-400 text-xs uppercase mb-3 font-bold tracking-wider">Financial</Text>
                                 <DetailRow label="Price/Liter" value={`KES ${selectedLifting?.buying_price_per_liter.toLocaleString()}`} mono />
                                 <DetailRow label="Total Cost" value={`KES ${selectedLifting?.total_cost.toLocaleString()}`} highlight mono />
-                                <DetailRow label="Tax Paid" value={`KES ${selectedLifting?.tax_paid.toLocaleString()}`} mono last />
+                                <DetailRow label="Tax Paid" value={`KES ${selectedLifting?.tax_paid.toLocaleString()}`} mono />
+                                <DetailRow label="Supplier" value={selectedLifting?.supplier_name || 'N/A'} />
+                                <DetailRow label="Payment" value={selectedLifting?.is_credit ? 'Credit' : 'Cash'} highlight={!selectedLifting?.is_credit} last />
                             </View>
 
                             {/* Delete */}

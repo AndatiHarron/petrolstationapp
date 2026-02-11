@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { InputField } from '../../input-field';
 import { Button } from '../../button';
-import type { StoreLiftingRequest, TankResource, StationResource } from '@/features/api/model';
+import type { StoreLiftingRequest, TankResource, StationResource, SupplierResource } from '@/features/api/model';
 
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
@@ -14,8 +14,10 @@ interface AddLiftingModalProps {
     isSubmitting: boolean;
     stations: StationResource[];
     tanks: TankResource[];
+    creditors: SupplierResource[];
     isLoadingStations: boolean;
     isLoadingTanks: boolean;
+    isLoadingCreditors: boolean;
 }
 
 export function AddLiftingModal({
@@ -25,11 +27,15 @@ export function AddLiftingModal({
     isSubmitting,
     stations,
     tanks,
+    creditors,
     isLoadingStations,
     isLoadingTanks,
+    isLoadingCreditors,
 }: AddLiftingModalProps) {
     const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
     const [selectedTankId, setSelectedTankId] = useState<string | null>(null);
+    const [selectedSupplierId, setSelectedSupplierId] = useState<string | null>(null);
+    const [isCredit, setIsCredit] = useState(false);
     const [formData, setFormData] = useState({
         lifting_date: formatDate(new Date()),
         invoice_number: '',
@@ -88,6 +94,8 @@ export function AddLiftingModal({
         });
         setSelectedStationId(null);
         setSelectedTankId(null);
+        setSelectedSupplierId(null);
+        setIsCredit(false);
     };
 
     const handleSubmit = () => {
@@ -104,6 +112,8 @@ export function AddLiftingModal({
             buying_price_per_liter: formData.buying_price_per_liter,
             total_cost: formData.total_cost || formData.volume_liters * formData.buying_price_per_liter,
             tax_paid: formData.tax_paid || null,
+            supplier_id: selectedSupplierId || undefined,
+            is_credit: isCredit,
         });
     };
 
@@ -257,6 +267,51 @@ export function AddLiftingModal({
                                     KES {(formData.tax_paid || 0).toLocaleString()}
                                 </Text>
                             </View>
+                        </View>
+
+                        {/* Supplier Selector */}
+                        <View className="mb-5">
+                            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Supplier (Optional)</Text>
+                            {isLoadingCreditors ? (
+                                <View className="h-12 items-center justify-center">
+                                    <ActivityIndicator size="small" color="#38bdf8" />
+                                </View>
+                            ) : creditors.length === 0 ? (
+                                <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                                    <Text className="text-slate-500 text-sm">No suppliers available.</Text>
+                                </View>
+                            ) : (
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                                    <View className="flex-row gap-2">
+                                        <TouchableOpacity
+                                            onPress={() => setSelectedSupplierId(null)}
+                                            className={`px-4 py-3 rounded-xl border ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-slate-800 border-slate-700'}`}
+                                        >
+                                            <Text className={selectedSupplierId === null ? 'text-white font-bold' : 'text-slate-300'}>None</Text>
+                                        </TouchableOpacity>
+                                        {creditors.map((creditor) => (
+                                            <TouchableOpacity
+                                                key={creditor.id}
+                                                onPress={() => setSelectedSupplierId(creditor.id)}
+                                                className={`px-4 py-3 rounded-xl border ${selectedSupplierId === creditor.id ? 'bg-sky-600 border-sky-500' : 'bg-slate-800 border-slate-700'}`}
+                                            >
+                                                <Text className={selectedSupplierId === creditor.id ? 'text-white font-bold' : 'text-slate-300'}>{creditor.name}</Text>
+                                            </TouchableOpacity>
+                                        ))}
+                                    </View>
+                                </ScrollView>
+                            )}
+                        </View>
+
+                        {/* Credit Toggle */}
+                        <View className="mb-5 flex-row items-center justify-between bg-slate-800 border border-slate-700 rounded-xl p-4">
+                            <Text className="text-white font-medium">Bought on Credit?</Text>
+                            <Switch
+                                value={isCredit}
+                                onValueChange={setIsCredit}
+                                trackColor={{ false: '#475569', true: '#f59e0b' }}
+                                thumbColor={isCredit ? '#ffffff' : '#94a3b8'}
+                            />
                         </View>
 
                         {/* Validation hint */}

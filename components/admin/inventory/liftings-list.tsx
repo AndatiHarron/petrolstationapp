@@ -37,17 +37,29 @@ function LiftingItem({ item, onPress }: { item: LiftingResource; onPress: (item:
                     <Text className="text-white text-lg font-bold">{item.tank_name}</Text>
                     <Text className="text-slate-400 text-sm">{item.product_name} • {item.station_name}</Text>
                 </View>
-                <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
-                    <Text className="text-emerald-400 font-bold text-sm">{item.volume_liters.toLocaleString()} L</Text>
+                <View className="items-end gap-1">
+                    <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
+                        <Text className="text-emerald-400 font-bold text-sm">{item.volume_liters.toLocaleString()} L</Text>
+                    </View>
+                    {item.is_credit ? (
+                        <View className="bg-amber-500/20 px-2 py-0.5 rounded-full">
+                            <Text className="text-amber-400 text-xs font-bold">Credit</Text>
+                        </View>
+                    ) : null}
                 </View>
             </View>
             <View className="flex-row justify-between items-center mt-2">
-                <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
+                <View>
+                    <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
+                    {item.supplier_name ? (
+                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier_name}</Text>
+                    ) : null}
+                </View>
                 <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
             </View>
-            {item.invoice_number && (
+            {item.invoice_number ? (
                 <Text className="text-slate-600 text-xs mt-1">Inv: {item.invoice_number}</Text>
-            )}
+            ) : null}
         </TouchableOpacity>
     );
 }

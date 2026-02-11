@@ -28,4 +28,11 @@ export interface StoreLiftingRequest {
    * @nullable
    */
   tax_paid?: number | null;
+  /**
+   * @maxLength 255
+   * @nullable
+   */
+  supplier_name?: string | null;
+  supplier_id?: string;
+  is_credit?: boolean;
 }
