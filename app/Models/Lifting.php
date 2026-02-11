@@ -12,15 +12,16 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Lifting extends Model
 {
+    use BelongsToOrganization;
     use HasFactory;
     use HasUuids;
-    use BelongsToOrganization;
     use LogsActivity;
 
     protected $guarded = [];
 
     protected $casts = [
         'lifting_date' => 'date',
+        'is_credit' => 'boolean',
     ];
 
     public function getActivitylogOptions(): LogOptions
@@ -29,7 +30,7 @@ class Lifting extends Model
             ->logOnly([
                 'volume_liters',
                 'buying_price_per_liter',
-                'tank.name'
+                'tank.name',
             ])
             ->setDescriptionForEvent(fn (string $eventName) => "Lifting {$eventName}");
     }
@@ -40,16 +41,21 @@ class Lifting extends Model
             $tank = $lifting->tank;
 
             // 1. Update the current volume
-           if ($tank) {
-               $tank->increment('current_volume', $lifting->volume_liters);
+            if ($tank) {
+                $tank->increment('current_volume', $lifting->volume_liters);
 
-               // 2. Recalculate the current dip reading
-               if (method_exists($tank, 'updateDipFromCurrentVolume')) {
-                   $tank->updateDipFromCurrentVolume();
-               }
-               // 3. Save the changes
-               $tank->save();
-           }
+                // 2. Recalculate the current dip reading
+                if (method_exists($tank, 'updateDipFromCurrentVolume')) {
+                    $tank->updateDipFromCurrentVolume();
+                }
+                // 3. Save the changes
+                $tank->save();
+            }
+
+            // 4. Update Supplier balance if on credit
+            if ($lifting->is_credit && $lifting->supplier_id) {
+                $lifting->supplier->increment('current_balance', $lifting->total_cost);
+            }
         });
 
         static::deleted(function (Lifting $lifting) {
@@ -67,18 +73,31 @@ class Lifting extends Model
                 // 3. Save the changes
                 $tank->save();
             }
+
+            // 4. Update Supplier balance if on credit
+            if ($lifting->is_credit && $lifting->supplier_id) {
+                $lifting->supplier->decrement('current_balance', $lifting->total_cost);
+            }
         });
     }
 
-    public function organization(): BelongsTo {
+    public function organization(): BelongsTo
+    {
         return $this->belongsTo(Organization::class);
     }
 
-    public function station(): BelongsTo {
+    public function station(): BelongsTo
+    {
         return $this->belongsTo(Station::class);
     }
 
-    public function tank(): BelongsTo {
+    public function tank(): BelongsTo
+    {
         return $this->belongsTo(Tank::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 }

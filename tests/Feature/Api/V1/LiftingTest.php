@@ -10,6 +10,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\deleteJson;
+use function Pest\Laravel\getJson;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\putJson;
 use function Pest\Laravel\seed;
@@ -227,4 +228,74 @@ test('supplier_name must be a string up to 255 chars if provided', function () {
         'total_cost' => 100000,
     ])->assertStatus(422)
         ->assertJsonValidationErrors(['supplier_name']);
+});
+
+test('manager can only see their own station liftings in index', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    Lifting::factory()->create(['station_id' => $stationA->id, 'organization_id' => $org->id]);
+    Lifting::factory()->create(['station_id' => $stationB->id, 'organization_id' => $org->id]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    $response = getJson('/api/v1/liftings')->assertOk();
+
+    // Should only see 1 record (from station A)
+    $response->assertJsonCount(1, 'data');
+});
+
+test('manager cannot view lifting from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $liftingB = Lifting::factory()->create(['station_id' => $stationB->id, 'organization_id' => $org->id]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    getJson("/api/v1/liftings/{$liftingB->id}")->assertStatus(403);
+});
+
+test('manager cannot update lifting from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $liftingB = Lifting::factory()->create([
+        'station_id' => $stationB->id,
+        'organization_id' => $org->id,
+        'created_at' => now(),
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    putJson("/api/v1/liftings/{$liftingB->id}", [
+        'supplier_name' => 'Should fail',
+    ])->assertStatus(403);
+});
+
+test('manager cannot delete lifting from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $liftingB = Lifting::factory()->create([
+        'station_id' => $stationB->id,
+        'organization_id' => $org->id,
+        'created_at' => now(),
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    deleteJson("/api/v1/liftings/{$liftingB->id}")->assertStatus(403);
 });

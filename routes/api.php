@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuditLogController;
+use App\Http\Controllers\Api\V1\CreditorController;
 use App\Http\Controllers\Api\V1\CreditSaleController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\LiftingController;
@@ -55,4 +56,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     // Credit Sales: index, create and show
     Route::apiResource('credit-sales', CreditSaleController::class)
         ->only(['index', 'store', 'show']);
+
+    // Creditors (Suppliers)
+    Route::apiResource('creditors', CreditorController::class);
 });

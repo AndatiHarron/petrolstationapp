@@ -51,6 +51,14 @@ class StoreLiftingRequest extends FormRequest
             'total_cost' => 'required|numeric|min:0',
             'tax_paid' => 'nullable|numeric|min:0',
             'supplier_name' => 'nullable|string|max:255',
+            'supplier_id' => [
+                Rule::requiredIf(fn () => $this->boolean('is_credit') === true),
+                'uuid',
+                Rule::exists('suppliers', 'id')->where(function ($query) {
+                    return $query->where('organization_id', Auth::user()->organization_id);
+                }),
+            ],
+            'is_credit' => 'sometimes|boolean',
         ];
     }
 }

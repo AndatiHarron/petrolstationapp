@@ -19,7 +19,7 @@ class LiftingController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Lifting::with(['station', 'tank.product'])->latest('lifting_date');
+        $query = Lifting::with(['station', 'tank.product', 'supplier'])->latest('lifting_date');
 
         // Filter: Manager's Station
         if ($user->hasRole('manager') && $user->station_id) {
