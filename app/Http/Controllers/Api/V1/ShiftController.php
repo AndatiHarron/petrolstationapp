@@ -5,13 +5,18 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LockShiftRequest;
 use App\Http\Resources\ClosingShiftResource;
+use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\ShiftResource;
+use App\Models\Invoice;
 use App\Models\Shift;
 use App\Services\ShiftReconciliationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ShiftController extends Controller
 {
@@ -211,5 +216,139 @@ class ShiftController extends Controller
         ]);
 
         return new ClosingShiftResource($shift);
+    }
+
+    /**
+     * Get invoice data for a locked shift
+     */
+    public function invoiceData(Request $request, Shift $shift)
+    {
+        Gate::authorize('view', $shift);
+
+        if ($shift->status !== Shift::STATUS_LOCKED && $shift->status !== Shift::STATUS_APPROVED) {
+            return response()->json(['message' => 'Shift must be locked to fetch invoice data.'], 422);
+        }
+
+        $invoiceData = $shift->creditSales()
+            ->with('customer')
+            ->get()
+            ->groupBy('customer_id')
+            ->map(function ($sales) {
+                $customer = $sales->first()->customer;
+
+                return [
+                    'customer_id' => $customer->id,
+                    'customer_name' => $customer->name,
+                    'total_amount' => $sales->sum('amount'),
+                    'sales' => $sales->map(fn ($sale) => [
+                        'id' => $sale->id,
+                        'amount' => $sale->amount,
+                        'vehicle_reg' => $sale->vehicle_reg,
+                        'notes' => $sale->notes,
+                        'created_at' => $sale->created_at,
+                    ]),
+                ];
+            })->values();
+
+        return response()->json(['data' => $invoiceData]);
+    }
+
+    /**
+     * Get generated invoices for a locked shift
+     */
+    public function invoices(Request $request, Shift $shift)
+    {
+        Gate::authorize('view', $shift);
+
+        $invoices = $shift->invoices()->with('customer')->get();
+
+        return InvoiceResource::collection($invoices);
+    }
+
+    /**
+     * Generate PDF invoices for a locked shift
+     */
+    public function generateInvoices(Request $request, Shift $shift)
+    {
+        Gate::authorize('view', $shift);
+
+        if ($shift->status !== Shift::STATUS_LOCKED && $shift->status !== Shift::STATUS_APPROVED) {
+            return response()->json(['message' => 'Shift must be locked to generate invoices.'], 422);
+        }
+
+        $shift->load(['organization', 'station']);
+
+        $salesByCustomer = $shift->creditSales()
+            ->with('customer')
+            ->get()
+            ->groupBy('customer_id');
+
+        $generatedInvoices = [];
+
+        foreach ($salesByCustomer as $customerId => $sales) {
+            // Idempotency: Check if invoice already exists for this shift and customer
+            $existingInvoice = Invoice::where('shift_id', $shift->id)
+                ->where('customer_id', $customerId)
+                ->first();
+
+            if ($existingInvoice) {
+                $generatedInvoices[] = $existingInvoice;
+
+                continue;
+            }
+
+            $customer = $sales->first()->customer;
+            $totalAmount = $sales->sum('amount');
+            $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
+
+            // Ensure unique invoice number
+            while (Invoice::where('invoice_number', $invoiceNumber)->exists()) {
+                $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
+            }
+
+            $pdf = Pdf::loadView('pdfs.invoice', [
+                'organization_name' => $shift->organization->name ?? 'N/A',
+                'station_name' => $shift->station->name ?? 'N/A',
+                'invoice_number' => $invoiceNumber,
+                'customer_name' => $customer->name,
+                'date' => ($shift->locked_at ?? now())->format('Y-m-d'),
+                'shift_id' => $shift->id,
+                'sales' => $sales,
+                'total_amount' => $totalAmount,
+            ]);
+
+            $path = "invoices/{$invoiceNumber}.pdf";
+            Storage::disk('local')->put($path, $pdf->output());
+
+            $invoice = Invoice::create([
+                'organization_id' => $shift->organization_id,
+                'shift_id' => $shift->id,
+                'customer_id' => $customerId,
+                'invoice_number' => $invoiceNumber,
+                'total_amount' => $totalAmount,
+                'pdf_path' => $path,
+            ]);
+
+            $generatedInvoices[] = $invoice;
+        }
+
+        return response()->json([
+            'message' => count($generatedInvoices).' invoices generated successfully.',
+            'invoices' => $generatedInvoices,
+        ]);
+    }
+
+    /**
+     * Download a specific invoice
+     */
+    public function downloadInvoice(Invoice $invoice)
+    {
+        Gate::authorize('view', $invoice);
+
+        if (! Storage::disk('local')->exists($invoice->pdf_path)) {
+            abort(404, 'Invoice file not found.');
+        }
+
+        return Storage::disk('local')->download($invoice->pdf_path);
     }
 }

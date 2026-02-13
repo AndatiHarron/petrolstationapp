@@ -44,6 +44,10 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::post('/shifts/start', [ShiftController::class, 'store']);
     Route::post('/shifts/{shift}/lock', [ShiftController::class, 'lock']);
     Route::get('/shifts/{shift}/closing-data', [ShiftController::class, 'closingData']);
+    Route::get('/shifts/{shift}/invoice-data', [ShiftController::class, 'invoiceData']);
+    Route::get('/shifts/{shift}/invoices', [ShiftController::class, 'invoices']);
+    Route::post('/shifts/{shift}/generate-invoices', [ShiftController::class, 'generateInvoices']);
+    Route::get('/invoices/{invoice}/download', [ShiftController::class, 'downloadInvoice'])->name('invoices.download');
 
     Route::get('/audit-logs', [AuditLogController::class, 'index']);
     Route::get('/audit-logs/{activity}', [AuditLogController::class, 'show']);

@@ -63,6 +63,11 @@ class Shift extends Model
         return $this->hasMany(CreditSale::class);
     }
 
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function station(): BelongsTo
     {
         return $this->belongsTo(Station::class);
