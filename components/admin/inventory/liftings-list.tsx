@@ -51,8 +51,8 @@ function LiftingItem({ item, onPress }: { item: LiftingResource; onPress: (item:
             <View className="flex-row justify-between items-center mt-2">
                 <View>
                     <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
-                    {item.supplier_name ? (
-                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier_name}</Text>
+                    {item.supplier?.name ? (
+                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier?.name}</Text>
                     ) : null}
                 </View>
                 <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>

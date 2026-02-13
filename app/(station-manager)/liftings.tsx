@@ -53,8 +53,8 @@ const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item:
             <View className="flex-row justify-between items-center mt-2">
                 <View>
                     <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
-                    {item.supplier_name ? (
-                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier_name}</Text>
+                    {item.supplier?.name ? (
+                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier?.name}</Text>
                     ) : null}
                 </View>
                 <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
@@ -92,6 +92,7 @@ export default function LiftingsScreen() {
     const [newItem, setNewItem] = useState<Partial<StoreLiftingRequest>>({
         lifting_date: formatDate(new Date()),
         invoice_number: '',
+        supplier_name: '',
         volume_liters: 0,
         buying_price_per_liter: 0,
         total_cost: 0,
@@ -200,6 +201,7 @@ export default function LiftingsScreen() {
         setNewItem({
             lifting_date: formatDate(new Date()),
             invoice_number: '',
+            supplier_name: '',
             volume_liters: 0,
             buying_price_per_liter: 0,
             total_cost: 0,
@@ -246,6 +248,7 @@ export default function LiftingsScreen() {
             tank_id: selectedTankId,
             lifting_date: newItem.lifting_date,
             invoice_number: newItem.invoice_number || null,
+            supplier_name: newItem.supplier_name || null,
             volume_liters: newItem.volume_liters,
             buying_price_per_liter: newItem.buying_price_per_liter,
             total_cost: newItem.total_cost || (newItem.volume_liters * newItem.buying_price_per_liter),
@@ -398,6 +401,13 @@ export default function LiftingsScreen() {
                             />
 
                             <InputField
+                                label="Supplier Name"
+                                placeholder="e.g. Shell Kenya Ltd"
+                                value={newItem.supplier_name || ''}
+                                onChangeText={(text) => setNewItem({ ...newItem, supplier_name: text })}
+                            />
+
+                            <InputField
                                 label="Volume (Liters) *"
                                 placeholder="0"
                                 keyboardType="numeric"
@@ -536,7 +546,7 @@ export default function LiftingsScreen() {
                                 </View>
                                 <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
                                     <Text className="text-slate-300">Supplier</Text>
-                                    <Text className="text-sky-400 font-medium">{selectedLifting?.supplier_name || 'N/A'}</Text>
+                                    <Text className="text-sky-400 font-medium">{selectedLifting?.supplier?.name || 'N/A'}</Text>
                                 </View>
                                 <View className="flex-row justify-between">
                                     <Text className="text-slate-300">Payment</Text>

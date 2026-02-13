@@ -225,7 +225,7 @@ export default function InventoryTab() {
                                 <DetailRow label="Price/Liter" value={`KES ${selectedLifting?.buying_price_per_liter.toLocaleString()}`} mono />
                                 <DetailRow label="Total Cost" value={`KES ${selectedLifting?.total_cost.toLocaleString()}`} highlight mono />
                                 <DetailRow label="Tax Paid" value={`KES ${selectedLifting?.tax_paid.toLocaleString()}`} mono />
-                                <DetailRow label="Supplier" value={selectedLifting?.supplier_name || 'N/A'} />
+                                <DetailRow label="Supplier" value={selectedLifting?.supplier?.name || 'N/A'} />
                                 <DetailRow label="Payment" value={selectedLifting?.is_credit ? 'Credit' : 'Cash'} highlight={!selectedLifting?.is_credit} last />
                             </View>
 
