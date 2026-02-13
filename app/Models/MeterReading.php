@@ -4,9 +4,12 @@ namespace App\Models;
 
 use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
  * @method static \Illuminate\Database\Eloquent\Builder|MeterReading findOrFail($id)
@@ -15,7 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class MeterReading extends Model
 {
     use BelongsToOrganization;
+    use HasFactory;
     use HasUuids;
+    use LogsActivity;
     use SoftDeletes;
 
     public $incrementing = false;
@@ -27,6 +32,21 @@ class MeterReading extends Model
     protected $casts = [
         'gps_coordinates' => 'array',
     ];
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly([
+                'opening_reading',
+                'closing_reading',
+                'volume_sold',
+                'price_per_liter',
+                'total_value',
+            ])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(fn (string $eventName) => "Meter reading was {$eventName}");
+    }
 
     public function organization(): BelongsTo
     {

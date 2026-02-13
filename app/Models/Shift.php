@@ -35,7 +35,10 @@ class Shift extends Model
                 'status',
                 'cash_variance',
                 'total_collected_cash',
+                'total_expected_cash',
                 'stock_variance_liters',
+                'started_at',
+                'locked_at',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
