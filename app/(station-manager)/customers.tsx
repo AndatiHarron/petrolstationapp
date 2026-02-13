@@ -5,8 +5,9 @@ import { FlashList } from '@shopify/flash-list';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { Ionicons } from '@expo/vector-icons';
-import { useCustomersStore, useCustomersDestroy, useCustomersUpdate, getCustomersIndexQueryKey } from '../../features/api/customer/customer';
-import { CustomersIndex200, StoreCustomerRequest, CustomersIndex200Meta, CustomersIndex200Links } from '../../features/api/model';
+import { useCustomersStore, useCustomersDestroy, getCustomersIndexQueryKey } from '../../features/api/customer/customer';
+import { useEditRequestsStore } from '../../features/api/edit-request/edit-request';
+import { CustomersIndex200, StoreCustomerRequest, CustomersIndex200Meta, CustomersIndex200Links, StoreEditRequestRequest } from '../../features/api/model';
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
@@ -84,16 +85,17 @@ export default function CustomersScreen() {
         tax_pin: '',
         credit_limit: 0,
     });
+    const [editReason, setEditReason] = useState('');
 
     // Details Modal State
     const [selectedCustomer, setSelectedCustomer] = useState<CustomersIndex200['data'][number] | null>(null);
 
-    const updateMutation = useCustomersUpdate({
+    const editRequestMutation = useEditRequestsStore({
         mutation: {
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: getCustomersIndexQueryKey() });
                 setIsCreateModalOpen(false);
                 setEditingId(null);
+                setEditReason('');
                 setNewItem({
                     name: '',
                     email: '',
@@ -101,10 +103,10 @@ export default function CustomersScreen() {
                     tax_pin: '',
                     credit_limit: 0,
                 });
-                Alert.alert("Success", "Customer updated successfully.");
+                Alert.alert("Success", "Edit request submitted for approval.");
             },
             onError: (error: any) => {
-                Alert.alert("Error", error?.response?.data?.message || "Failed to update customer.");
+                Alert.alert("Error", error?.response?.data?.message || "Failed to submit edit request.");
             }
         }
     });
@@ -167,6 +169,7 @@ export default function CustomersScreen() {
             tax_pin: '',
             credit_limit: 0,
         });
+        setEditReason('');
         setIsCreateModalOpen(true);
     };
 
@@ -177,7 +180,19 @@ export default function CustomersScreen() {
         }
 
         if (editingId) {
-            updateMutation.mutate({ customer: editingId, data: newItem });
+            if (!editReason.trim()) {
+                Alert.alert("Validation Error", "Please provide a reason for this edit request.");
+                return;
+            }
+
+            const payload: StoreEditRequestRequest = {
+                model_type: 'App\\Models\\Customer',
+                model_id: editingId,
+                requested_data: [JSON.stringify(newItem)],
+                reason: editReason
+            };
+
+            editRequestMutation.mutate({ data: payload });
         } else {
             createMutation.mutate({ data: newItem });
         }
@@ -194,6 +209,7 @@ export default function CustomersScreen() {
             tax_pin: selectedCustomer.tax_pin || '',
             credit_limit: selectedCustomer.credit_limit || 0,
         });
+        setEditReason('');
         setSelectedCustomer(null);
         setIsCreateModalOpen(true);
     };
@@ -279,7 +295,7 @@ export default function CustomersScreen() {
                 )}
             </View>
 
-            {/* Create Customer Modal */}
+            {/* Create Customer/Request Edit Modal */}
             <Modal
                 visible={isCreateModalOpen}
                 animationType="slide"
@@ -292,13 +308,21 @@ export default function CustomersScreen() {
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[85%] rounded-t-3xl shadow-2xl">
                         <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
-                            <Text className="text-xl font-bold text-white">{editingId ? 'Edit Customer' : 'New Customer'}</Text>
+                            <Text className="text-xl font-bold text-white">{editingId ? 'Request Edit' : 'New Customer'}</Text>
                             <TouchableOpacity onPress={() => setIsCreateModalOpen(false)}>
                                 <Ionicons name="close-circle" size={28} color="#64748b" />
                             </TouchableOpacity>
                         </View>
 
                         <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 40 }}>
+                            {editingId && (
+                                <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
+                                    <Text className="text-blue-400 text-sm">
+                                        You are requesting an update to this customer. An admin will review your changes.
+                                    </Text>
+                                </View>
+                            )}
+
                             <InputField
                                 label="Full Name *"
                                 placeholder="Enter customer name"
@@ -339,11 +363,22 @@ export default function CustomersScreen() {
                                 onChangeText={(text) => setNewItem({ ...newItem, credit_limit: parseFloat(text) || 0 })}
                             />
 
+                            {editingId && (
+                                <InputField
+                                    label="Reason for Edit *"
+                                    placeholder="Why are you making this change?"
+                                    value={editReason}
+                                    onChangeText={setEditReason}
+                                    multiline
+                                    style={{ height: 80, textAlignVertical: 'top' }}
+                                />
+                            )}
+
                             <View className="mt-6">
                                 <Button
-                                    title={editingId ? "Update Customer" : "Create Customer"}
+                                    title={editingId ? "Submit Edit Request" : "Create Customer"}
                                     onPress={handleCreateSubmit}
-                                    loading={createMutation.isPending || updateMutation.isPending}
+                                    loading={createMutation.isPending || editRequestMutation.isPending}
                                 />
                             </View>
                         </ScrollView>
@@ -394,7 +429,7 @@ export default function CustomersScreen() {
 
                         <View className="mt-auto pt-6 mb-24 gap-3">
                             <Button
-                                title="Edit Customer"
+                                title="Request Edit"
                                 onPress={handleEditPress}
                                 className="bg-slate-700"
                             />

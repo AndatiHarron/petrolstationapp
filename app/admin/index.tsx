@@ -8,6 +8,8 @@ import { QuickStats } from '../../components/admin/dashboard/quick-stats';
 import { WetStockLevels } from '../../components/admin/dashboard/wet-stock-levels';
 import { ProductPrices } from '../../components/admin/dashboard/product-prices';
 import { RecentActivity } from '../../components/admin/dashboard/recent-activity';
+import { FinancialReports } from '../../components/admin/reports/financial-reports';
+import { InventoryReports } from '../../components/admin/reports/inventory-reports';
 
 export default function AdminDashboard() {
     return (
@@ -35,6 +37,12 @@ export default function AdminDashboard() {
 
                     {/* Recent Activity */}
                     <RecentActivity />
+
+                    {/* Financial Reports */}
+                    <FinancialReports />
+
+                    {/* Inventory Reports */}
+                    <InventoryReports />
                 </Animated.ScrollView>
             </SafeAreaView>
         </View>

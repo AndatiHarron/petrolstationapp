@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { LayoutDashboard, Banknote, Settings, Package, Building2 } from 'lucide-react-native';
+import { LayoutDashboard, Banknote, Settings, Package, Building2, ClipboardList } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 
 export default function AdminLayout() {
@@ -32,6 +32,13 @@ export default function AdminLayout() {
                     }}
                 />
                 <Tabs.Screen
+                    name="requests"
+                    options={{
+                        title: 'Requests',
+                        tabBarIcon: ({ color, size }) => <ClipboardList size={size} color={color} />,
+                    }}
+                />
+                <Tabs.Screen
                     name="system"
                     options={{
                         title: 'System',
@@ -56,3 +63,4 @@ export default function AdminLayout() {
         </>
     );
 }
+

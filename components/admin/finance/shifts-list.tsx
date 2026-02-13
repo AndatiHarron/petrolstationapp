@@ -1,9 +1,9 @@
-import React, { memo, useCallback, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Clock, ChevronRight, AlertTriangle } from 'lucide-react-native';
-import type { ShiftResource, ShiftIndex200, AuthenticationExceptionResponse } from '@/features/api/model';
-import { useShiftIndex } from '@/features/api/shift/shift';
 import { SkeletonCard } from '@/components/station-manager/skeleton-card';
+import type { ShiftIndex200, ShiftResource } from '@/features/api/model';
+import { useShiftIndex } from '@/features/api/shift/shift';
+import { AlertTriangle, ChevronRight, Clock } from 'lucide-react-native';
+import React, { memo, useCallback, useState } from 'react';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, View } from 'react-native';
 
 interface ShiftsListProps {
     onItemPress: (shiftId: string) => void;
