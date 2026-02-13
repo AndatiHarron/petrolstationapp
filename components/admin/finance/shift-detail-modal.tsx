@@ -1,310 +1,337 @@
-import React, { memo } from 'react';
-import { View, Text, Modal, TouchableOpacity, ScrollView } from 'react-native';
-import { X, Building2, Calendar, DollarSign, Gauge, TrendingUp, AlertTriangle, Droplet, CreditCard } from 'lucide-react-native';
-import type { ShiftResource, ShiftShow200, AuthenticationExceptionResponse } from '@/features/api/model';
-import { useShiftShow } from '@/features/api/shift/shift';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import {
+    View,
+    Text,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    ActivityIndicator,
+    Alert,
+} from 'react-native';
+import { useQueryClient } from '@tanstack/react-query';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { X, Clock, FileText, Download } from 'lucide-react-native';
+import type {
+    InvoiceResource,
+    ShiftGenerateInvoices200,
+    ShiftResource,
+    ShiftShow200,
+} from '@/features/api/model';
+import {
+    getShiftInvoicesQueryKey,
+    useShiftGenerateInvoices,
+    useShiftInvoices,
+    useShiftShow,
+} from '@/features/api/shift/shift';
+import { Button } from '@/components/button';
+import { downloadAndShareInvoice } from '@/lib/invoice-download';
+
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'KES',
+});
 
 interface ShiftDetailModalProps {
     shiftId: string | null;
     onClose: () => void;
 }
 
+const InvoiceRow = memo(function InvoiceRow({
+    id,
+    invoiceNumber,
+    totalAmount,
+    onDownload,
+    isDownloading,
+}: {
+    id: string;
+    invoiceNumber: string;
+    totalAmount: string;
+    onDownload: (id: string) => void;
+    isDownloading: boolean;
+}) {
+    const handlePress = useCallback(() => {
+        onDownload(id);
+    }, [id, onDownload]);
+
+    const formattedAmount = CURRENCY_FORMATTER.format(parseFloat(totalAmount));
+
+    return (
+        <Animated.View entering={FadeIn} style={styles.invoiceRow}>
+            <View style={styles.invoiceRowContent}>
+                <View style={styles.invoiceRowText}>
+                    <Text style={styles.invoiceNumber} selectable>
+                        {invoiceNumber}
+                    </Text>
+                    <Text style={styles.invoiceAmount}>{formattedAmount}</Text>
+                </View>
+                <Pressable
+                    onPress={handlePress}
+                    disabled={isDownloading}
+                    style={({ pressed }) => [
+                        styles.downloadButton,
+                        pressed && styles.downloadButtonPressed,
+                        isDownloading && styles.downloadButtonDisabled,
+                    ]}
+                >
+                    {isDownloading ? (
+                        <ActivityIndicator size="small" color="#10b981" />
+                    ) : (
+                        <Download size={18} color="#10b981" />
+                    )}
+                </Pressable>
+            </View>
+        </Animated.View>
+    );
+});
+
 export const ShiftDetailModal = memo(function ShiftDetailModal({
     shiftId,
     onClose,
 }: ShiftDetailModalProps) {
-    const { data: response, isLoading } = useShiftShow(shiftId || '', {
-        query: {
-            enabled: !!shiftId,
+    const queryClient = useQueryClient();
+    const [lastGenerationWasEmpty, setLastGenerationWasEmpty] = useState(false);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
+
+    useEffect(() => {
+        setLastGenerationWasEmpty(false);
+    }, [shiftId]);
+
+    const { data: response, isLoading } = useShiftShow(shiftId ?? '', {
+        query: { enabled: !!shiftId },
+    });
+
+    const hasShiftData = (res: unknown): res is { data: ShiftShow200 } => {
+        return res !== null && typeof res === 'object' && 'data' in res && res.data !== null;
+    };
+    const shift: ShiftResource | undefined = hasShiftData(response)
+        ? (response.data as unknown as ShiftResource)
+        : undefined;
+    const isLocked = shift?.status === 'LOCKED';
+
+    const { data: invoicesResponse } = useShiftInvoices(shiftId ?? '', {
+        query: { enabled: !!shiftId && !!isLocked },
+    });
+
+    const hasInvoicesData = (res: unknown): res is { data: InvoiceResource[] } => {
+        return res !== null && typeof res === 'object' && 'data' in res && res.data !== null;
+    };
+    const invoicesToShow: InvoiceResource[] = hasInvoicesData(invoicesResponse)
+        ? (Array.isArray(invoicesResponse.data) ? invoicesResponse.data : [])
+        : [];
+
+        console.log("invoicesResponse", JSON.stringify(invoicesResponse, null, 2), invoicesToShow.length)
+
+    const generateMutation = useShiftGenerateInvoices({
+        mutation: {
+            onSuccess: (res, { shift: sid }) => {
+                queryClient.invalidateQueries({ queryKey: getShiftInvoicesQueryKey(sid) });
+                const data = res as unknown as ShiftGenerateInvoices200;
+                const raw = data?.invoices ?? [];
+                const list = Array.isArray(raw)
+                    ? raw.filter((x): x is NonNullable<typeof x> => x != null)
+                    : raw != null
+                      ? [raw]
+                      : [];
+                setLastGenerationWasEmpty(list.length === 0);
+            },
+            onError: (err: unknown) => {
+                let message = 'Failed to generate invoices';
+                if (err && typeof err === 'object') {
+                    const ax = err as { response?: { data?: { message?: string } }; message?: string };
+                    const apiMsg = ax.response?.data?.message;
+                    if (apiMsg) {
+                        message = apiMsg;
+                    } else if (ax.message) {
+                        message = String(ax.message);
+                    }
+                }
+                Alert.alert('Error', message);
+            },
         },
     });
 
-    // Type guard to check if response has data
-    const hasData = (res: unknown): res is { data: ShiftShow200 } => {
-        return res !== null && typeof res === 'object' && 'data' in res && res.data !== null;
-    };
+    const handleDownload = useCallback(async (invoiceId: string) => {
+        setDownloadingId(invoiceId);
+        try {
+            await downloadAndShareInvoice(invoiceId);
+        } catch (e) {
+            const message = e instanceof Error ? e.message : 'Failed to download invoice';
+            Alert.alert('Error', message);
+        } finally {
+            setDownloadingId(null);
+        }
+    }, []);
 
-    const shift: ShiftResource | undefined = hasData(response) ? response.data as unknown as ShiftResource : undefined;
+    if (!shiftId) return null;
 
-    const formattedDate = shift
+    const formattedDate = shift?.started_at
         ? new Date(shift.started_at).toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-        })
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+          })
         : '';
 
-    const formatCurrency = (amount: number) =>
-        new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'KES',
-        }).format(amount);
+    const financials = shift?.financials;
+    const formattedExpected = financials
+        ? CURRENCY_FORMATTER.format(financials.expected)
+        : '';
+    const formattedCollected = financials
+        ? CURRENCY_FORMATTER.format(financials.collected)
+        : '';
+    const formattedVariance = financials
+        ? CURRENCY_FORMATTER.format(financials.variance)
+        : '';
 
     return (
         <Modal
             visible={!!shiftId}
             animationType="slide"
-            transparent={true}
+            presentationStyle="formSheet"
+            transparent
             onRequestClose={onClose}
         >
-            <View className="flex-1 bg-black/60">
-                <View className="flex-1 mt-12 bg-slate-900 rounded-t-3xl">
-                    {/* Header */}
-                    <View className="flex-row items-center justify-between px-6 py-4 border-b border-slate-800">
-                        <Text className="text-white text-xl font-bold">Shift Details</Text>
-                        <TouchableOpacity
-                            onPress={onClose}
-                            className="bg-slate-800 p-2 rounded-full"
-                            activeOpacity={0.7}
-                        >
+            <View style={styles.overlay}>
+                <View style={styles.container}>
+                    <View style={styles.header}>
+                        <Text style={styles.headerTitle}>Shift Details</Text>
+                        <Pressable onPress={onClose} style={styles.closeButton}>
                             <X size={20} color="#94a3b8" />
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
 
-                    {/* Content */}
                     <ScrollView
-                        className="flex-1 px-6"
-                        contentContainerStyle={{ paddingBottom: 40, paddingTop: 20 }}
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
+                        contentInsetAdjustmentBehavior="automatic"
                     >
                         {isLoading ? (
                             <>
-                                {/* Station & Status Skeleton */}
-                                <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                    <View className="flex-row items-center justify-between">
-                                        <View className="flex-row items-center flex-1">
-                                            <View className="bg-slate-700/50 p-3 rounded-xl mr-3 w-14 h-14" />
-                                            <View className="flex-1">
-                                                <View className="h-5 w-40 bg-slate-700/50 rounded mb-2" />
-                                                <View className="h-3 w-32 bg-slate-700/50 rounded" />
-                                            </View>
-                                        </View>
-                                        <View className="h-6 w-16 bg-slate-700/50 rounded-full" />
-                                    </View>
+                                <View style={[styles.card, { marginBottom: 24 }]}>
+                                    <View style={[styles.skeleton, { height: 16, width: 128, marginBottom: 12 }]} />
+                                    <View style={[styles.skeleton, { height: 40, width: 192 }]} />
                                 </View>
-
-                                {/* Financials Skeleton */}
-                                <View className="bg-slate-800/50 rounded-2xl p-5 mb-6 border border-slate-700/50">
-                                    <View className="h-4 w-36 bg-slate-700/50 rounded mb-4" />
-                                    <View className="space-y-3">
-                                        <View className="bg-slate-900/50 rounded-xl p-4 mb-3">
-                                            <View className="h-3 w-32 bg-slate-700/50 rounded mb-2" />
-                                            <View className="h-8 w-40 bg-slate-700/50 rounded" />
-                                        </View>
-                                        <View className="bg-slate-900/50 rounded-xl p-4 mb-3">
-                                            <View className="h-3 w-32 bg-slate-700/50 rounded mb-2" />
-                                            <View className="h-8 w-40 bg-slate-700/50 rounded" />
-                                        </View>
-                                        <View className="bg-slate-900/50 rounded-xl p-4">
-                                            <View className="h-3 w-20 bg-slate-700/50 rounded mb-2" />
-                                            <View className="h-8 w-36 bg-slate-700/50 rounded" />
-                                        </View>
+                                <View style={[styles.card, { marginBottom: 16 }]}>
+                                    <View style={[styles.skeleton, { height: 16, width: 160, marginBottom: 16 }]} />
+                                    <View style={styles.innerCard}>
+                                        <View style={[styles.skeleton, { height: 12, width: 96, marginBottom: 8 }]} />
+                                        <View style={[styles.skeleton, { height: 20, width: '100%' }]} />
                                     </View>
-                                </View>
-
-                                {/* Readings Skeleton */}
-                                <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                    <View className="h-4 w-40 bg-slate-700/50 rounded mb-4" />
-                                    {[1, 2, 3].map((i) => (
-                                        <View key={i} className="bg-slate-900/50 rounded-xl p-4 mb-2">
-                                            <View className="flex-row justify-between items-center">
-                                                <View className="flex-1">
-                                                    <View className="h-4 w-24 bg-slate-700/50 rounded mb-2" />
-                                                    <View className="h-3 w-32 bg-slate-700/50 rounded" />
-                                                </View>
-                                                <View className="items-end">
-                                                    <View className="h-4 w-16 bg-slate-700/50 rounded mb-1" />
-                                                    <View className="h-3 w-20 bg-slate-700/50 rounded" />
-                                                </View>
-                                            </View>
-                                        </View>
-                                    ))}
                                 </View>
                             </>
                         ) : shift ? (
                             <>
-                                {/* Station & Status Card */}
-                                <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                    <View className="flex-row items-center justify-between mb-4">
-                                        <View className="flex-row items-center flex-1">
-                                            <View className="bg-blue-500/10 p-3 rounded-xl mr-3">
-                                                <Building2 size={24} color="#3b82f6" />
-                                            </View>
-                                            <View className="flex-1">
-                                                <Text className="text-white text-lg font-bold">{shift.station_name}</Text>
-                                                <View className="flex-row items-center mt-1">
-                                                    <Calendar size={14} color="#64748b" />
-                                                    <Text className="text-slate-400 text-sm ml-2">{formattedDate}</Text>
-                                                </View>
-                                            </View>
-                                        </View>
-                                        <View className={`px-3 py-1 rounded-full ${shift.status === 'active' ? 'bg-emerald-500/10' :
-                                            shift.status === 'locked' ? 'bg-amber-500/10' : 'bg-slate-500/10'
-                                            }`}>
-                                            <Text className={`text-xs font-semibold ${shift.status === 'active' ? 'text-emerald-400' :
-                                                shift.status === 'locked' ? 'text-amber-400' : 'text-slate-400'
-                                                }`}>
-                                                {shift.status.toUpperCase()}
-                                            </Text>
-                                        </View>
+                                <View style={styles.shiftHeader}>
+                                    <View style={styles.row}>
+                                        <Clock size={20} color="#10b981" />
+                                        <Text style={styles.stationName}>{shift.station_name}</Text>
                                     </View>
-                                </View>
-
-                                {/* Financials Card */}
-                                <View className={`rounded-2xl p-5 mb-6 border ${shift.variance_alert
-                                    ? 'bg-red-950/20 border-red-800/50'
-                                    : 'bg-slate-800/50 border-slate-700/50'
-                                    }`}>
-                                    <View className="flex-row items-center mb-4">
-                                        <DollarSign size={18} color={shift.variance_alert ? '#ef4444' : '#10b981'} />
-                                        <Text className="text-slate-400 text-sm font-semibold ml-2 uppercase">
-                                            Financial Summary
+                                    <Text style={styles.date}>{formattedDate}</Text>
+                                    <View
+                                        style={[
+                                            styles.statusBadge,
+                                            isLocked ? styles.statusLocked : styles.statusActive,
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.statusText,
+                                                isLocked ? styles.statusTextLocked : styles.statusTextActive,
+                                            ]}
+                                        >
+                                            {shift.status?.toUpperCase() ?? 'UNKNOWN'}
                                         </Text>
-                                        {shift.variance_alert && (
-                                            <View className="ml-auto flex-row items-center bg-red-500/10 px-2 py-1 rounded-full">
-                                                <AlertTriangle size={14} color="#ef4444" />
-                                                <Text className="text-red-400 text-xs font-semibold ml-1">VARIANCE ALERT</Text>
-                                            </View>
-                                        )}
                                     </View>
+                                </View>
 
-                                    <View className="space-y-3">
-                                        <View className="bg-slate-900/50 rounded-xl p-4 mb-3">
-                                            <Text className="text-slate-500 text-xs mb-1">Expected Revenue</Text>
-                                            <Text className="text-white text-2xl font-bold">
-                                                {formatCurrency(shift.financials.expected)}
-                                            </Text>
+                                <View style={[styles.card, { marginBottom: 16 }]}>
+                                    <View style={styles.sectionHeader}>
+                                        <FileText size={18} color="#64748b" />
+                                        <Text style={styles.sectionTitle}>Financial Summary</Text>
+                                    </View>
+                                    <View style={styles.innerCard}>
+                                        <View style={[styles.financialRow, styles.financialRowBorder]}>
+                                            <Text style={styles.fieldLabel}>Expected</Text>
+                                            <Text style={styles.fieldValue}>{formattedExpected}</Text>
                                         </View>
-
-                                        <View className="bg-slate-900/50 rounded-xl p-4 mb-3">
-                                            <Text className="text-slate-500 text-xs mb-1">Collected Revenue</Text>
-                                            <Text className="text-emerald-400 text-2xl font-bold">
-                                                {formatCurrency(shift.financials.collected)}
-                                            </Text>
+                                        <View style={[styles.financialRow, styles.financialRowBorder]}>
+                                            <Text style={styles.fieldLabel}>Collected</Text>
+                                            <Text style={styles.collectedValue}>{formattedCollected}</Text>
                                         </View>
-
-                                        <View className={`rounded-xl p-4 ${shift.variance_alert ? 'bg-red-900/30' : 'bg-slate-900/50'
-                                            }`}>
-                                            <Text className="text-slate-500 text-xs mb-1">Variance</Text>
-                                            <View className="flex-row items-center">
-                                                <TrendingUp size={20} color={
-                                                    shift.financials.variance > 0 ? '#10b981' :
-                                                        shift.financials.variance < 0 ? '#ef4444' : '#64748b'
-                                                } />
-                                                <Text className={`text-2xl font-bold ml-2 ${shift.financials.variance > 0 ? 'text-emerald-400' :
-                                                    shift.financials.variance < 0 ? 'text-red-400' : 'text-slate-400'
-                                                    }`}>
-                                                    {shift.financials.variance > 0 ? '+' : ''}
-                                                    {formatCurrency(shift.financials.variance)}
-                                                </Text>
-                                            </View>
+                                        <View style={styles.financialRow}>
+                                            <Text style={styles.fieldLabel}>Variance</Text>
+                                            <Text
+                                                style={[
+                                                    styles.fieldValue,
+                                                    (financials?.variance ?? 0) < 0
+                                                        ? styles.varianceNegative
+                                                        : styles.variancePositive,
+                                                ]}
+                                            >
+                                                {formattedVariance}
+                                            </Text>
                                         </View>
                                     </View>
                                 </View>
 
-                                {/* Meter Readings */}
-                                {shift.readings && shift.readings.length > 0 && (
-                                    <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                        <View className="flex-row items-center mb-4">
-                                            <Gauge size={18} color="#64748b" />
-                                            <Text className="text-slate-400 text-sm font-semibold ml-2 uppercase">
-                                                Meter Readings ({shift.readings.length})
-                                            </Text>
-                                        </View>
-                                        {shift.readings.map((reading, index) => (
-                                            <View key={index} className="bg-slate-900/50 rounded-xl p-4 mb-2">
-                                                <View className="flex-row justify-between items-center">
-                                                    <View className="flex-1">
-                                                        <Text className="text-white font-semibold">Nozzle {reading.nozzle_id.slice(-4)}</Text>
-                                                        <Text className="text-slate-500 text-xs mt-1">Volume: {reading.volume_sold}L</Text>
-                                                    </View>
-                                                    <View className="items-end">
-                                                        <Text className="text-emerald-400 font-bold">{reading.closing_reading}L</Text>
-                                                        <Text className="text-slate-500 text-xs">Opening: {reading.opening_reading}L</Text>
-                                                    </View>
-                                                </View>
-                                            </View>
-                                        ))}
+                                {shift.variance_alert ? (
+                                    <View style={styles.alertBox}>
+                                        <Text style={styles.alertText}>
+                                            Variance alert flagged for this shift
+                                        </Text>
                                     </View>
-                                )}
+                                ) : null}
 
-                                {/* Dip Readings */}
-                                {shift.dips && shift.dips.length > 0 && (
-                                    <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                        <View className="flex-row items-center mb-4">
-                                            <Droplet size={18} color="#64748b" />
-                                            <Text className="text-slate-400 text-sm font-semibold ml-2 uppercase">
-                                                Tank Dips ({shift.dips.length})
-                                            </Text>
+                                {isLocked ? (
+                                    <View style={[styles.card, { marginBottom: 24 }]}>
+                                        <View style={styles.sectionHeader}>
+                                            <FileText size={18} color="#64748b" />
+                                            <Text style={styles.sectionTitle}>Invoices</Text>
                                         </View>
-                                        {shift.dips.map((dip, index) => (
-                                            <View key={index} className="bg-slate-900/50 rounded-xl p-4 mb-2">
-                                                <View className="flex-row justify-between items-center">
-                                                    <View className="flex-1">
-                                                        <Text className="text-white font-semibold">Tank {dip.tank_id.slice(-4)}</Text>
-                                                        <Text className="text-slate-500 text-xs mt-1">Dip Reading</Text>
-                                                    </View>
-                                                    <View className="items-end">
-                                                        <Text className="text-blue-400 font-bold">{dip.dip_mm}mm</Text>
-                                                        <Text className="text-slate-500 text-xs">{dip.volume_liters}L</Text>
-                                                    </View>
-                                                </View>
-                                            </View>
-                                        ))}
-                                    </View>
-                                )}
 
-                                {/* Payments */}
-                                {shift.payments && shift.payments.length > 0 && (
-                                    <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                        <View className="flex-row items-center mb-4">
-                                            <DollarSign size={18} color="#64748b" />
-                                            <Text className="text-slate-400 text-sm font-semibold ml-2 uppercase">
-                                                Payment Methods
-                                            </Text>
-                                        </View>
-                                        {shift.payments.map((payment, index) => (
-                                            <View key={index} className="bg-slate-900/50 rounded-xl p-4 mb-2">
-                                                <View className="flex-row justify-between items-center">
-                                                    <Text className="text-white font-semibold">{payment.method}</Text>
-                                                    <Text className="text-emerald-400 font-bold">{formatCurrency(Number(payment.amount))}</Text>
-                                                </View>
+                                        {invoicesToShow.length > 0 ? (
+                                            <View style={styles.invoiceList}>
+                                                {invoicesToShow.map((inv) => (
+                                                    <InvoiceRow
+                                                        key={inv.id}
+                                                        id={inv.id}
+                                                        invoiceNumber={inv.invoice_number}
+                                                        totalAmount={String(inv.total_amount)}
+                                                        onDownload={handleDownload}
+                                                        isDownloading={downloadingId === inv.id}
+                                                    />
+                                                ))}
                                             </View>
-                                        ))}
-                                    </View>
-                                )}
+                                        ) : lastGenerationWasEmpty ? (
+                                            <Text style={styles.hintText}>
+                                                No credit sales in this shift. No invoices to generate.
+                                            </Text>
+                                        ) : null}
 
-                                {/* Credit Sales */}
-                                {shift.credit_sales && shift.credit_sales.length > 0 && (
-                                    <View className="bg-slate-800/50 rounded-2xl p-5 mb-6">
-                                        <View className="flex-row items-center mb-4">
-                                            <CreditCard size={18} color="#64748b" />
-                                            <Text className="text-slate-400 text-sm font-semibold ml-2 uppercase">
-                                                Credit Sales ({shift.credit_sales.length})
-                                            </Text>
-                                        </View>
-                                        {shift.credit_sales.map((sale, index) => (
-                                            <View key={index} className="bg-slate-900/50 rounded-xl p-4 mb-2">
-                                                <View className="flex-row justify-between items-center">
-                                                    <View className="flex-1">
-                                                        <Text className="text-white font-semibold">{sale.customer_name}</Text>
-                                                        {sale.vehicle_reg && (
-                                                            <Text className="text-slate-500 text-xs mt-1">{sale.vehicle_reg}</Text>
-                                                        )}
-                                                    </View>
-                                                    <Text className="text-amber-400 font-bold">{formatCurrency(sale.amount)}</Text>
-                                                </View>
-                                            </View>
-                                        ))}
+                                        <Button
+                                            title={
+                                                generateMutation.isPending
+                                                    ? 'Generating…'
+                                                    : 'Generate Invoices'
+                                            }
+                                            loading={generateMutation.isPending}
+                                            onPress={() =>
+                                                generateMutation.mutate({ shift: shiftId })
+                                            }
+                                            variant="primary"
+                                            className="mt-4"
+                                        />
                                     </View>
-                                )}
+                                ) : null}
                             </>
                         ) : (
-                            <View className="flex-1 items-center justify-center py-20">
-                                <Text className="text-slate-400">Shift not found</Text>
+                            <View style={styles.emptyState}>
+                                <Text style={styles.emptyText}>Shift not found</Text>
                             </View>
                         )}
                     </ScrollView>
@@ -312,4 +339,211 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
             </View>
         </Modal>
     );
+});
+
+const styles = StyleSheet.create({
+    overlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+    },
+    container: {
+        flex: 1,
+        marginTop: 96,
+        backgroundColor: '#0f172a',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        borderCurve: 'continuous',
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 24,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#1e293b',
+    },
+    headerTitle: {
+        color: '#ffffff',
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    closeButton: {
+        backgroundColor: '#1e293b',
+        padding: 8,
+        borderRadius: 9999,
+    },
+    scrollView: {
+        flex: 1,
+        paddingHorizontal: 24,
+    },
+    scrollContent: {
+        paddingBottom: 40,
+        paddingTop: 20,
+        gap: 16,
+    },
+    card: {
+        backgroundColor: 'rgba(30,41,59,0.5)',
+        borderRadius: 16,
+        padding: 20,
+        borderCurve: 'continuous',
+    },
+    innerCard: {
+        backgroundColor: 'rgba(15,23,42,0.5)',
+        borderRadius: 12,
+        padding: 16,
+    },
+    skeleton: {
+        backgroundColor: 'rgba(51,65,85,0.5)',
+        borderRadius: 4,
+    },
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    shiftHeader: {
+        marginBottom: 16,
+        gap: 8,
+    },
+    stationName: {
+        color: '#ffffff',
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginLeft: 8,
+    },
+    date: {
+        color: '#94a3b8',
+        fontSize: 14,
+    },
+    statusBadge: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    statusLocked: {
+        backgroundColor: 'rgba(245,158,11,0.15)',
+    },
+    statusActive: {
+        backgroundColor: 'rgba(16,185,129,0.15)',
+    },
+    statusText: {
+        fontSize: 12,
+        fontWeight: 'bold',
+    },
+    statusTextLocked: {
+        color: '#f59e0b',
+    },
+    statusTextActive: {
+        color: '#10b981',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    sectionTitle: {
+        color: '#94a3b8',
+        fontSize: 12,
+        fontWeight: '600',
+        marginLeft: 8,
+        textTransform: 'uppercase',
+    },
+    financialRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+    },
+    financialRowBorder: {
+        borderBottomWidth: 1,
+        borderBottomColor: '#1e293b',
+    },
+    fieldLabel: {
+        color: '#64748b',
+        fontSize: 14,
+    },
+    fieldValue: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    collectedValue: {
+        color: '#10b981',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    variancePositive: {
+        color: '#10b981',
+    },
+    varianceNegative: {
+        color: '#ef4444',
+    },
+    alertBox: {
+        backgroundColor: 'rgba(239,68,68,0.1)',
+        borderWidth: 1,
+        borderColor: 'rgba(239,68,68,0.3)',
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 16,
+    },
+    alertText: {
+        color: '#ef4444',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    invoiceList: {
+        gap: 12,
+        marginBottom: 16,
+    },
+    invoiceRow: {
+        backgroundColor: 'rgba(15,23,42,0.5)',
+        borderRadius: 12,
+        padding: 16,
+        borderCurve: 'continuous',
+    },
+    invoiceRowContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    invoiceRowText: {
+        flex: 1,
+    },
+    invoiceNumber: {
+        color: '#ffffff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    invoiceAmount: {
+        color: '#10b981',
+        fontSize: 14,
+        marginTop: 4,
+    },
+    downloadButton: {
+        padding: 12,
+        borderRadius: 12,
+        backgroundColor: 'rgba(16,185,129,0.1)',
+    },
+    downloadButtonPressed: {
+        opacity: 0.8,
+    },
+    downloadButtonDisabled: {
+        opacity: 0.6,
+    },
+    emptyState: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 80,
+    },
+    emptyText: {
+        color: '#94a3b8',
+        fontSize: 16,
+    },
+    hintText: {
+        color: '#64748b',
+        fontSize: 14,
+        marginBottom: 16,
+    },
 });

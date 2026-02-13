@@ -32,7 +32,12 @@ import type {
   ShiftClosingData403,
   ShiftCurrent200,
   ShiftCurrent404,
+  ShiftGenerateInvoices200,
+  ShiftGenerateInvoices422,
   ShiftIndex200,
+  ShiftInvoiceData200,
+  ShiftInvoiceData422,
+  ShiftInvoices200,
   ShiftLock200,
   ShiftLock403,
   ShiftLock500,
@@ -749,6 +754,495 @@ export function useShiftClosingData<TData = Awaited<ReturnType<typeof shiftClosi
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getShiftClosingDataQueryOptions(shift,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * @summary Get invoice data for a locked shift
+ */
+export type shiftInvoiceDataResponse200 = {
+  data: ShiftInvoiceData200
+  status: 200
+}
+
+export type shiftInvoiceDataResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type shiftInvoiceDataResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type shiftInvoiceDataResponse404 = {
+  data: ModelNotFoundExceptionResponse
+  status: 404
+}
+
+export type shiftInvoiceDataResponse422 = {
+  data: ShiftInvoiceData422
+  status: 422
+}
+    
+export type shiftInvoiceDataResponseSuccess = (shiftInvoiceDataResponse200) & {
+  headers: Headers;
+};
+export type shiftInvoiceDataResponseError = (shiftInvoiceDataResponse401 | shiftInvoiceDataResponse403 | shiftInvoiceDataResponse404 | shiftInvoiceDataResponse422) & {
+  headers: Headers;
+};
+
+export type shiftInvoiceDataResponse = (shiftInvoiceDataResponseSuccess | shiftInvoiceDataResponseError)
+
+export const getShiftInvoiceDataUrl = (shift: string,) => {
+
+
+  
+
+  return `/v1/shifts/${shift}/invoice-data`
+}
+
+export const shiftInvoiceData = async (shift: string, options?: RequestInit): Promise<shiftInvoiceDataResponse> => {
+  
+  return customInstance<shiftInvoiceDataResponse>(getShiftInvoiceDataUrl(shift),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getShiftInvoiceDataQueryKey = (shift: string,) => {
+    return [
+    `/v1/shifts/${shift}/invoice-data`
+    ] as const;
+    }
+
+    
+export const getShiftInvoiceDataQueryOptions = <TData = Awaited<ReturnType<typeof shiftInvoiceData>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftInvoiceData422>(shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoiceData>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getShiftInvoiceDataQueryKey(shift);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftInvoiceData>>> = ({ signal }) => shiftInvoiceData(shift, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(shift), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftInvoiceData>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ShiftInvoiceDataQueryResult = NonNullable<Awaited<ReturnType<typeof shiftInvoiceData>>>
+export type ShiftInvoiceDataQueryError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftInvoiceData422
+
+
+export function useShiftInvoiceData<TData = Awaited<ReturnType<typeof shiftInvoiceData>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftInvoiceData422>(
+ shift: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoiceData>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftInvoiceData>>,
+          TError,
+          Awaited<ReturnType<typeof shiftInvoiceData>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftInvoiceData<TData = Awaited<ReturnType<typeof shiftInvoiceData>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftInvoiceData422>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoiceData>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftInvoiceData>>,
+          TError,
+          Awaited<ReturnType<typeof shiftInvoiceData>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftInvoiceData<TData = Awaited<ReturnType<typeof shiftInvoiceData>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftInvoiceData422>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoiceData>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get invoice data for a locked shift
+ */
+
+export function useShiftInvoiceData<TData = Awaited<ReturnType<typeof shiftInvoiceData>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftInvoiceData422>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoiceData>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getShiftInvoiceDataQueryOptions(shift,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * @summary Get generated invoices for a locked shift
+ */
+export type shiftInvoicesResponse200 = {
+  data: ShiftInvoices200
+  status: 200
+}
+
+export type shiftInvoicesResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type shiftInvoicesResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type shiftInvoicesResponse404 = {
+  data: ModelNotFoundExceptionResponse
+  status: 404
+}
+    
+export type shiftInvoicesResponseSuccess = (shiftInvoicesResponse200) & {
+  headers: Headers;
+};
+export type shiftInvoicesResponseError = (shiftInvoicesResponse401 | shiftInvoicesResponse403 | shiftInvoicesResponse404) & {
+  headers: Headers;
+};
+
+export type shiftInvoicesResponse = (shiftInvoicesResponseSuccess | shiftInvoicesResponseError)
+
+export const getShiftInvoicesUrl = (shift: string,) => {
+
+
+  
+
+  return `/v1/shifts/${shift}/invoices`
+}
+
+export const shiftInvoices = async (shift: string, options?: RequestInit): Promise<shiftInvoicesResponse> => {
+  
+  return customInstance<shiftInvoicesResponse>(getShiftInvoicesUrl(shift),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getShiftInvoicesQueryKey = (shift: string,) => {
+    return [
+    `/v1/shifts/${shift}/invoices`
+    ] as const;
+    }
+
+    
+export const getShiftInvoicesQueryOptions = <TData = Awaited<ReturnType<typeof shiftInvoices>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoices>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getShiftInvoicesQueryKey(shift);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof shiftInvoices>>> = ({ signal }) => shiftInvoices(shift, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(shift), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof shiftInvoices>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ShiftInvoicesQueryResult = NonNullable<Awaited<ReturnType<typeof shiftInvoices>>>
+export type ShiftInvoicesQueryError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse
+
+
+export function useShiftInvoices<TData = Awaited<ReturnType<typeof shiftInvoices>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoices>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftInvoices>>,
+          TError,
+          Awaited<ReturnType<typeof shiftInvoices>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftInvoices<TData = Awaited<ReturnType<typeof shiftInvoices>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoices>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof shiftInvoices>>,
+          TError,
+          Awaited<ReturnType<typeof shiftInvoices>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useShiftInvoices<TData = Awaited<ReturnType<typeof shiftInvoices>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoices>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get generated invoices for a locked shift
+ */
+
+export function useShiftInvoices<TData = Awaited<ReturnType<typeof shiftInvoices>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ shift: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof shiftInvoices>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getShiftInvoicesQueryOptions(shift,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+/**
+ * @summary Generate PDF invoices for a locked shift
+ */
+export type shiftGenerateInvoicesResponse200 = {
+  data: ShiftGenerateInvoices200
+  status: 200
+}
+
+export type shiftGenerateInvoicesResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type shiftGenerateInvoicesResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type shiftGenerateInvoicesResponse404 = {
+  data: ModelNotFoundExceptionResponse
+  status: 404
+}
+
+export type shiftGenerateInvoicesResponse422 = {
+  data: ShiftGenerateInvoices422
+  status: 422
+}
+    
+export type shiftGenerateInvoicesResponseSuccess = (shiftGenerateInvoicesResponse200) & {
+  headers: Headers;
+};
+export type shiftGenerateInvoicesResponseError = (shiftGenerateInvoicesResponse401 | shiftGenerateInvoicesResponse403 | shiftGenerateInvoicesResponse404 | shiftGenerateInvoicesResponse422) & {
+  headers: Headers;
+};
+
+export type shiftGenerateInvoicesResponse = (shiftGenerateInvoicesResponseSuccess | shiftGenerateInvoicesResponseError)
+
+export const getShiftGenerateInvoicesUrl = (shift: string,) => {
+
+
+  
+
+  return `/v1/shifts/${shift}/generate-invoices`
+}
+
+export const shiftGenerateInvoices = async (shift: string, options?: RequestInit): Promise<shiftGenerateInvoicesResponse> => {
+  
+  return customInstance<shiftGenerateInvoicesResponse>(getShiftGenerateInvoicesUrl(shift),
+  {      
+    ...options,
+    method: 'POST'
+    
+    
+  }
+);}
+
+
+
+
+export const getShiftGenerateInvoicesMutationOptions = <TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftGenerateInvoices422,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftGenerateInvoices>>, TError,{shift: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof shiftGenerateInvoices>>, TError,{shift: string}, TContext> => {
+
+const mutationKey = ['shiftGenerateInvoices'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof shiftGenerateInvoices>>, {shift: string}> = (props) => {
+          const {shift} = props ?? {};
+
+          return  shiftGenerateInvoices(shift,requestOptions)
+        }
+
+
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ShiftGenerateInvoicesMutationResult = NonNullable<Awaited<ReturnType<typeof shiftGenerateInvoices>>>
+    
+    export type ShiftGenerateInvoicesMutationError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftGenerateInvoices422
+
+    /**
+ * @summary Generate PDF invoices for a locked shift
+ */
+export const useShiftGenerateInvoices = <TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse | ShiftGenerateInvoices422,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof shiftGenerateInvoices>>, TError,{shift: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof shiftGenerateInvoices>>,
+        TError,
+        {shift: string},
+        TContext
+      > => {
+      return useMutation(getShiftGenerateInvoicesMutationOptions(options), queryClient);
+    }
+    /**
+ * @summary Download a specific invoice
+ */
+export type invoicesDownloadResponse200 = {
+  data: string
+  status: 200
+}
+
+export type invoicesDownloadResponse401 = {
+  data: AuthenticationExceptionResponse
+  status: 401
+}
+
+export type invoicesDownloadResponse403 = {
+  data: AuthorizationExceptionResponse
+  status: 403
+}
+
+export type invoicesDownloadResponse404 = {
+  data: ModelNotFoundExceptionResponse
+  status: 404
+}
+    
+export type invoicesDownloadResponseSuccess = (invoicesDownloadResponse200) & {
+  headers: Headers;
+};
+export type invoicesDownloadResponseError = (invoicesDownloadResponse401 | invoicesDownloadResponse403 | invoicesDownloadResponse404) & {
+  headers: Headers;
+};
+
+export type invoicesDownloadResponse = (invoicesDownloadResponseSuccess | invoicesDownloadResponseError)
+
+export const getInvoicesDownloadUrl = (invoice: string,) => {
+
+
+  
+
+  return `/v1/invoices/${invoice}/download`
+}
+
+export const invoicesDownload = async (invoice: string, options?: RequestInit): Promise<invoicesDownloadResponse> => {
+  
+  return customInstance<invoicesDownloadResponse>(getInvoicesDownloadUrl(invoice),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+);}
+
+
+
+
+
+export const getInvoicesDownloadQueryKey = (invoice: string,) => {
+    return [
+    `/v1/invoices/${invoice}/download`
+    ] as const;
+    }
+
+    
+export const getInvoicesDownloadQueryOptions = <TData = Awaited<ReturnType<typeof invoicesDownload>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(invoice: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof invoicesDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getInvoicesDownloadQueryKey(invoice);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof invoicesDownload>>> = ({ signal }) => invoicesDownload(invoice, { signal, ...requestOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(invoice), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof invoicesDownload>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type InvoicesDownloadQueryResult = NonNullable<Awaited<ReturnType<typeof invoicesDownload>>>
+export type InvoicesDownloadQueryError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse
+
+
+export function useInvoicesDownload<TData = Awaited<ReturnType<typeof invoicesDownload>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ invoice: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof invoicesDownload>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof invoicesDownload>>,
+          TError,
+          Awaited<ReturnType<typeof invoicesDownload>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useInvoicesDownload<TData = Awaited<ReturnType<typeof invoicesDownload>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ invoice: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof invoicesDownload>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof invoicesDownload>>,
+          TError,
+          Awaited<ReturnType<typeof invoicesDownload>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useInvoicesDownload<TData = Awaited<ReturnType<typeof invoicesDownload>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ invoice: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof invoicesDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Download a specific invoice
+ */
+
+export function useInvoicesDownload<TData = Awaited<ReturnType<typeof invoicesDownload>>, TError = AuthenticationExceptionResponse | AuthorizationExceptionResponse | ModelNotFoundExceptionResponse>(
+ invoice: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof invoicesDownload>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getInvoicesDownloadQueryOptions(invoice,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

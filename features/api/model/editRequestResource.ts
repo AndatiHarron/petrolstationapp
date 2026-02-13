@@ -11,14 +11,19 @@ export interface EditRequestResource {
   status: string;
   model_type: string;
   model_id: string;
-  original_data: string;
-  requested_data: string;
-  reason: string;
-  comments: string;
+  /** @nullable */
+  original_data: unknown[] | null;
+  requested_data: unknown[];
+  /** @nullable */
+  reason: string | null;
+  /** @nullable */
+  comments: string | null;
   user?: UserResource;
   approver?: UserResource;
-  approved_at: string;
-  rejected_at: string;
+  /** @nullable */
+  approved_at: string | null;
+  /** @nullable */
+  rejected_at: string | null;
   created_at: string;
   updated_at: string;
 }
