@@ -47,6 +47,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::get('/audit-logs/{activity}', [AuditLogController::class, 'show']);
 
     Route::apiResource('customers', CustomerController::class);
+    Route::apiResource('edit-requests', EditRequestController::class)->only(['index', 'store', 'show', 'update']);
     Route::apiResource('liftings', LiftingController::class);
     Route::apiResource('stations', StationController::class);
     Route::apiResource('tanks', TankController::class);

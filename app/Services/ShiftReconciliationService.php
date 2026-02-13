@@ -47,7 +47,8 @@ class ShiftReconciliationService
         });
     }
 
-    protected function processMeters(Shift $shift, array $meters) {
+    protected function processMeters(Shift $shift, array $meters)
+    {
         $totalExpected = 0;
         $totalVolume = 0;
         $totalTaxLiability = 0;
@@ -56,16 +57,16 @@ class ShiftReconciliationService
         foreach ($meters as $meter) {
             $nozzle = Nozzle::with(['tank.product'])->find($meter['nozzle_id']);
 
-            $opening = (float) $nozzle->current_reading;
+            $opening = (float) ($meter['opening_reading'] ?? $nozzle->current_reading);
             $closing = (float) $meter['closing_reading'];
 
             $digits = (int) ($nozzle->digits ?? 7);
             $maxLimit = pow(10, $digits);
 
-            if($opening > $closing) {
+            if ($opening > $closing) {
                 $threshold = $maxLimit * 0.9;
 
-                if($opening < $threshold) {
+                if ($opening < $threshold) {
                     throw new \Exception(
                         "Error on Nozzle [{$nozzle->name}]: Closing reading ({$closing}) cannot be less than Opening reading ({$opening}). check for typos."
                     );
@@ -121,18 +122,20 @@ class ShiftReconciliationService
                 'total_value' => $value,
                 'evidence_path' => $evidencePath,
                 'evidence_hash' => $evidenceHash,
-                'gps_coordinates' => $meter['gps_coordinates'] ?? null
+                'gps_coordinates' => $meter['gps_coordinates'] ?? null,
             ]);
 
             $nozzle->update([
-                'current_reading' => $closing
+                'current_reading' => $closing,
             ]);
 
             $totalExpected += $value;
             $totalVolume += $volume;
 
             $tankId = $nozzle->tank_id;
-            if (!isset($volumePerTank[$tankId])) $volumePerTank[$tankId] = 0;
+            if (! isset($volumePerTank[$tankId])) {
+                $volumePerTank[$tankId] = 0;
+            }
             $volumePerTank[$tankId] += $volume;
         }
 
@@ -140,11 +143,12 @@ class ShiftReconciliationService
             'total_expected' => $totalExpected,
             'total_volume' => $totalVolume,
             'total_tax' => $totalTaxLiability,
-            'volume_sold_per_tank' => $volumePerTank
+            'volume_sold_per_tank' => $volumePerTank,
         ];
     }
 
-    protected function processDips (Shift $shift, array $dips, array $salesByTank) {
+    protected function processDips(Shift $shift, array $dips, array $salesByTank)
+    {
         $netVariance = 0;
 
         foreach ($dips as $dip) {
@@ -163,7 +167,7 @@ class ShiftReconciliationService
                 'shift_id' => $shift->id,
                 'tank_id' => $tank->id,
                 'dip_mm' => $dip['dip_mm'],
-                'volume_liters' => $currentVolume
+                'volume_liters' => $currentVolume,
             ]);
 
             $tank->update([
@@ -175,11 +179,12 @@ class ShiftReconciliationService
         }
 
         return [
-          'net_variance' => $netVariance,
+            'net_variance' => $netVariance,
         ];
     }
 
-    protected function savePayments(Shift $shift, array $payments) {
+    protected function savePayments(Shift $shift, array $payments)
+    {
         $total = 0;
 
         $shift->payments()->delete();
@@ -197,33 +202,33 @@ class ShiftReconciliationService
             }
         }
 
-          if (isset($payments['credit']) && is_array($payments['credit'])) {
-              $creditTotal = 0;
+        if (isset($payments['credit']) && is_array($payments['credit'])) {
+            $creditTotal = 0;
 
-              foreach ($payments['credit'] as $creditEntry) {
-                  if(($creditEntry['amount'] ?? 0) > 0) {
-                      CreditSale::create([
-                          'organization_id' => $shift->organization_id,
-                          'shift_id' => $shift->id,
-                          'customer_id' => $creditEntry['customer_id'],
-                          'amount' => $creditEntry['amount'],
-                          'vehicle_reg' => $creditEntry['vehicle_reg'] ?? null,
-                      ]);
+            foreach ($payments['credit'] as $creditEntry) {
+                if (($creditEntry['amount'] ?? 0) > 0) {
+                    CreditSale::create([
+                        'organization_id' => $shift->organization_id,
+                        'shift_id' => $shift->id,
+                        'customer_id' => $creditEntry['customer_id'],
+                        'amount' => $creditEntry['amount'],
+                        'vehicle_reg' => $creditEntry['vehicle_reg'] ?? null,
+                    ]);
 
-                      $creditTotal += $creditEntry['amount'];
-                  }
-              }
+                    $creditTotal += $creditEntry['amount'];
+                }
+            }
 
-              if($creditTotal > 0) {
-                  $shift->payments()->create([
-                      'organization_id' => $shift->organization_id,
-                      'method' => 'credit',
-                      'amount' => $creditTotal
-                  ]);
+            if ($creditTotal > 0) {
+                $shift->payments()->create([
+                    'organization_id' => $shift->organization_id,
+                    'method' => 'credit',
+                    'amount' => $creditTotal,
+                ]);
 
-                  $total += $creditTotal;
-              }
-          }
+                $total += $creditTotal;
+            }
+        }
 
         return $total;
     }
@@ -235,40 +240,51 @@ class ShiftReconciliationService
         }
 
         $maxVal = pow(10, $digits);
+
         return ($maxVal - $open) + $close;
     }
 
-    private function calculateTankVolume(Tank $tank, float $mm) : float {
+    private function calculateTankVolume(Tank $tank, float $mm): float
+    {
         $chart = $tank->calibration_chart;
 
-        if (empty($chart)) return 0;
+        if (empty($chart)) {
+            return 0;
+        }
 
         // Force sort by mm asc
-        usort($chart, fn($a, $b) => $a['mm'] <=> $b['mm']);
+        usort($chart, fn ($a, $b) => $a['mm'] <=> $b['mm']);
 
         // Check bounds
         $minNode = $chart[0];
         $maxNode = end($chart);
 
         // If dip is BELOW the lowest chart point, it's empty
-        if ($mm < $minNode['mm']) return 0;
+        if ($mm < $minNode['mm']) {
+            return 0;
+        }
 
         // If dip is ABOVE the highest chart point, cap it at Max Capacity
-        if ($mm > $maxNode['mm']) return $maxNode['liters'];
+        if ($mm > $maxNode['mm']) {
+            return $maxNode['liters'];
+        }
 
         // Linear Interpolation
         for ($i = 0; $i < count($chart) - 1; $i++) {
             $lower = $chart[$i];
-            $upper = $chart[$i+1];
+            $upper = $chart[$i + 1];
 
             if ($mm >= $lower['mm'] && $mm <= $upper['mm']) {
                 $rangeMm = $upper['mm'] - $lower['mm'];
                 $rangeLiters = $upper['liters'] - $lower['liters'];
 
                 // Prevent division by zero
-                if ($rangeMm == 0) return $lower['liters'];
+                if ($rangeMm == 0) {
+                    return $lower['liters'];
+                }
 
                 $ratio = ($mm - $lower['mm']) / $rangeMm;
+
                 return $lower['liters'] + ($ratio * $rangeLiters);
             }
         }

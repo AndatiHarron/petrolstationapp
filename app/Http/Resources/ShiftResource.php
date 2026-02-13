@@ -2,7 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Filament\Resources\Shifts\RelationManagers\MeterReadingsRelationManager;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -30,13 +29,6 @@ class ShiftResource extends JsonResource
             'dips' => $this->whenLoaded('dipReadings'),
             'payments' => $this->whenLoaded('payments'),
             'credit_sales' => CreditSaleResource::collection($this->whenLoaded('creditSales')),
-        ];
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            MeterReadingsRelationManager::class,
         ];
     }
 }

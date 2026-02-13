@@ -24,7 +24,7 @@ class ShiftController extends Controller
     {
         Gate::authorize('viewAny', Shift::class);
 
-        $query = Shift::with('station');
+        $query = Shift::with(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
 
         if (Auth::user()->hasRole('manager') && Auth::user()->station_id) {
             $query->where('station_id', Auth::user()->station_id);
@@ -42,6 +42,7 @@ class ShiftController extends Controller
     {
         $shift = Shift::where('started_by_user_id', Auth::id())
             ->where('status', 'OPEN')
+            ->with(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer'])
             ->first();
 
         if (! $shift) {
@@ -72,6 +73,8 @@ class ShiftController extends Controller
             ->first();
 
         if ($existing) {
+            $existing->load(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
+
             return new ShiftResource($existing);
         }
 
@@ -90,6 +93,8 @@ class ShiftController extends Controller
             'started_at' => now(),
             'status' => 'OPEN',
         ]);
+
+        $shift->load(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
 
         return new ShiftResource($shift);
     }
@@ -140,7 +145,7 @@ class ShiftController extends Controller
                 $payments
             );
 
-            $updatedShift->load(['meterReadings', 'dipReadings', 'payments', 'creditSales']);
+            $updatedShift->load(['meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
 
             return new ShiftResource($updatedShift);
 
@@ -160,7 +165,7 @@ class ShiftController extends Controller
     {
         Gate::authorize('view', $shift);
 
-        $shift->load(['meterReadings', 'dipReadings', 'payments', 'creditSales', 'station']);
+        $shift->load(['meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer', 'station']);
 
         return new ShiftResource($shift);
     }
