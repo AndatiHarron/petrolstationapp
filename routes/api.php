@@ -4,9 +4,11 @@ use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CreditorController;
 use App\Http\Controllers\Api\V1\CreditSaleController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\EditRequestController;
 use App\Http\Controllers\Api\V1\LiftingController;
 use App\Http\Controllers\Api\V1\NozzleController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShiftController;
 use App\Http\Controllers\Api\V1\StationController;
 use App\Http\Controllers\Api\V1\TankController;
@@ -60,4 +62,11 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
 
     // Creditors (Suppliers)
     Route::apiResource('creditors', CreditorController::class);
+
+    Route::prefix('reports')->group(function () {
+        Route::get('/debt-aging', [ReportController::class, 'debtAging']);
+        Route::get('/pl', [ReportController::class, 'pl']);
+        Route::get('/tax-summary', [ReportController::class, 'taxSummary']);
+        Route::get('/variance-trend', [ReportController::class, 'varianceTrend']);
+    });
 });
