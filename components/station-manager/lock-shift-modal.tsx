@@ -1,9 +1,10 @@
 import { useCustomersIndex } from '@/features/api/customer/customer';
 import type { ShiftClosingData200, ShiftResource } from '@/features/api/model';
 import { useShiftClosingData } from '@/features/api/shift/shift';
+import * as ImagePicker from 'expo-image-picker';
 import { SymbolView } from 'expo-symbols';
 import React, { useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, InteractionManager, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 interface ClosingNozzle {
@@ -73,6 +74,9 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     // 1. Meter Readings State
     const [meterReadings, setMeterReadings] = useState<Record<string, string>>({});
 
+    // 1b. Meter Evidence (RN file format per nozzle for FormData upload)
+    const [meterEvidence, setMeterEvidence] = useState<Record<string, { uri: string; type?: string; name?: string }>>({});
+
     // 2. Tank Dips State
     const [tankDips, setTankDips] = useState<Record<string, string>>({});
 
@@ -80,6 +84,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     React.useEffect(() => {
         setStep(1);
         setMeterReadings({});
+        setMeterEvidence({});
         setTankDips({});
         setCashAmount('');
         setMpesaAmount('');
@@ -105,9 +110,11 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     const [cashAmount, setCashAmount] = useState('');
     const [mpesaAmount, setMpesaAmount] = useState('');
     const [creditSales, setCreditSales] = useState<Array<{ id: string, customerId: string, amount: string, vehicleReg: string }>>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Helpers
     const handleNext = () => {
+        if (step === 1 && !canProceedFromStep1) return;
         if (step < 3) setStep(prev => (prev + 1) as any);
     };
 
@@ -115,32 +122,39 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
         if (step > 1) setStep(prev => (prev - 1) as any);
     };
 
-    const handleSubmit = () => {
-        // Collect all data
-        const data = {
-            meters: Object.entries(meterReadings).map(([id, val]) => {
+    const handleSubmit = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            const metersWithEvidence = Object.entries(meterReadings).map(([id, val]) => {
                 const nozzle = closingData?.nozzles.find(n => n.nozzle_id === id);
+                const evidence = meterEvidence[id];
                 return {
                     nozzle_id: id,
                     opening_reading: nozzle?.opening_reading || 0,
-                    closing_reading: Number(val)
+                    closing_reading: Number(val),
+                    ...(evidence ? { evidence } : {}),
                 };
-            }),
-            dips: Object.entries(tankDips).map(([id, val]) => ({
-                tank_id: id,
-                dip_mm: Number(val)
-            })),
-            payments: {
-                cash: Number(cashAmount) || 0,
-                mpesa: Number(mpesaAmount) || 0,
-                credit: creditSales.length > 0 ? creditSales.map(s => ({
-                    customer_id: s.customerId,
-                    amount: Number(s.amount),
-                    vehicle_reg: s.vehicleReg || null
-                })) : null
-            }
-        };
-        onSubmit(data);
+            });
+            onSubmit({
+                meters: metersWithEvidence,
+                dips: Object.entries(tankDips).map(([id, val]) => ({
+                    tank_id: id,
+                    dip_mm: Number(val)
+                })),
+                payments: {
+                    cash: Number(cashAmount) || 0,
+                    mpesa: Number(mpesaAmount) || 0,
+                    credit: creditSales.length > 0 ? creditSales.map(s => ({
+                        customer_id: s.customerId,
+                        amount: Number(s.amount),
+                        vehicle_reg: s.vehicleReg || null
+                    })) : null
+                }
+            });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const addCreditSale = () => {
@@ -156,6 +170,42 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     const updateCreditSale = (id: string, field: keyof typeof creditSales[0], value: string) => {
         setCreditSales(creditSales.map(s => s.id === id ? { ...s, [field]: value } : s));
     };
+
+    const takeMeterPhoto = async (nozzleId: string) => {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert(
+                'Camera Permission Required',
+                'Please grant camera access to capture meter evidence for audit compliance.',
+                [{ text: 'OK' }]
+            );
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images'],
+            quality: 0.8,
+            allowsEditing: false,
+        });
+        if (!result.canceled && result.assets[0]) {
+            const asset = result.assets[0];
+            const evidence = {
+                uri: asset.uri,
+                type: asset.mimeType ?? 'image/jpeg',
+                name: asset.fileName ?? `meter-${nozzleId}.jpg`,
+            };
+            // Defer state update to avoid navigation context race after camera closes
+            // (known issue: launchCameraAsync can break navigation context on return from full-screen camera)
+            InteractionManager.runAfterInteractions(() => {
+                setMeterEvidence(prev => ({ ...prev, [nozzleId]: evidence }));
+            });
+        }
+    };
+
+    const allMetersHaveEvidence = closingData
+        ? closingData.nozzles.every(n => !!meterEvidence[n.nozzle_id])
+        : false;
+
+    const canProceedFromStep1 = allMetersHaveEvidence;
 
     if (!visible) return null;
 
@@ -228,15 +278,20 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         {step === 1 && (
                             <Animated.View entering={FadeIn}>
                                 <Text className="text-slate-300 mb-6 leading-6">
-                                    Enter the closing reading for each pump nozzle. Ensure accuracy to avoid variances.
+                                    Enter the closing reading for each pump nozzle and capture a photo of the meter display for audit compliance.
                                 </Text>
+                                {!canProceedFromStep1 ? (
+                                    <View className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                                        <Text className="text-amber-400 text-sm">Photo evidence required for each nozzle before proceeding.</Text>
+                                    </View>
+                                ) : null}
                                 {closingData.nozzles.map((nozzle, index) => (
-                                    <View key={`${nozzle.nozzle_id}-${index}`} className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                                        <View className="flex-row justify-between mb-3">
+                                    <View key={`${nozzle.nozzle_id}-${index}`} className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 gap-3">
+                                        <View className="flex-row justify-between mb-1">
                                             <Text className="text-slate-200 font-bold">{nozzle.pump_name}</Text>
                                             <Text className="text-slate-400 text-xs">Prev: {nozzle.opening_reading}</Text>
                                         </View>
-                                        <View className="flex-row items-center bg-slate-900 Wborder border-slate-700 rounded-lg overflow-hidden h-12">
+                                        <View className="flex-row items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden h-12">
                                             <View className="pl-3 pr-2 h-full justify-center border-r border-slate-700 bg-slate-800/30">
                                                 <SymbolView name="gauge.with.needle" size={18} tintColor="#64748b" />
                                             </View>
@@ -248,6 +303,32 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                 value={meterReadings[nozzle.nozzle_id]}
                                                 onChangeText={(v) => setMeterReadings(p => ({ ...p, [nozzle.nozzle_id]: v }))}
                                             />
+                                        </View>
+                                        <View className="flex-row items-center gap-3">
+                                            {meterEvidence[nozzle.nozzle_id] ? (
+                                                <>
+                                                    <Image
+                                                        source={{ uri: meterEvidence[nozzle.nozzle_id].uri }}
+                                                        className="w-16 h-16 rounded-lg border border-slate-600"
+                                                        resizeMode="cover"
+                                                    />
+                                                    <Pressable
+                                                        onPress={() => takeMeterPhoto(nozzle.nozzle_id)}
+                                                        className="flex-row items-center gap-2 px-3 py-2 rounded-lg bg-slate-700 border border-slate-600"
+                                                    >
+                                                        <SymbolView name="camera.fill" size={16} tintColor="#94a3b8" />
+                                                        <Text className="text-slate-300 text-sm font-medium">Retake</Text>
+                                                    </Pressable>
+                                                </>
+                                            ) : (
+                                                <Pressable
+                                                    onPress={() => takeMeterPhoto(nozzle.nozzle_id)}
+                                                    className="flex-row items-center gap-2 px-4 py-3 rounded-lg bg-blue-600/20 border border-blue-500/30"
+                                                >
+                                                    <SymbolView name="camera.fill" size={18} tintColor="#60a5fa" />
+                                                    <Text className="text-blue-400 text-sm font-bold">Take Photo</Text>
+                                                </Pressable>
+                                            )}
                                         </View>
                                     </View>
                                 ))}
@@ -437,16 +518,36 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         {step < 3 ? (
                             <TouchableOpacity
                                 onPress={handleNext}
-                                className="flex-[2] py-4 bg-blue-600 rounded-xl items-center shadow-lg shadow-blue-900/40"
+                                disabled={step === 1 && !canProceedFromStep1}
+                                className={`flex-[2] py-4 rounded-xl items-center ${step === 1 && !canProceedFromStep1 ? 'bg-slate-700 opacity-60' : 'bg-blue-600'}`}
+                                style={step === 1 && !canProceedFromStep1 ? undefined : {
+                                    shadowColor: '#1e3a8a',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 8,
+                                    elevation: 4,
+                                }}
                             >
                                 <Text className="text-white font-bold uppercase tracking-wider">Next Step</Text>
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
                                 onPress={handleSubmit}
-                                className="flex-[2] py-4 bg-emerald-600 rounded-xl items-center shadow-lg shadow-emerald-900/40"
+                                disabled={isSubmitting}
+                                className={`flex-[2] py-4 bg-emerald-600 rounded-xl items-center ${isSubmitting ? 'opacity-70' : ''}`}
+                                style={{
+                                    shadowColor: '#064e3b',
+                                    shadowOffset: { width: 0, height: 4 },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 8,
+                                    elevation: 4,
+                                }}
                             >
-                                <Text className="text-white font-bold uppercase tracking-wider">Submit & Lock Shift</Text>
+                                {isSubmitting ? (
+                                    <ActivityIndicator size="small" color="#ffffff" />
+                                ) : (
+                                    <Text className="text-white font-bold uppercase tracking-wider">Submit & Lock Shift</Text>
+                                )}
                             </TouchableOpacity>
                         )}
                     </View>

@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { X, Clock, FileText, Download } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { X, Clock, FileText, Download, Camera } from 'lucide-react-native';
 import type {
     InvoiceResource,
     ShiftGenerateInvoices200,
@@ -26,10 +27,37 @@ import {
 } from '@/features/api/shift/shift';
 import { Button } from '@/components/button';
 import { downloadAndShareInvoice } from '@/lib/invoice-download';
+import { fetchEvidenceAsDataUri } from '@/lib/evidence-image';
+import type { MeterReading } from '@/features/api/model';
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'KES',
+});
+
+const EvidenceImage = memo(function EvidenceImage({
+    evidencePath,
+    style,
+}: {
+    evidencePath: string | null;
+    style: object;
+}) {
+    const [dataUri, setDataUri] = useState<string | null>(null);
+    const [failed, setFailed] = useState(false);
+
+    useEffect(() => {
+        if (!evidencePath) return;
+        setDataUri(null);
+        setFailed(false);
+        fetchEvidenceAsDataUri(evidencePath).then((uri) => {
+            if (uri) setDataUri(uri);
+            else setFailed(true);
+        });
+    }, [evidencePath]);
+
+    if (failed) return <View style={[style, { backgroundColor: 'rgba(51,65,85,0.5)', alignItems: 'center', justifyContent: 'center' }]} />;
+    if (!dataUri) return <View style={[style, { backgroundColor: 'rgba(51,65,85,0.5)', alignItems: 'center', justifyContent: 'center' }]}><ActivityIndicator size="small" color="#64748b" /></View>;
+    return <Image source={{ uri: dataUri }} style={style} contentFit="cover" transition={200} />;
 });
 
 interface ShiftDetailModalProps {
@@ -120,8 +148,6 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
         ? (Array.isArray(invoicesResponse.data) ? invoicesResponse.data : [])
         : [];
 
-        console.log("invoicesResponse", JSON.stringify(invoicesResponse, null, 2), invoicesToShow.length)
-
     const generateMutation = useShiftGenerateInvoices({
         mutation: {
             onSuccess: (res, { shift: sid }) => {
@@ -192,7 +218,6 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
             visible={!!shiftId}
             animationType="slide"
             presentationStyle="formSheet"
-            transparent
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
@@ -277,6 +302,50 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                             </Text>
                                         </View>
                                     </View>
+                                </View>
+
+                                <View style={[styles.card, { marginBottom: 16 }]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Camera size={18} color="#64748b" />
+                                        <Text style={styles.sectionTitle}>Meter Evidence</Text>
+                                    </View>
+                                    {(() => {
+                                        const readingsWithEvidence = (shift.readings ?? []).filter(
+                                            (r): r is MeterReading & { nozzle?: { name?: string } } =>
+                                                !!r.evidence_path
+                                        );
+                                        if (readingsWithEvidence.length === 0) {
+                                            return (
+                                                <Text style={styles.hintText}>
+                                                    No meter evidence recorded for this shift.
+                                                </Text>
+                                            );
+                                        }
+                                        return (
+                                            <View style={styles.evidenceGrid}>
+                                                {readingsWithEvidence.map((r) => {
+                                                    const nozzleName =
+                                                        (r as MeterReading & { nozzle?: { name?: string } }).nozzle
+                                                            ?.name ?? `Nozzle ${r.nozzle_id.slice(0, 8)}`;
+                                                    if (!r.evidence_path) return null;
+                                                    return (
+                                                        <View key={r.id} style={styles.evidenceItem}>
+                                                            <EvidenceImage
+                                                                evidencePath={r.evidence_path}
+                                                                style={styles.evidenceThumbnail}
+                                                            />
+                                                            <Text
+                                                                style={styles.evidenceLabel}
+                                                                numberOfLines={2}
+                                                            >
+                                                                {nozzleName}
+                                                            </Text>
+                                                        </View>
+                                                    );
+                                                })}
+                                            </View>
+                                        );
+                                    })()}
                                 </View>
 
                                 {shift.variance_alert ? (
@@ -545,5 +614,27 @@ const styles = StyleSheet.create({
         color: '#64748b',
         fontSize: 14,
         marginBottom: 16,
+    },
+    evidenceGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    evidenceItem: {
+        width: 80,
+        alignItems: 'center',
+        gap: 6,
+    },
+    evidenceThumbnail: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        borderCurve: 'continuous',
+        backgroundColor: 'rgba(30,41,59,0.5)',
+    },
+    evidenceLabel: {
+        color: '#94a3b8',
+        fontSize: 11,
+        textAlign: 'center',
     },
 });

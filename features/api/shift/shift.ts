@@ -573,9 +573,34 @@ export const getShiftLockUrl = (shift: string,) => {
 export const shiftLock = async (shift: string,
     lockShiftRequest: LockShiftRequest, options?: RequestInit): Promise<shiftLockResponse> => {
     const formData = new FormData();
-formData.append(`payments`, JSON.stringify(lockShiftRequest.payments));
-lockShiftRequest.meters.forEach(value => formData.append(`meters`, JSON.stringify(value)));
-lockShiftRequest.dips.forEach(value => formData.append(`dips`, JSON.stringify(value)));
+    formData.append('payments', JSON.stringify(lockShiftRequest.payments));
+    lockShiftRequest.dips.forEach(value => formData.append('dips', JSON.stringify(value)));
+
+    const hasMeterEvidence = lockShiftRequest.meters.some(m => m.evidence != null);
+    if (hasMeterEvidence) {
+      lockShiftRequest.meters.forEach((meter, index) => {
+        formData.append(`meters[${index}][nozzle_id]`, meter.nozzle_id);
+        formData.append(`meters[${index}][opening_reading]`, String(meter.opening_reading));
+        formData.append(`meters[${index}][closing_reading]`, String(meter.closing_reading));
+        if (meter.evidence != null) {
+          const ev = meter.evidence as Blob | { uri: string; type?: string; name?: string };
+          if (ev instanceof Blob) {
+            formData.append(`meters[${index}][evidence]`, ev, `meter-${meter.nozzle_id}.jpg`);
+          } else {
+            formData.append(`meters[${index}][evidence]`, {
+              uri: ev.uri,
+              type: ev.type ?? 'image/jpeg',
+              name: ev.name ?? `meter-${meter.nozzle_id}.jpg`,
+            });
+          }
+        }
+        if (meter.gps_coordinates != null) {
+          formData.append(`meters[${index}][gps_coordinates]`, meter.gps_coordinates);
+        }
+      });
+    } else {
+      lockShiftRequest.meters.forEach(value => formData.append('meters', JSON.stringify(value)));
+    }
 
   return customInstance<shiftLockResponse>(getShiftLockUrl(shift),
   {      

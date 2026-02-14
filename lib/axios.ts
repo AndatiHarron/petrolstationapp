@@ -44,6 +44,9 @@ export const customInstance = <T>(
   if (data instanceof FormData) {
     const newData = new FormData();
 
+    const isRNFileDescriptor = (val: unknown): val is { uri: string; type?: string; name?: string } =>
+      typeof val === 'object' && val !== null && 'uri' in val && typeof (val as { uri: unknown }).uri === 'string';
+
     const appendRecursive = (formData: FormData, data: any, rootKey: string) => {
       if (rootKey === 'evidence' && data instanceof Blob) {
         formData.append(rootKey, data);
@@ -52,6 +55,8 @@ export const customInstance = <T>(
       if (data instanceof Date) {
         formData.append(rootKey, data.toISOString());
       } else if (data instanceof Blob || data instanceof File) {
+        formData.append(rootKey, data);
+      } else if (isRNFileDescriptor(data)) {
         formData.append(rootKey, data);
       } else if (Array.isArray(data)) {
         data.forEach((value, index) => {
@@ -136,6 +141,10 @@ export const customInstance = <T>(
       ...options,
       data: newData,
       cancelToken: source.token,
+      headers: {
+        ...options?.headers,
+        'Content-Type': false as unknown as string,
+      },
     }).then(({ data }) => data);
 
     // @ts-ignore
