@@ -51,6 +51,7 @@ export function AddLiftingModal({
         return tanks.filter(t => t.station_id === selectedStationId);
     }, [tanks, selectedStationId]);
 
+
     const handleStationChange = (stationId: string) => {
         setSelectedStationId(stationId);
         setSelectedTankId(null); // Reset tank when station changes
@@ -64,7 +65,7 @@ export function AddLiftingModal({
         const totalCost = formData.total_cost || 0;
         setFormData(prev => ({
             ...prev,
-            tax_paid: totalCost * (vatRate / 100),
+            tax_paid: totalCost * (vatRate),
         }));
     };
 
@@ -78,7 +79,7 @@ export function AddLiftingModal({
 
         const selectedTank = tanks.find(t => t.id === selectedTankId);
         const vatRate = selectedTank?.product_vat_rate || 0;
-        updated.tax_paid = totalCost * (vatRate / 100);
+        updated.tax_paid = totalCost * (vatRate);
 
         setFormData(updated);
     };

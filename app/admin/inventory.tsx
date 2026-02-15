@@ -10,6 +10,12 @@ import { useTanksIndex, getTanksIndexQueryKey } from '../../features/api/tank/ta
 import { useStationsIndex } from '../../features/api/station/station';
 import { useCreditorsIndex } from '../../features/api/creditor/creditor';
 import { getAuditLogIndexQueryKey } from '../../features/api/audit-log/audit-log';
+import {
+    getReportPlQueryKey,
+    getReportTaxSummaryQueryKey,
+    getReportDebtAgingQueryKey,
+    getReportVarianceTrendQueryKey,
+} from '../../features/api/report/report';
 import type {
     LiftingsIndex200,
     LiftingsIndex200Meta,
@@ -69,6 +75,10 @@ export default function InventoryTab() {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setIsCreateModalOpen(false);
                 Alert.alert('Success', 'Lifting recorded successfully.');
             },
@@ -84,6 +94,10 @@ export default function InventoryTab() {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setSelectedLifting(null);
                 Alert.alert('Success', 'Lifting deleted successfully.');
             },

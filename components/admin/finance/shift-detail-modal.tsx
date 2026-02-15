@@ -29,6 +29,7 @@ import { Button } from '@/components/button';
 import { downloadAndShareInvoice } from '@/lib/invoice-download';
 import { fetchEvidenceAsDataUri } from '@/lib/evidence-image';
 import type { MeterReading } from '@/features/api/model';
+import { useUsersStore } from '@/features/api/user/user';
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
     style: 'currency',

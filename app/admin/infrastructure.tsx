@@ -1,53 +1,92 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, Pressable, StatusBar, Alert } from 'react-native';
+import { View, Text, Pressable, StatusBar, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Package, Cylinder, Truck } from 'lucide-react-native';
+import { Building2, Package, Cylinder, Truck, Gauge, ChevronDown, ChevronUp } from 'lucide-react-native';
 import { StationsList } from '@/components/admin/infrastructure/stations-list';
 import { ProductsList } from '@/components/admin/infrastructure/products-list';
 import { TanksList } from '@/components/admin/infrastructure/tanks-list';
+import { NozzlesList } from '@/components/admin/infrastructure/nozzles-list';
 import { SuppliersList } from '@/components/admin/infrastructure/suppliers-list';
 import { StationModal } from '@/components/admin/infrastructure/station-modal';
 import { ProductModal } from '@/components/admin/infrastructure/product-modal';
 import { TankModal } from '@/components/admin/infrastructure/tank-modal';
+import { NozzleModal } from '@/components/admin/infrastructure/nozzle-modal';
 import { SupplierModal } from '@/components/admin/infrastructure/supplier-modal';
 import { useStationsDestroy, getStationsIndexQueryKey } from '@/features/api/station/station';
 import { useProductsDestroy, getProductsIndexQueryKey } from '@/features/api/product/product';
 import { useTanksDestroy, getTanksIndexQueryKey } from '@/features/api/tank/tank';
+import { useNozzlesDestroy, getNozzlesIndexQueryKey } from '@/features/api/nozzle/nozzle';
 import { useCreditorsDestroy, getCreditorsIndexQueryKey } from '@/features/api/creditor/creditor';
-import type { StationResource, ProductResource, TankResource, SupplierResource } from '@/features/api/model';
+import type { StationResource, ProductResource, TankResource, NozzleResource, SupplierResource } from '@/features/api/model';
 
-type TabType = 'stations' | 'products' | 'tanks' | 'suppliers';
+type TabType = 'stations' | 'products' | 'tanks' | 'nozzles' | 'suppliers';
 
 const TABS: { id: TabType; label: string; icon: typeof Building2 }[] = [
     { id: 'stations', label: 'Stations', icon: Building2 },
     { id: 'products', label: 'Products', icon: Package },
     { id: 'tanks', label: 'Tanks', icon: Cylinder },
+    { id: 'nozzles', label: 'Nozzles', icon: Gauge },
     { id: 'suppliers', label: 'Suppliers', icon: Truck },
 ];
 
-function TabButton({
-    tab,
-    isActive,
-    onPress
+function SectionDropdown({
+    activeTab,
+    onSelect,
+    isOpen,
+    onToggle
 }: {
-    tab: typeof TABS[number];
-    isActive: boolean;
-    onPress: () => void;
+    activeTab: TabType;
+    onSelect: (tab: TabType) => void;
+    isOpen: boolean;
+    onToggle: () => void;
 }) {
-    const Icon = tab.icon;
+    const activeTabConfig = TABS.find((t) => t.id === activeTab) ?? TABS[0];
+    const Icon = activeTabConfig.icon;
+
     return (
-        <Pressable
-            onPress={onPress}
-            className={`flex-1 flex-row items-center justify-center py-3 rounded-lg ${isActive ? 'bg-slate-700' : ''
-                }`}
-        >
-            <Icon size={18} color={isActive ? '#ffffff' : '#64748b'} />
-            <Text className={`ml-2 font-medium ${isActive ? 'text-white' : 'text-slate-500'}`}>
-                {tab.label}
-            </Text>
-        </Pressable>
+        <View className="mx-4 mb-4">
+            <Pressable
+                onPress={onToggle}
+                className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex-row items-center justify-between"
+            >
+                <View className="flex-row items-center">
+                    <Icon size={20} color="#94a3b8" />
+                    <Text className="text-white font-medium text-base ml-2">{activeTabConfig.label}</Text>
+                </View>
+                {isOpen ? (
+                    <ChevronUp size={20} color="#64748b" />
+                ) : (
+                    <ChevronDown size={20} color="#64748b" />
+                )}
+            </Pressable>
+            {isOpen ? (
+                <View className="bg-slate-800 rounded-xl border border-slate-700 mt-1 max-h-56 overflow-hidden">
+                    <ScrollView nestedScrollEnabled>
+                        {TABS.map((tab) => {
+                            const TabIcon = tab.icon;
+                            const isSelected = activeTab === tab.id;
+                            return (
+                                <Pressable
+                                    key={tab.id}
+                                    onPress={() => {
+                                        onSelect(tab.id);
+                                        onToggle();
+                                    }}
+                                    className={`p-4 flex-row items-center border-b border-slate-700 last:border-b-0 ${isSelected ? 'bg-blue-600/20' : ''}`}
+                                >
+                                    <TabIcon size={18} color={isSelected ? '#3b82f6' : '#94a3b8'} />
+                                    <Text className={`ml-3 font-medium ${isSelected ? 'text-blue-400' : 'text-white'}`}>
+                                        {tab.label}
+                                    </Text>
+                                </Pressable>
+                            );
+                        })}
+                    </ScrollView>
+                </View>
+            ) : null}
+        </View>
     );
 }
 
@@ -55,14 +94,17 @@ export default function InfrastructureTab() {
     const params = useLocalSearchParams<{ tab?: TabType }>();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<TabType>(params.tab ?? 'stations');
+    const [showSectionPicker, setShowSectionPicker] = useState(false);
 
     // Modal states
     const [stationModalVisible, setStationModalVisible] = useState(false);
     const [productModalVisible, setProductModalVisible] = useState(false);
     const [tankModalVisible, setTankModalVisible] = useState(false);
+    const [nozzleModalVisible, setNozzleModalVisible] = useState(false);
     const [editingStation, setEditingStation] = useState<StationResource | undefined>(undefined);
     const [editingProduct, setEditingProduct] = useState<ProductResource | undefined>(undefined);
     const [editingTank, setEditingTank] = useState<TankResource | undefined>(undefined);
+    const [editingNozzle, setEditingNozzle] = useState<NozzleResource | undefined>(undefined);
     const [supplierModalVisible, setSupplierModalVisible] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<SupplierResource | undefined>(undefined);
 
@@ -100,6 +142,17 @@ export default function InfrastructureTab() {
         },
     });
 
+    const nozzleDeleteMutation = useNozzlesDestroy({
+        mutation: {
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: getNozzlesIndexQueryKey() });
+            },
+            onError: () => {
+                Alert.alert('Error', 'Failed to delete nozzle.');
+            },
+        },
+    });
+
     const supplierDeleteMutation = useCreditorsDestroy({
         mutation: {
             onSuccess: () => {
@@ -113,6 +166,10 @@ export default function InfrastructureTab() {
 
     const handleTabChange = useCallback((tab: TabType) => {
         setActiveTab(tab);
+    }, []);
+
+    const handleToggleSectionPicker = useCallback(() => {
+        setShowSectionPicker((prev) => !prev);
     }, []);
 
     // Station handlers
@@ -208,6 +265,37 @@ export default function InfrastructureTab() {
         setEditingTank(undefined);
     }, []);
 
+    // Nozzle handlers
+    const handleAddNozzle = useCallback(() => {
+        setEditingNozzle(undefined);
+        setNozzleModalVisible(true);
+    }, []);
+
+    const handleEditNozzle = useCallback((nozzle: NozzleResource) => {
+        setEditingNozzle(nozzle);
+        setNozzleModalVisible(true);
+    }, []);
+
+    const handleDeleteNozzle = useCallback((id: string) => {
+        Alert.alert(
+            'Delete Nozzle',
+            'Are you sure you want to delete this nozzle? This action cannot be undone.',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => nozzleDeleteMutation.mutate({ nozzle: id }),
+                },
+            ]
+        );
+    }, [nozzleDeleteMutation]);
+
+    const handleCloseNozzleModal = useCallback(() => {
+        setNozzleModalVisible(false);
+        setEditingNozzle(undefined);
+    }, []);
+
     // Supplier handlers
     const handleAddSupplier = useCallback(() => {
         setEditingSupplier(undefined);
@@ -265,6 +353,14 @@ export default function InfrastructureTab() {
                         onDeleteTank={handleDeleteTank}
                     />
                 );
+            case 'nozzles':
+                return (
+                    <NozzlesList
+                        onAddNozzle={handleAddNozzle}
+                        onEditNozzle={handleEditNozzle}
+                        onDeleteNozzle={handleDeleteNozzle}
+                    />
+                );
             case 'suppliers':
                 return (
                     <SuppliersList
@@ -286,21 +382,17 @@ export default function InfrastructureTab() {
                 <View className="px-4 mb-4 mt-4">
                     <Text className="text-2xl font-bold text-white">Infrastructure</Text>
                     <Text className="text-slate-500 text-sm mt-1">
-                        Manage stations, products, tanks, and suppliers
+                        Manage stations, products, tanks, nozzles, and suppliers
                     </Text>
                 </View>
 
-                {/* Tab Bar */}
-                <View className="mx-4 mb-4 p-1 bg-slate-800 rounded-xl flex-row">
-                    {TABS.map((tab) => (
-                        <TabButton
-                            key={tab.id}
-                            tab={tab}
-                            isActive={activeTab === tab.id}
-                            onPress={() => handleTabChange(tab.id)}
-                        />
-                    ))}
-                </View>
+                {/* Section Dropdown */}
+                <SectionDropdown
+                    activeTab={activeTab}
+                    onSelect={handleTabChange}
+                    isOpen={showSectionPicker}
+                    onToggle={handleToggleSectionPicker}
+                />
 
                 {/* Content */}
                 <View className="flex-1 px-4">
@@ -323,6 +415,11 @@ export default function InfrastructureTab() {
                 visible={tankModalVisible}
                 onClose={handleCloseTankModal}
                 tank={editingTank}
+            />
+            <NozzleModal
+                visible={nozzleModalVisible}
+                onClose={handleCloseNozzleModal}
+                nozzle={editingNozzle}
             />
             <SupplierModal
                 visible={supplierModalVisible}

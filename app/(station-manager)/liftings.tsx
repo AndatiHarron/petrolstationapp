@@ -7,8 +7,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useLiftingsStore, useLiftingsDestroy, getLiftingsIndexQueryKey } from '../../features/api/lifting/lifting';
 import { useGetV1User } from '../../features/api/default/default';
-import { useTanksIndex } from '../../features/api/tank/tank';
+import { useTanksIndex, getTanksIndexQueryKey } from '../../features/api/tank/tank';
 import { useCreditorsIndex } from '../../features/api/creditor/creditor';
+import { getAuditLogIndexQueryKey } from '../../features/api/audit-log/audit-log';
+import {
+    getReportPlQueryKey,
+    getReportTaxSummaryQueryKey,
+    getReportDebtAgingQueryKey,
+    getReportVarianceTrendQueryKey,
+} from '../../features/api/report/report';
 import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200, LiftingsIndex200Meta, LiftingsIndex200Links, CreditorsIndex200, SupplierResource } from '../../features/api/model';
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
@@ -130,7 +137,12 @@ export default function LiftingsScreen() {
         mutation: {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
-                queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+                queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setIsCreateModalOpen(false);
                 resetForm();
                 Alert.alert("Success", "Lifting recorded successfully.");
@@ -145,7 +157,12 @@ export default function LiftingsScreen() {
         mutation: {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
-                queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+                queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setSelectedLifting(null);
                 Alert.alert("Success", "Lifting deleted successfully.");
             },
