@@ -30,7 +30,9 @@ class StoreCreditSaleRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists('shifts', 'id')->where(function ($query) use ($user) {
-                    $query->where('organization_id', $user->organization_id);
+                    if (! $user->hasRole('super-admin')) {
+                        $query->where('organization_id', $user->organization_id);
+                    }
 
                     if ($user->hasRole('manager') && $user->station_id) {
                         $query->where('station_id', $user->station_id);
@@ -41,6 +43,10 @@ class StoreCreditSaleRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists('customers', 'id')->where(function ($query) {
+                    if (Auth::user()->hasRole('super-admin')) {
+                        return $query;
+                    }
+
                     return $query->where('organization_id', Auth::user()->organization_id);
                 }),
             ],

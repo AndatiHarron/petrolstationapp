@@ -7,11 +7,13 @@ use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\EditRequestController;
 use App\Http\Controllers\Api\V1\LiftingController;
 use App\Http\Controllers\Api\V1\NozzleController;
+use App\Http\Controllers\Api\V1\OrganizationController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShiftController;
 use App\Http\Controllers\Api\V1\StationController;
 use App\Http\Controllers\Api\V1\TankController;
+use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +61,8 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('tanks', TankController::class);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('nozzles', NozzleController::class);
+    Route::apiResource('organizations', OrganizationController::class)->only(['index', 'store', 'show']);
+    Route::apiResource('users', UserController::class)->only(['index', 'store', 'show']);
 
     // Credit Sales: index, create and show
     Route::apiResource('credit-sales', CreditSaleController::class)

@@ -30,6 +30,10 @@ class StoreTankRequest extends FormRequest
                 'uuid',
                 // Ensure the station belongs to the User's Organization
                 Rule::exists('stations', 'id')->where(function ($query) {
+                    if (Auth::user()->hasRole('super-admin')) {
+                        return $query;
+                    }
+
                     return $query->where('organization_id', Auth::user()->organization_id);
                 }),
             ],

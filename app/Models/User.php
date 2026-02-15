@@ -10,17 +10,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
+    use BelongsToOrganization;
+    use HasApiTokens;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-    use BelongsToOrganization;
-    use HasUuids;
+
     use HasRoles;
-    use HasApiTokens;
+    use HasUuids;
 
     public $incrementing = false;
 
@@ -35,6 +37,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'organization_id',
+        'station_id',
     ];
 
     /**
@@ -65,7 +69,7 @@ class User extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 
-    public function station() : BelongsTo
+    public function station(): BelongsTo
     {
         return $this->belongsTo(Station::class);
     }

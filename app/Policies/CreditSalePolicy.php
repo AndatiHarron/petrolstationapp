@@ -36,7 +36,7 @@ class CreditSalePolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->hasAnyRole(['super-admin', 'admin', 'manager']);
     }
 
     /**

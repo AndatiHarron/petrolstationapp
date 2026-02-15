@@ -112,6 +112,46 @@ test('manager cannot record lifting for a different station tank', function () {
         ->assertJsonValidationErrors(['station_id']);
 });
 
+test('creating a lifting auto-calculates tax_paid if omitted', function () {
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+
+    $product = \App\Models\Product::factory()->create([
+        'organization_id' => $org->id,
+        'vat_rate' => 16.0,
+    ]);
+    $tank = Tank::factory()->create([
+        'organization_id' => $org->id,
+        'station_id' => $station->id,
+        'product_id' => $product->id,
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $station->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    $data = [
+        'station_id' => $station->id,
+        'tank_id' => $tank->id,
+        'lifting_date' => now()->format('Y-m-d'),
+        'invoice_number' => 'INV-TAX',
+        'volume_liters' => 1160,
+        'buying_price_per_liter' => 1,
+        'total_cost' => 1160,
+        // 'tax_paid' is omitted
+    ];
+
+    $response = postJson('/api/v1/liftings', $data)->assertStatus(201);
+
+    // 1160 with 16% VAT should result in 160 tax
+    $response->assertJsonPath('data.tax_paid', 160);
+
+    $this->assertDatabaseHas('liftings', [
+        'invoice_number' => 'INV-TAX',
+        'tax_paid' => 160,
+    ]);
+});
+
 test('manager cannot delete old liftings', function () {
     $org = Organization::factory()->create();
     $lifting = Lifting::factory()->create([

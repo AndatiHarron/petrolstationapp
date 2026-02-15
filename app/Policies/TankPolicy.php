@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Tank;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class TankPolicy
 {
@@ -16,7 +14,7 @@ class TankPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['super-admin','admin', 'manager']);
+        return $user->hasAnyRole(['super-admin', 'admin', 'manager']);
     }
 
     /**
@@ -24,7 +22,7 @@ class TankPolicy
      */
     public function view(User $user, $model): bool
     {
-        return $user->hasAnyRole(['super-admin','admin', 'manager']);
+        return $user->hasAnyRole(['super-admin', 'admin', 'manager']);
     }
 
     /**
@@ -32,7 +30,7 @@ class TankPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 
     /**
@@ -40,7 +38,7 @@ class TankPolicy
      */
     public function update(User $user, $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 
     /**
@@ -48,6 +46,6 @@ class TankPolicy
      */
     public function delete(User $user, $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 }

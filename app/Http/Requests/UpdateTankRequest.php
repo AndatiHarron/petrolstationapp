@@ -30,6 +30,10 @@ class UpdateTankRequest extends FormRequest
                 'sometimes',
                 'uuid',
                 Rule::exists('stations', 'id')->where(function ($query) {
+                    if (Auth::user()->hasRole('super-admin')) {
+                        return $query;
+                    }
+
                     return $query->where('organization_id', Auth::user()->organization_id);
                 }),
             ],

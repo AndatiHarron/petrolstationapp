@@ -31,6 +31,10 @@ class UpdateNozzleRequest extends FormRequest
                 'sometimes',
                 'uuid',
                 Rule::exists('stations', 'id')->where(function ($query) {
+                    if (Auth::user()->hasRole('super-admin')) {
+                        return $query;
+                    }
+
                     return $query->where('organization_id', Auth::user()->organization_id);
                 }),
             ],
@@ -41,8 +45,12 @@ class UpdateNozzleRequest extends FormRequest
                 'uuid',
                 Rule::exists('tanks', 'id')->where(function ($query) {
                     $stationId = $this->station_id ?? $this->route('nozzle')->station_id;
-                    return $query->where('station_id', $stationId)
-                        ->where('organization_id', Auth::user()->organization_id);
+                    $query->where('station_id', $stationId);
+                    if (! Auth::user()->hasRole('super-admin')) {
+                        $query->where('organization_id', Auth::user()->organization_id);
+                    }
+
+                    return $query;
                 }),
             ],
 

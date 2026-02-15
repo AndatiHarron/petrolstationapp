@@ -7,11 +7,15 @@ use App\Http\Requests\StoreLiftingRequest;
 use App\Http\Requests\UpdateLiftingRequest;
 use App\Http\Resources\LiftingResource;
 use App\Models\Lifting;
+use App\Models\Tank;
+use App\Services\TaxService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class LiftingController extends Controller
 {
+    public function __construct(protected TaxService $taxService) {}
+
     /**
      * List Liftings
      * Filterable by date range and station (for Admins)
@@ -46,7 +50,20 @@ class LiftingController extends Controller
     {
         Gate::authorize('create', Lifting::class);
 
-        $lifting = Lifting::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->user()->hasRole('super-admin')) {
+            $station = \App\Models\Station::withoutGlobalScopes()->find($data['station_id']);
+            $data['organization_id'] = $station->organization_id;
+        }
+
+        if (! isset($data['tax_paid']) || $data['tax_paid'] === null) {
+            $tank = Tank::with('product')->find($data['tank_id']);
+            $vatRate = (float) ($tank->product->vat_rate ?? 0);
+            $data['tax_paid'] = $this->taxService->calculateInputTax((float) $data['total_cost'], $vatRate);
+        }
+
+        $lifting = Lifting::create($data);
 
         return (new LiftingResource($lifting->load(['station', 'tank.product'])))
             ->response()

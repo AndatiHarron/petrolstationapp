@@ -37,7 +37,14 @@ class TankController extends Controller
     {
         Gate::authorize('create', Tank::class);
 
-        $tank = Tank::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->user()->hasRole('super-admin')) {
+            $station = \App\Models\Station::withoutGlobalScopes()->find($data['station_id']);
+            $data['organization_id'] = $station->organization_id;
+        }
+
+        $tank = Tank::create($data);
 
         // If initial volume is set, calculate the dip immediately
         if ($request->has('current_volume') || $request->has('calibration_chart')) {
@@ -65,7 +72,14 @@ class TankController extends Controller
     {
         Gate::authorize('update', $tank);
 
-        $tank->update($request->validated());
+        $data = $request->validated();
+
+        if ($request->user()->hasRole('super-admin') && isset($data['station_id'])) {
+            $station = \App\Models\Station::withoutGlobalScopes()->find($data['station_id']);
+            $data['organization_id'] = $station->organization_id;
+        }
+
+        $tank->update($data);
 
         // Recalculate dip if chart or volume changed
         if ($request->hasAny(['calibration_chart', 'current_volume'])) {

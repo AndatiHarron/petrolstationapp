@@ -15,6 +15,8 @@ use Throwable;
 
 class ShiftReconciliationService
 {
+    public function __construct(protected TaxService $taxService) {}
+
     /**
      * @throws Throwable
      */
@@ -81,13 +83,7 @@ class ShiftReconciliationService
             $value = $volume * $price;
 
             $vatRate = (float) $nozzle->tank->product->vat_rate;
-
-            if ($vatRate > 0) {
-                $rawTax = $value - ($value / (1 + ($vatRate / 100)));
-                $taxComponent = round($rawTax, 2);
-            } else {
-                $taxComponent = 0;
-            }
+            $taxComponent = $this->taxService->calculateOutputTax($value, $vatRate);
 
             $totalTaxLiability += $taxComponent;
 

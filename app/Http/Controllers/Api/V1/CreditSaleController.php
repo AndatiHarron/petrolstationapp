@@ -37,7 +37,14 @@ class CreditSaleController extends Controller
     {
         Gate::authorize('create', CreditSale::class);
 
-        $sale = CreditSale::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->user()->hasRole('super-admin')) {
+            $shift = \App\Models\Shift::withoutGlobalScopes()->find($data['shift_id']);
+            $data['organization_id'] = $shift->organization_id;
+        }
+
+        $sale = CreditSale::create($data);
 
         return (new CreditSaleResource($sale->load(['customer'])))
             ->response()

@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Liftings;
 use App\Filament\Resources\Liftings\Pages\CreateLifting;
 use App\Filament\Resources\Liftings\Pages\EditLifting;
 use App\Filament\Resources\Liftings\Pages\ListLiftings;
-use App\Filament\Resources\Liftings\Schemas\LiftingForm;
-use App\Filament\Resources\Liftings\Tables\LiftingsTable;
 use App\Models\Lifting;
 use App\Models\Tank;
 use BackedEnum;
@@ -28,6 +26,7 @@ class LiftingResource extends Resource
     protected static ?string $model = Lifting::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedListBullet;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Inventory';
 
     public static function form(Schema $schema): Schema
@@ -40,8 +39,7 @@ class LiftingResource extends Resource
 
             Select::make('tank_id')
                 ->label('Destination Tank')
-                ->relationship('tank', 'name', fn($query, $get) =>
-                    $query->where('station_id', $get('station_id'))
+                ->relationship('tank', 'name', fn ($query, $get) => $query->where('station_id', $get('station_id'))
                 )
                 ->required(),
 
@@ -67,15 +65,10 @@ class LiftingResource extends Resource
                     // 2. Auto-Calculate VAT based on Product Rate
                     if ($tankId = $get('tank_id')) {
                         $tank = Tank::with('product')->find($tankId);
-                        $vatRate = $tank->product->vat_rate ?? 0;
+                        $vatRate = (float) ($tank->product->vat_rate ?? 0);
 
-                        if ($vatRate > 0) {
-                            // Formula: Tax = Cost - (Cost / 1.16)
-                            $tax = $cost - ($cost / (1 + ($vatRate / 100)));
-                            $set('tax_paid', number_format($tax, 2, '.', ''));
-                        } else {
-                            $set('tax_paid', 0);
-                        }
+                        $tax = app(\App\Services\TaxService::class)->calculateInputTax((float) $cost, $vatRate);
+                        $set('tax_paid', $tax);
                     }
                 }),
 
@@ -91,7 +84,7 @@ class LiftingResource extends Resource
                 ->numeric()
                 ->prefix('KES')
                 ->required()
-                ->helperText('Auto-calculated based on product VAT rate, but editable')
+                ->helperText('Auto-calculated based on product VAT rate, but editable'),
         ]);
     }
 
@@ -127,34 +120,34 @@ class LiftingResource extends Resource
                 TextColumn::make('total_cost')
                     ->money('KES')
                     ->sortable(),
-//
-//                TextColumn::make('tax_paid')
-//                    ->money('KES')
-//                    ->label('Input VAT')
-//                    ->color('success')
-//                    ->sortable()
+                //
+                //                TextColumn::make('tax_paid')
+                //                    ->money('KES')
+                //                    ->label('Input VAT')
+                //                    ->color('success')
+                //                    ->sortable()
 
             ])
             ->filters([
                 SelectFilter::make('station')
-                ->relationship('station', 'name'),
+                    ->relationship('station', 'name'),
 
                 Filter::make('lifting_date')
-                ->schema([
-                    DatePicker::make('from'),
-                    DatePicker::make('until'),
-                ])
-                ->query(function ($query, array $data) {
-                    return $query
-                        ->when($data['from'], fn ($q) => $q->whereDate('lifting_date', '>=', $data['from']))
-                        ->when($data['until'], fn ($q) => $q->whereDate('lifting_date', '<=', $data['until']));
-                })
+                    ->schema([
+                        DatePicker::make('from'),
+                        DatePicker::make('until'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'], fn ($q) => $q->whereDate('lifting_date', '>=', $data['from']))
+                            ->when($data['until'], fn ($q) => $q->whereDate('lifting_date', '<=', $data['until']));
+                    }),
             ])
             ->recordActions([
-                EditAction::make()
+                EditAction::make(),
             ])
             ->toolbarActions([
-                DeleteBulkAction::make()
+                DeleteBulkAction::make(),
             ]);
     }
 

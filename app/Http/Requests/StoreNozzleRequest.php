@@ -31,6 +31,10 @@ class StoreNozzleRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists('stations', 'id')->where(function ($query) {
+                    if (Auth::user()->hasRole('super-admin')) {
+                        return $query;
+                    }
+
                     return $query->where('organization_id', Auth::user()->organization_id);
                 }),
             ],
@@ -40,8 +44,12 @@ class StoreNozzleRequest extends FormRequest
                 'required',
                 'uuid',
                 Rule::exists('tanks', 'id')->where(function ($query) {
-                    return $query->where('station_id', $this->station_id)
-                        ->where('organization_id', Auth::user()->organization_id);
+                    $query->where('station_id', $this->station_id);
+                    if (! Auth::user()->hasRole('super-admin')) {
+                        $query->where('organization_id', Auth::user()->organization_id);
+                    }
+
+                    return $query;
                 }),
             ],
 

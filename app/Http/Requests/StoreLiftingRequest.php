@@ -55,6 +55,10 @@ class StoreLiftingRequest extends FormRequest
                 Rule::requiredIf(fn () => $this->boolean('is_credit') === true),
                 'uuid',
                 Rule::exists('suppliers', 'id')->where(function ($query) {
+                    if (Auth::user()->hasRole('super-admin')) {
+                        return $query;
+                    }
+
                     return $query->where('organization_id', Auth::user()->organization_id);
                 }),
             ],

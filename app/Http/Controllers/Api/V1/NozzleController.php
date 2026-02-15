@@ -36,7 +36,14 @@ class NozzleController extends Controller
     {
         Gate::authorize('create', Nozzle::class);
 
-        $nozzle = Nozzle::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->user()->hasRole('super-admin')) {
+            $station = \App\Models\Station::withoutGlobalScopes()->find($data['station_id']);
+            $data['organization_id'] = $station->organization_id;
+        }
+
+        $nozzle = Nozzle::create($data);
 
         return new NozzleResource($nozzle->load(['station', 'tank.product']));
     }
