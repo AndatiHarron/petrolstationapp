@@ -99,7 +99,6 @@ export default function LiftingsScreen() {
     const [newItem, setNewItem] = useState<Partial<StoreLiftingRequest>>({
         lifting_date: formatDate(new Date()),
         invoice_number: '',
-        supplier_name: '',
         volume_liters: 0,
         buying_price_per_liter: 0,
         total_cost: 0,
@@ -195,7 +194,7 @@ export default function LiftingsScreen() {
         // Calculate tax based on selected tank's VAT rate
         const selectedTank = tanks.find(t => t.id === selectedTankId);
         const vatRate = selectedTank?.product_vat_rate || 0;
-        updated.tax_paid = totalCost * (vatRate / 100);
+        updated.tax_paid = totalCost * (vatRate);
 
         setNewItem(updated);
     };
@@ -218,7 +217,6 @@ export default function LiftingsScreen() {
         setNewItem({
             lifting_date: formatDate(new Date()),
             invoice_number: '',
-            supplier_name: '',
             volume_liters: 0,
             buying_price_per_liter: 0,
             total_cost: 0,
@@ -265,7 +263,6 @@ export default function LiftingsScreen() {
             tank_id: selectedTankId,
             lifting_date: newItem.lifting_date,
             invoice_number: newItem.invoice_number || null,
-            supplier_name: newItem.supplier_name || null,
             volume_liters: newItem.volume_liters,
             buying_price_per_liter: newItem.buying_price_per_liter,
             total_cost: newItem.total_cost || (newItem.volume_liters * newItem.buying_price_per_liter),
@@ -415,13 +412,6 @@ export default function LiftingsScreen() {
                                 placeholder="INV-12345"
                                 value={newItem.invoice_number || ''}
                                 onChangeText={(text) => setNewItem({ ...newItem, invoice_number: text })}
-                            />
-
-                            <InputField
-                                label="Supplier Name"
-                                placeholder="e.g. Shell Kenya Ltd"
-                                value={newItem.supplier_name || ''}
-                                onChangeText={(text) => setNewItem({ ...newItem, supplier_name: text })}
                             />
 
                             <InputField

@@ -3,17 +3,19 @@ import { View, Text, Pressable, StatusBar, Alert, ScrollView } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Package, Cylinder, Truck, Gauge, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Building2, Package, Cylinder, Truck, Gauge, Users, ChevronDown, ChevronUp } from 'lucide-react-native';
 import { StationsList } from '@/components/admin/infrastructure/stations-list';
 import { ProductsList } from '@/components/admin/infrastructure/products-list';
 import { TanksList } from '@/components/admin/infrastructure/tanks-list';
 import { NozzlesList } from '@/components/admin/infrastructure/nozzles-list';
 import { SuppliersList } from '@/components/admin/infrastructure/suppliers-list';
+import { ManagersList } from '@/components/admin/infrastructure/managers-list';
 import { StationModal } from '@/components/admin/infrastructure/station-modal';
 import { ProductModal } from '@/components/admin/infrastructure/product-modal';
 import { TankModal } from '@/components/admin/infrastructure/tank-modal';
 import { NozzleModal } from '@/components/admin/infrastructure/nozzle-modal';
 import { SupplierModal } from '@/components/admin/infrastructure/supplier-modal';
+import { CreateManagerModal } from '@/components/admin/infrastructure/create-manager-modal';
 import { useStationsDestroy, getStationsIndexQueryKey } from '@/features/api/station/station';
 import { useProductsDestroy, getProductsIndexQueryKey } from '@/features/api/product/product';
 import { useTanksDestroy, getTanksIndexQueryKey } from '@/features/api/tank/tank';
@@ -21,7 +23,7 @@ import { useNozzlesDestroy, getNozzlesIndexQueryKey } from '@/features/api/nozzl
 import { useCreditorsDestroy, getCreditorsIndexQueryKey } from '@/features/api/creditor/creditor';
 import type { StationResource, ProductResource, TankResource, NozzleResource, SupplierResource } from '@/features/api/model';
 
-type TabType = 'stations' | 'products' | 'tanks' | 'nozzles' | 'suppliers';
+type TabType = 'stations' | 'products' | 'tanks' | 'nozzles' | 'suppliers' | 'managers';
 
 const TABS: { id: TabType; label: string; icon: typeof Building2 }[] = [
     { id: 'stations', label: 'Stations', icon: Building2 },
@@ -29,6 +31,7 @@ const TABS: { id: TabType; label: string; icon: typeof Building2 }[] = [
     { id: 'tanks', label: 'Tanks', icon: Cylinder },
     { id: 'nozzles', label: 'Nozzles', icon: Gauge },
     { id: 'suppliers', label: 'Suppliers', icon: Truck },
+    { id: 'managers', label: 'Managers', icon: Users },
 ];
 
 function SectionDropdown({
@@ -107,6 +110,7 @@ export default function InfrastructureTab() {
     const [editingNozzle, setEditingNozzle] = useState<NozzleResource | undefined>(undefined);
     const [supplierModalVisible, setSupplierModalVisible] = useState(false);
     const [editingSupplier, setEditingSupplier] = useState<SupplierResource | undefined>(undefined);
+    const [createManagerModalVisible, setCreateManagerModalVisible] = useState(false);
 
     // Delete mutations
     const stationDeleteMutation = useStationsDestroy({
@@ -327,6 +331,14 @@ export default function InfrastructureTab() {
         setEditingSupplier(undefined);
     }, []);
 
+    const handleAddManager = useCallback(() => {
+        setCreateManagerModalVisible(true);
+    }, []);
+
+    const handleCloseCreateManagerModal = useCallback(() => {
+        setCreateManagerModalVisible(false);
+    }, []);
+
     const renderContent = () => {
         switch (activeTab) {
             case 'stations':
@@ -369,6 +381,8 @@ export default function InfrastructureTab() {
                         onDeleteSupplier={handleDeleteSupplier}
                     />
                 );
+            case 'managers':
+                return <ManagersList onAddManager={handleAddManager} />;
             default:
                 return null;
         }
@@ -382,7 +396,7 @@ export default function InfrastructureTab() {
                 <View className="px-4 mb-4 mt-4">
                     <Text className="text-2xl font-bold text-white">Infrastructure</Text>
                     <Text className="text-slate-500 text-sm mt-1">
-                        Manage stations, products, tanks, nozzles, and suppliers
+                        Manage stations, products, tanks, nozzles, suppliers, and managers
                     </Text>
                 </View>
 
@@ -425,6 +439,10 @@ export default function InfrastructureTab() {
                 visible={supplierModalVisible}
                 onClose={handleCloseSupplierModal}
                 supplier={editingSupplier}
+            />
+            <CreateManagerModal
+                visible={createManagerModalVisible}
+                onClose={handleCloseCreateManagerModal}
             />
         </View>
     );

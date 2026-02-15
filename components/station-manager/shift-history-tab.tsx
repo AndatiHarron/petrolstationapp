@@ -325,12 +325,7 @@ export function ShiftHistoryTab() {
                                 <Text className="text-slate-300">Collected</Text>
                                 <Text className="text-emerald-400 font-bold font-mono">Sh {selectedShift?.financials?.collected?.toLocaleString() ?? '0'}</Text>
                             </View>
-                            <View className="flex-row justify-between">
-                                <Text className="text-slate-300">Variance</Text>
-                                <Text className={`font-bold font-mono ${(selectedShift?.financials?.variance ?? 0) < 0 ? 'text-red-400' : 'text-white'}`}>
-                                    Sh {selectedShift?.financials?.variance?.toLocaleString() ?? '0'}
-                                </Text>
-                            </View>
+                            
                         </View>
 
                         {selectedShift?.variance_alert && (
