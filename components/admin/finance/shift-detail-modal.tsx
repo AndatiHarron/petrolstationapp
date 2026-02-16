@@ -14,7 +14,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { Galeria } from '@nandorojo/galeria';
-import { X, Clock, FileText, Download, Camera } from 'lucide-react-native';
+import { X, Clock, FileText, Download, Camera, Droplets } from 'lucide-react-native';
 import type {
     InvoiceResource,
     ShiftGenerateInvoices200,
@@ -37,6 +37,9 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'KES',
 });
+
+const LITER_FORMATTER = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+const LITER_INTEGER_FORMATTER = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
 type EvidenceDisplayItem = {
     id: string;
@@ -312,6 +315,18 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
         ? CURRENCY_FORMATTER.format(financials.variance)
         : '';
 
+    const wetStock = shift?.wet_stock;
+    const wetVarianceLiters = wetStock?.variance_liters;
+    const wetSoldLiters = wetStock?.total_sold_liters;
+    const formattedWetVariance =
+        typeof wetVarianceLiters === 'number'
+            ? `${wetVarianceLiters > 0 ? '+' : ''}${LITER_FORMATTER.format(wetVarianceLiters)} L`
+            : '';
+    const formattedWetSold =
+        typeof wetSoldLiters === 'number'
+            ? `${LITER_INTEGER_FORMATTER.format(wetSoldLiters)} L`
+            : '';
+
     return (
         <Modal
             visible={!!shiftId}
@@ -401,6 +416,52 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                             </Text>
                                         </View>
                                     </View>
+                                </View>
+
+                                <View style={[styles.card, { marginBottom: 16 }]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Droplets size={18} color="#64748b" />
+                                        <Text style={styles.sectionTitle}>Wet Stock Variance</Text>
+                                    </View>
+                                    {typeof wetVarianceLiters === 'number' &&
+                                    typeof wetSoldLiters === 'number' ? (
+                                        <View style={styles.innerCard}>
+                                            <View
+                                                style={[
+                                                    styles.financialRow,
+                                                    styles.financialRowBorder,
+                                                ]}
+                                            >
+                                                <Text style={styles.fieldLabel}>
+                                                    Variance (L)
+                                                </Text>
+                                                <Text
+                                                    style={[
+                                                        styles.fieldValue,
+                                                        wetVarianceLiters < 0
+                                                            ? styles.varianceNegative
+                                                            : wetVarianceLiters > 0
+                                                              ? styles.variancePositive
+                                                              : undefined,
+                                                    ]}
+                                                >
+                                                    {formattedWetVariance}
+                                                </Text>
+                                            </View>
+                                            <View style={styles.financialRow}>
+                                                <Text style={styles.fieldLabel}>
+                                                    Total sold (L)
+                                                </Text>
+                                                <Text style={styles.fieldValue}>
+                                                    {formattedWetSold}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    ) : (
+                                        <Text style={styles.hintText}>
+                                            No wet stock data recorded for this shift.
+                                        </Text>
+                                    )}
                                 </View>
 
                                 <View style={[styles.card, { marginBottom: 16 }]}>
