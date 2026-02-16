@@ -7,12 +7,7 @@ export function ReconciliationWidget() {
     const [mpesa, setMpesa] = useState('');
     const [credit, setCredit] = useState('');
 
-    const expectedRevenue = 145000; // Mocked expected value from pumps
-
     const totalCollected = (parseFloat(cash) || 0) + (parseFloat(mpesa) || 0) + (parseFloat(credit) || 0);
-    const difference = totalCollected - expectedRevenue;
-    const isShort = difference < 0;
-    const isOver = difference > 0;
 
     // Format currency
     const formatCurrency = (amount: number) => {
@@ -26,36 +21,14 @@ export function ReconciliationWidget() {
     return (
         <View className="bg-slate-800 rounded-2xl p-6 mt-6 border border-slate-700">
             <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-4">
-                Shift Balancing
+                Shift Collections
             </Text>
 
             {/* Summary Card */}
             <View className="bg-slate-900/50 rounded-xl p-4 mb-6 border border-slate-700/50">
-                <View className="flex-row justify-between mb-2">
-                    <Text className="text-slate-400 font-medium">Expected Revenue</Text>
-                    <Text className="text-slate-200 font-bold">{formatCurrency(expectedRevenue)}</Text>
-                </View>
                 <View className="flex-row justify-between mb-4">
                     <Text className="text-slate-400 font-medium">Total Collected</Text>
                     <Text className="text-white font-bold text-lg">{formatCurrency(totalCollected)}</Text>
-                </View>
-
-                <View className={`p-3 rounded-lg flex-row items-center justify-between ${difference === 0 ? 'bg-emerald-500/10 border border-emerald-500/30' :
-                    isShort ? 'bg-red-500/10 border border-red-500/30' :
-                        'bg-amber-500/10 border border-amber-500/30'
-                    }`}>
-                    <Text className={`font-bold ${difference === 0 ? 'text-emerald-400' :
-                        isShort ? 'text-red-400' :
-                            'text-amber-400'
-                        }`}>
-                        {difference === 0 ? 'Balanced' : isShort ? 'Shortage' : 'Overage'}
-                    </Text>
-                    <Text className={`font-black text-lg ${difference === 0 ? 'text-emerald-400' :
-                        isShort ? 'text-red-400' :
-                            'text-amber-400'
-                        }`}>
-                        {formatCurrency(Math.abs(difference))}
-                    </Text>
                 </View>
             </View>
 

@@ -46,8 +46,6 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
         });
     };
 
-    const variance = item.financials?.variance ?? 0;
-
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
@@ -65,12 +63,8 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
                 </View>
             </View>
 
-            <View className="flex-row gap-3 mt-2">
-                <View className="flex-1 bg-slate-700/40 p-2 rounded-lg">
-                    <Text className="text-slate-500 text-[10px] uppercase">Expected</Text>
-                    <Text className="text-white text-sm font-bold">Sh {item.financials?.expected?.toLocaleString() ?? '0'}</Text>
-                </View>
-                <View className="flex-1 bg-slate-700/40 p-2 rounded-lg">
+            <View className="mt-2">
+                <View className="bg-slate-700/40 p-2 rounded-lg">
                     <Text className="text-slate-500 text-[10px] uppercase">Collected</Text>
                     <Text className="text-emerald-400 text-sm font-bold">Sh {item.financials?.collected?.toLocaleString() ?? '0'}</Text>
                 </View>
@@ -317,23 +311,11 @@ export function ShiftHistoryTab() {
 
                         <View className="bg-slate-800 p-4 rounded-xl mb-4">
                             <Text className="text-slate-400 text-xs uppercase mb-3 font-bold">Financial Summary</Text>
-                            <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                <Text className="text-slate-300">Expected</Text>
-                                <Text className="text-amber-400 font-bold font-mono">Sh {selectedShift?.financials?.expected?.toLocaleString() ?? '0'}</Text>
-                            </View>
-                            <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
+                            <View className="flex-row justify-between">
                                 <Text className="text-slate-300">Collected</Text>
                                 <Text className="text-emerald-400 font-bold font-mono">Sh {selectedShift?.financials?.collected?.toLocaleString() ?? '0'}</Text>
                             </View>
-                            
                         </View>
-
-                        {selectedShift?.variance_alert && (
-                            <View className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl mb-4 flex-row items-center gap-2">
-                                <Ionicons name="warning" size={16} color="#ef4444" />
-                                <Text className="text-red-400 text-sm font-medium">Variance alert flagged for this shift</Text>
-                            </View>
-                        )}
 
                         <View className="mt-auto pt-4 mb-16">
                             <Button

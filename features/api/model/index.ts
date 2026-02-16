@@ -148,6 +148,7 @@ export * from './shiftLock403';
 export * from './shiftLock500';
 export * from './shiftResource';
 export * from './shiftResourceFinancials';
+export * from './shiftResourceWetStock';
 export * from './shiftShow200';
 export * from './shiftStore200';
 export * from './shiftStore400';

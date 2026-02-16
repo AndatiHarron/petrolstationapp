@@ -152,19 +152,10 @@ export function CurrentShiftTab() {
                                         <Text className="text-white font-bold">
                                             Collected: <Text className="text-emerald-400">Sh {activeShift.financials?.collected?.toLocaleString() || '0'}</Text>
                                         </Text>
-                                        <Text className="text-white font-bold">
-                                            Expected: <Text className="text-amber-400">Sh {activeShift.financials?.expected?.toLocaleString() || '0'}</Text>
-                                        </Text>
                                     </View>
                                 </View>
                             </View>
 
-                            {activeShift.variance_alert && (
-                                <View className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex-row items-center gap-2">
-                                    <SymbolView name="exclamationmark.triangle.fill" size={18} tintColor="#ef4444" />
-                                    <Text className="text-red-400 font-medium text-sm">Variance detected in this shift</Text>
-                                </View>
-                            )}
                         </View>
 
                         <View className="p-5 pt-0">
