@@ -1,20 +1,16 @@
 #!/bin/bash
-set -e  # Exit on any error
+set -e  # Exit on error
 
-# Ensure PORT is set (Railway provides it, or default to 80)
-export PORT=${PORT:-80}
-
-# Start Nightwatch agent in background on fixed internal port
+# Start Nightwatch agent in background
 php artisan nightwatch:agent --listen-on=0.0.0.0:2407 --verbose &
+
 AGENT_PID=$!
 
-# Give agent 3 seconds to bind
-sleep 3
+# Wait briefly for agent
+sleep 2
 
-echo "Starting web server on 0.0.0.0:$PORT (public) and Nightwatch on :2407 (internal)"
+# Start web server (use heroku-php-apache2 for prod)
+vendor/bin/heroku-php-apache2 public/ -p 8000
 
-# Production web server on $PORT (80), serving from public/
-vendor/bin/heroku-php-apache2 public/ -p $PORT
-
-# The exec ensures agent is killed when web server stops
-trap "kill $AGENT_PID 2>/dev/null || true" EXIT
+# Kill agent on shutdown
+kill $AGENT_PID
