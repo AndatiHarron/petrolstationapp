@@ -54,7 +54,7 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
   const getTextStyle = () => {
     switch (variant) {
       case 'primary':
-        return 'text-white italic'; // Keep italic for velocity
+        return 'text-white';
       case 'secondary':
         return 'text-white';
       case 'outline':
@@ -79,7 +79,11 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       {loading ? (
         <ActivityIndicator color={variant === 'outline' ? '#000' : '#fff'} />
       ) : (
-        <Text className={`text-lg font-black uppercase tracking-wider ${getTextStyle()}`}>
+        <Text
+          className={`text-lg font-black uppercase tracking-wider ${getTextStyle()}`}
+          style={{ paddingHorizontal: 2, textAlign: 'center' }}
+          numberOfLines={1}
+        >
           {title}
         </Text>
       )}

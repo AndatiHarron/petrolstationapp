@@ -55,7 +55,7 @@ export const LoginForm = () => {
 
 
   return (
-    <View className="w-full">
+    <View className="w-full gap-5">
       <form.Field name="email">
         {(field) => (
           <InputField
@@ -66,6 +66,7 @@ export const LoginForm = () => {
             onChangeText={field.handleChange}
             onBlur={field.handleBlur}
             error={getErrorMessage(field.state.meta.errors, field.state.meta.isTouched, form.state.isSubmitted)}
+            className="mb-0"
           />
         )}
       </form.Field>
@@ -81,23 +82,24 @@ export const LoginForm = () => {
             error={getErrorMessage(field.state.meta.errors, field.state.meta.isTouched, form.state.isSubmitted)}
             secureTextEntry
             delay={200}
+            className="mb-0"
           />
         )}
       </form.Field>
 
       <Animated.View
         entering={FadeInDown.delay(300).duration(400).springify()}
-        className="mt-2"
+        className="mt-1"
       >
         <Button className='rounded-lg' title="Sign In" onPress={() => form.handleSubmit()} loading={form.state.isSubmitting || isLoginPending} />
       </Animated.View>
 
       <Animated.View
         entering={FadeInDown.delay(400).duration(400).springify()}
-        className="mt-8 items-center"
+        className="items-center"
       >
         <Text className="text-sm font-medium text-slate-500">
-          Forgot your password? <Text className="font-bold text-white underline">Get help</Text>
+          Forgot your password? <Text className="font-semibold text-slate-400">Get help</Text>
         </Text>
       </Animated.View>
     </View>

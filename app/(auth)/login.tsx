@@ -15,35 +15,31 @@ export default function LoginScreen() {
           className="flex-1"
         >
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingBottom: 40 }}
+            contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 16, paddingBottom: 40 }}
             keyboardShouldPersistTaps="handled"
             contentInsetAdjustmentBehavior="automatic"
+            showsVerticalScrollIndicator={false}
           >
-            <View className="flex-1 justify-end pb-12">
-              <Animated.View
-                entering={FadeInDown.duration(800).springify()}
-                className="mb-12"
-              >
-                <Text className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.9]">
-                  PETROL
-                </Text>
-                <Text className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.9]">
-                  INTEGRITY
-                </Text>
-                <Text className="mt-4 text-lg font-medium text-slate-400 max-w-[280px] leading-6">
-                  Secure access for station managers.
+            <View className="flex-1 justify-center gap-10">
+              <Animated.View entering={FadeInDown.duration(650).springify()} className="gap-4">
+                <View className="gap-0">
+                  <Text className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.9]">
+                    PETROL
+                  </Text>
+                  <Text className="text-6xl font-black text-white tracking-tighter uppercase leading-[0.9]">
+                    INTEGRITY
+                  </Text>
+                </View>
+                <Text className="max-w-[320px] text-base font-medium text-slate-400 leading-6">
+                  Shift integrity, inventory, and station operations in one place.
                 </Text>
               </Animated.View>
 
-              <Animated.View
-                entering={FadeInDown.delay(200).duration(800).springify()}
-              >
+              <Animated.View entering={FadeInDown.delay(150).duration(650).springify()} className="gap-8">
                 <LoginForm />
 
-                <View className="mt-8 items-center">
-                  <Text className="text-xs font-semibold text-slate-500 uppercase tracking-widest">
-                    System v1.0.0
-                  </Text>
+                <View className="items-center">
+                  <Text className="text-xs text-slate-500">System v1.0.0</Text>
                 </View>
               </Animated.View>
             </View>
