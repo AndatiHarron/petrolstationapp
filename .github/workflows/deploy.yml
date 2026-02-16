@@ -55,3 +55,10 @@ jobs:
           DB_USERNAME: pis_user
           DB_PASSWORD: password
         run: php artisan test
+  deploy:
+    needs: laravel-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Laravel Cloud
+        run: |
+          curl -X POST "${{ secrets.LARAVEL_CLOUD_DEPLOY_HOOK }}?commit_hash=${{ github.sha }}"
