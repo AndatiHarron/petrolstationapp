@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { InputField } from '@/components/input-field';
 import { Button } from '@/components/button';
@@ -34,7 +35,10 @@ import type {
 import { getShiftIndexQueryKey, useShiftIndex } from '@/features/api/shift/shift';
 import { useNozzlesIndex } from '@/features/api/nozzle/nozzle';
 import { useTanksIndex } from '@/features/api/tank/tank';
-import { useEditRequestsStore } from '@/features/api/edit-request/edit-request';
+import {
+    getEditRequestsIndexQueryKey,
+    useEditRequestsStore,
+} from '@/features/api/edit-request/edit-request';
 
 // ── Memoised list item (list-performance-item-memo) ──
 const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress: (item: ShiftResource) => void }) => {
@@ -75,6 +79,7 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
 
 // ── Main component ──
 export function ShiftHistoryTab() {
+    const queryClient = useQueryClient();
     // ---- Data ----
     const [historyPage, setHistoryPage] = useState(1);
     const { data: shiftsRaw, isLoading, isFetching, refetch } = useShiftIndex({
@@ -125,6 +130,7 @@ export function ShiftHistoryTab() {
     const editRequestMutation = useEditRequestsStore({
         mutation: {
             onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: getEditRequestsIndexQueryKey() });
                 setIsEditModalOpen(false);
                 setEditReason('');
                 setEditStep(1);

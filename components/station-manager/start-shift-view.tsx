@@ -6,6 +6,11 @@ import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated';
 import { useShiftLock, useShiftStore } from '@/features/api/shift/shift';
 import { useQueryClient } from '@tanstack/react-query';
 import { getApiErrorMessage } from '@/lib/api-error';
+import {
+    getActiveShiftQueryKey,
+    invalidateOnShiftLock,
+    invalidateOnShiftStart,
+} from '@/lib/query-invalidations';
 import { toast } from 'sonner-native';
 import { LockShiftModal } from './lock-shift-modal';
 
@@ -19,14 +24,8 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
     const queryClient = useQueryClient();
     const { mutateAsync: startShift, isPending: isCreateShiftPending } = useShiftStore({
         mutation: {
-            onSuccess: async () => {
-                await queryClient.invalidateQueries({
-                    queryKey: ['activeShift'],
-                });
-
-                await queryClient.invalidateQueries({
-                    queryKey: ['audit-logs'],
-                });
+            onSuccess: () => {
+                invalidateOnShiftStart(queryClient);
             },
             onError: (error) => {
                 const message = getApiErrorMessage(error);
@@ -39,17 +38,10 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
 
     const { mutateAsync: lockShift, isPending: isLockShiftPending } = useShiftLock({
         mutation: {
-            onSuccess: async () => {
+            onSuccess: (_res, variables) => {
                 // Force UI update immediately to show "No Active Shift"
-                queryClient.setQueryData(['activeShift'], null);
-
-                await queryClient.invalidateQueries({
-                    queryKey: ['activeShift'],
-                });
-
-                await queryClient.invalidateQueries({
-                    queryKey: ['audit-logs'],
-                });
+                queryClient.setQueryData(getActiveShiftQueryKey(), null);
+                invalidateOnShiftLock(queryClient, variables?.shift);
             },
             onError: (error) => {
                 const message = getApiErrorMessage(error);

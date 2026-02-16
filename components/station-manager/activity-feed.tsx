@@ -9,11 +9,7 @@ import { AuditLogResource } from '@/features/api/model/auditLogResource';
 import { AuditLogIndex200 } from '@/features/api/model';
 
 export function ActivityFeed() {
-    const { data: auditLogs, isPending: isAuditLogsPending, error } = useAuditLogIndex({
-        query: {
-            queryKey: ['audit-logs']
-        }
-    });
+    const { data: auditLogs, isPending: isAuditLogsPending, error } = useAuditLogIndex();
 
     if (error) {
         return (

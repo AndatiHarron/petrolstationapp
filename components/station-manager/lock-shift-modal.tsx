@@ -149,7 +149,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         customer_id: s.customerId,
                         amount: Number(s.amount),
                         vehicle_reg: s.vehicleReg || null
-                    })) : null
+                    })) : []
                 }
             });
         } finally {
