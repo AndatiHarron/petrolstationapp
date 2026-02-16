@@ -19,11 +19,15 @@ class ShiftResource extends JsonResource
             'station_name' => $this->station->name,
             'started_at' => $this->started_at->toDateTimeString(),
             'status' => $this->status,
-            'variance_alert' => $this->cash_variance < 0,
+            'variance_alert' => $this->cash_variance < 0 || $this->stock_variance_liters < 0,
             'financials' => [
                 'expected' => (float) $this->total_expected_cash,
                 'collected' => (float) $this->total_collected_cash,
                 'variance' => (float) $this->cash_variance,
+            ],
+            'wet_stock' => [
+                'variance_liters' => (float) $this->stock_variance_liters,
+                'total_sold_liters' => (float) $this->total_stock_sold_liters,
             ],
             'readings' => $this->whenLoaded('meterReadings'),
             'dips' => $this->whenLoaded('dipReadings'),
