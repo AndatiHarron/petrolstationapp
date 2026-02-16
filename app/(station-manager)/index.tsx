@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { StatusBar, View } from 'react-native';
+import { View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated from 'react-native-reanimated';
 
@@ -20,7 +21,7 @@ export default function StationManagerDashboard() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 <Animated.ScrollView
                     className="flex-1 px-4"

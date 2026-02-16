@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import Animated from 'react-native-reanimated';
 import { SuperAdminHeader } from '../../components/super-admin/super-admin-header';
 import { StatsRibbon } from '../../components/super-admin/stats-ribbon';
@@ -33,7 +33,7 @@ export default function SuperAdminDashboard() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 <Animated.ScrollView
                     className="flex-1 px-4"

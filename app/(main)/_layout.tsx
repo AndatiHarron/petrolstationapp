@@ -1,6 +1,6 @@
 import { Stack, useRouter } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
-import { View, TouchableOpacity, Platform, StatusBar } from 'react-native';
+import { View, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 

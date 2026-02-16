@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, Pressable, StatusBar, Alert, ScrollView } from 'react-native';
+import { View, Text, Pressable, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { Building2, Package, Cylinder, Truck, Gauge, Users, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { StatusBar } from 'expo-status-bar';
 import { StationsList } from '@/components/admin/infrastructure/stations-list';
 import { ProductsList } from '@/components/admin/infrastructure/products-list';
 import { TanksList } from '@/components/admin/infrastructure/tanks-list';
@@ -390,7 +391,7 @@ export default function InfrastructureTab() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 mb-4 mt-4">

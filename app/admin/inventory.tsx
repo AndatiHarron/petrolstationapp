@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -155,7 +155,7 @@ export default function InventoryTab() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800">

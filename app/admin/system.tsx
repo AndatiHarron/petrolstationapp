@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, RefreshControl, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
-import { StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuditLogIndex, useAuditLogShow } from '../../features/api/audit-log/audit-log';
 import type { AuditLogIndex200, AuditLogResource } from '@/features/api/model';
@@ -176,7 +176,7 @@ export default function SystemTab() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 py-4 border-b border-slate-800">

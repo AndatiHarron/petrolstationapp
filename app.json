@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "my-expo-app",
-    "slug": "my-expo-app",
+    "name": "Petrol Management System",
+    "slug": "petrol-management-system",
     "version": "1.0.0",
     "web": {
       "favicon": "./assets/favicon.png"
@@ -12,26 +12,47 @@
     "scheme": "petrol-integrity",
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0f172a",
+          "image": "./assets/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "dark": {
+            "backgroundColor": "#0f172a",
+            "image": "./assets/splash.png"
+          }
+        }
+      ]
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0f172a",
+    "androidStatusBar": {
+      "barStyle": "light-content",
+      "backgroundColor": "#0f172a"
     },
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
+      "bundleIdentifier": "com.octane.petrolintegrity",
       "supportsTablet": true
     },
     "android": {
+      "package": "com.octane.petrolintegrity",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3948e489-7317-4c8f-a2fa-abbae0ef88a9"
       }
     }
   }

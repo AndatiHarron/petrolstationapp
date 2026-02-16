@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,7 +14,7 @@ export default function ShiftsScreen() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1" edges={['top']}>
                 {/* Header */}
                 <View className="px-4 pt-4 pb-2">
