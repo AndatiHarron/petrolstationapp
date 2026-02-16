@@ -14,7 +14,7 @@ sleep 3
 echo "Starting web server on 0.0.0.0:$PORT (public) and Nightwatch on :2407 (internal)"
 
 # Production web server on $PORT (80), serving from public/
-exec vendor/bin/heroku-php-apache2 public/ -p $PORT
+vendor/bin/heroku-php-apache2 public/ -p $PORT
 
 # The exec ensures agent is killed when web server stops
 trap "kill $AGENT_PID 2>/dev/null || true" EXIT
