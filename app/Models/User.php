@@ -76,6 +76,10 @@ class User extends Authenticatable
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->organization_id !== null && $this->hasAnyRole(['admin', 'manager', 'super-admin']);
+        if ($this->hasRole('super-admin')) {
+            return true;
+        }
+
+        return $this->organization_id !== null && $this->hasAnyRole(['admin', 'manager']);
     }
 }
