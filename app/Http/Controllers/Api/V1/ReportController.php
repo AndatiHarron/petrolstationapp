@@ -148,6 +148,12 @@ class ReportController extends Controller
             ->orderBy('date')
             ->get();
 
-        return response()->json(['data' => $variances]);
+        $data = $variances->map(function ($item) {
+            $item->total_variance = (float) $item->total_variance;
+
+            return $item;
+        });
+
+        return response()->json(['data' => $data]);
     }
 }
