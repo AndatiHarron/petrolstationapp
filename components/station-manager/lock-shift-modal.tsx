@@ -4,7 +4,7 @@ import { useShiftClosingData } from '@/features/api/shift/shift';
 import * as ImagePicker from 'expo-image-picker';
 import { SymbolView } from 'expo-symbols';
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Image, InteractionManager, Modal, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Image, InteractionManager, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 interface ClosingNozzle {
@@ -245,15 +245,21 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
 
     return (
         <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
-            <View className="flex-1 bg-black/60 justify-end">
-                {/* Backdrop Tap to Close */}
-                <Pressable className="absolute inset-0" onPress={onClose} />
-
-                <Animated.View
-                    entering={SlideInDown.duration(250)}
-                    exiting={SlideOutDown}
-                    className="bg-slate-900 h-[92%] rounded-t-3xl border-t border-slate-700 w-full flex overflow-hidden"
+            <View className="flex-1 bg-black/60">
+                <KeyboardAvoidingView
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
+                    className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
+                    {/* Backdrop Tap to Close */}
+                    <Pressable className="absolute inset-0" onPress={onClose} />
+
+                    <Animated.View
+                        entering={SlideInDown.duration(250)}
+                        exiting={SlideOutDown}
+                        className="bg-slate-900 h-[92%] rounded-t-3xl border-t border-slate-700 w-full flex overflow-hidden"
+                    >
                     {/* Header */}
                     <View className="px-6 py-4 border-b border-slate-800 flex-row items-center justify-between bg-slate-900/90 z-10">
                         <View>
@@ -272,7 +278,12 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         <View className={`h-full bg-blue-500 transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`} />
                     </View>
 
-                    <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
+                    <ScrollView
+                        className="flex-1"
+                        contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                    >
 
                         {/* -------------------- STEP 1: METERS -------------------- */}
                         {step === 1 && (
@@ -552,6 +563,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         )}
                     </View>
                 </Animated.View>
+                </KeyboardAvoidingView>
             </View>
         </Modal>
     );

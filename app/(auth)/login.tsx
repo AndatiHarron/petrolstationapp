@@ -11,7 +11,8 @@ export default function LoginScreen() {
       <StatusBar style="light" />
       <SafeAreaView className="flex-1">
         <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          behavior="padding"
+          enabled={Platform.OS === 'ios'}
           className="flex-1"
         >
           <ScrollView

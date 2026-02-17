@@ -356,8 +356,10 @@ export default function LiftingsScreen() {
                 onRequestClose={() => setIsCreateModalOpen(false)}
             >
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[90%] rounded-t-3xl shadow-2xl">
                         <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
@@ -367,7 +369,12 @@ export default function LiftingsScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 40 }}>
+                        <ScrollView
+                            className="flex-1 p-6"
+                            contentContainerStyle={{ paddingBottom: 40 }}
+                            keyboardShouldPersistTaps="handled"
+                            showsVerticalScrollIndicator={false}
+                        >
                             {/* Station (Read-only) */}
                             <View className="mb-4">
                                 <Text className="text-slate-400 text-sm font-medium mb-1">Station</Text>

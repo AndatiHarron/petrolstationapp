@@ -341,8 +341,10 @@ export function ShiftHistoryTab() {
                 onRequestClose={() => setIsEditModalOpen(false)}
             >
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[92%] rounded-t-3xl shadow-2xl flex overflow-hidden">
                         {/* Header */}
@@ -363,7 +365,12 @@ export function ShiftHistoryTab() {
                             <View className={`h-full bg-blue-500 ${editStep === 1 ? 'w-1/3' : editStep === 2 ? 'w-2/3' : 'w-full'}`} />
                         </View>
 
-                        <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
+                        <ScrollView
+                            className="flex-1"
+                            contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+                            keyboardShouldPersistTaps="handled"
+                            showsVerticalScrollIndicator={false}
+                        >
                             <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
                                 <Text className="text-blue-400 text-sm">
                                     Correct the shift data below. An admin will review your changes before they are applied.

@@ -201,8 +201,10 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
         >
             <BlurView intensity={20} className="flex-1">
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 max-h-[90%]">
                         {/* Handle Bar */}
@@ -229,7 +231,12 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                         </View>
 
                         {/* Form */}
-                        <ScrollView className="px-6 pt-6" contentContainerStyle={{ paddingBottom: 20 }}>
+                        <ScrollView
+                            className="px-6 pt-6"
+                            contentContainerStyle={{ paddingBottom: 20 }}
+                            keyboardShouldPersistTaps="handled"
+                            showsVerticalScrollIndicator={false}
+                        >
                             {/* Name Input */}
                             <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
                                 Tank Name *

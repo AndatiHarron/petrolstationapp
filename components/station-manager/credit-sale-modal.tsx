@@ -30,8 +30,10 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
         >
             <BlurView intensity={20} className="flex-1">
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 h-[85%]">
                         {/* Handle Bar */}
@@ -53,7 +55,12 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView className="flex-1 px-6 pt-6">
+                        <ScrollView
+                            className="flex-1 px-6 pt-6"
+                            keyboardShouldPersistTaps="handled"
+                            contentContainerStyle={{ paddingBottom: 24 }}
+                            showsVerticalScrollIndicator={false}
+                        >
                             {/* Amount Input */}
                             <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">Total Amount (KES)</Text>
                             <View className="relative mb-8">

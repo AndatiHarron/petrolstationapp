@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useQueryClient } from '@tanstack/react-query';
 import { X } from 'lucide-react-native';
@@ -109,10 +109,12 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
         >
             <BlurView intensity={20} className="flex-1">
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700">
+                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 h-[85%] flex overflow-hidden">
                         {/* Handle Bar */}
                         <View className="items-center pt-2 pb-4">
                             <View className="w-12 h-1 bg-slate-700 rounded-full" />
@@ -137,7 +139,12 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                         </View>
 
                         {/* Form */}
-                        <View className="px-6 pt-6">
+                        <ScrollView
+                            className="flex-1 px-6 pt-6"
+                            keyboardShouldPersistTaps="handled"
+                            contentContainerStyle={{ paddingBottom: 24 }}
+                            showsVerticalScrollIndicator={false}
+                        >
                             {/* Name Input */}
                             <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
                                 Product Name *
@@ -186,7 +193,7 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                                     <Text className="text-slate-500 font-bold">%</Text>
                                 </View>
                             </View>
-                        </View>
+                        </ScrollView>
 
                         {/* Footer */}
                         <View className="p-6 border-t border-slate-800 bg-slate-900 pb-10">

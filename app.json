@@ -44,6 +44,7 @@
     },
     "android": {
       "package": "com.octane.petrolintegrity",
+      "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
