@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import { View, Pressable, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated from 'react-native-reanimated';
 
 import { ActivityFeed } from '../../components/station-manager/activity-feed';
 import { CreditSaleModal } from '../../components/station-manager/credit-sale-modal';
@@ -12,6 +11,7 @@ import { TanksSection } from '../../components/station-manager/tanks-section';
 import { CustomersSection } from '../../components/station-manager/customers-section';
 import { TutorialTarget } from '@/components/tutorial/tutorial-target';
 import { useTutorial } from '@/components/tutorial/use-tutorial';
+import { TutorialScrollArea } from '@/components/tutorial/tutorial-scroll-area';
 
 export default function StationManagerDashboard() {
     const { start } = useTutorial();
@@ -26,8 +26,9 @@ export default function StationManagerDashboard() {
         <View className="flex-1 bg-slate-900">
             <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
-                <Animated.ScrollView
-                    className="flex-1 px-4"
+                <TutorialScrollArea
+                    scrollClassName="flex-1"
+                    contentClassName="px-4"
                     contentContainerStyle={{ paddingBottom: 40 }}
                     showsVerticalScrollIndicator={false}
                 >
@@ -54,7 +55,7 @@ export default function StationManagerDashboard() {
                             <ActivityFeed />
                         </TutorialTarget>
                     </View>
-                </Animated.ScrollView>
+                </TutorialScrollArea>
             </SafeAreaView>
 
             <CreditSaleModal

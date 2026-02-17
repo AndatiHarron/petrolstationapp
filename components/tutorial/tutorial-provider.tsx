@@ -8,6 +8,8 @@ import { clearTutorialCompleted, getTutorialCompleted, setTutorialCompleted } fr
 import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 
 type TargetRef = RefObject<View>;
+type ScrollRef = RefObject<any>;
+type ScrollArea = { scrollRef: ScrollRef; contentRef: TargetRef };
 
 type TutorialContextValue = {
     role: TutorialRole;
@@ -27,6 +29,9 @@ type TutorialContextValue = {
 
     registerTarget: (id: string, ref: TargetRef) => () => void;
     getTargetRef: (id: string) => TargetRef | undefined;
+
+    registerScrollArea: (scrollRef: ScrollRef, contentRef: TargetRef) => () => void;
+    getScrollArea: () => ScrollArea | null;
 };
 
 export const TutorialContext = createContext<TutorialContextValue | null>(null);
@@ -43,6 +48,7 @@ export function TutorialProvider({ role, steps, children, autoStart = true }: Tu
     const pathname = usePathname();
 
     const targetsRef = useRef<Map<string, TargetRef>>(new Map());
+    const scrollAreaRef = useRef<ScrollArea | null>(null);
     const [isActive, setIsActive] = useState(false);
     const [stepIndex, setStepIndex] = useState(0);
     const [isReady, setIsReady] = useState(false);
@@ -148,6 +154,21 @@ export function TutorialProvider({ role, steps, children, autoStart = true }: Tu
         return targetsRef.current.get(id);
     }, []);
 
+    const registerScrollArea = useCallback((scrollRef: ScrollRef, contentRef: TargetRef) => {
+        const area: ScrollArea = { scrollRef, contentRef };
+        scrollAreaRef.current = area;
+        return () => {
+            const current = scrollAreaRef.current;
+            if (current?.scrollRef === scrollRef && current?.contentRef === contentRef) {
+                scrollAreaRef.current = null;
+            }
+        };
+    }, []);
+
+    const getScrollArea = useCallback(() => {
+        return scrollAreaRef.current;
+    }, []);
+
     const value = useMemo<TutorialContextValue>(
         () => ({
             role,
@@ -165,6 +186,8 @@ export function TutorialProvider({ role, steps, children, autoStart = true }: Tu
             resetCompletion,
             registerTarget,
             getTargetRef,
+            registerScrollArea,
+            getScrollArea,
         }),
         [
             finish,
@@ -174,6 +197,8 @@ export function TutorialProvider({ role, steps, children, autoStart = true }: Tu
             back,
             next,
             registerTarget,
+            registerScrollArea,
+            getScrollArea,
             resetCompletion,
             role,
             skip,

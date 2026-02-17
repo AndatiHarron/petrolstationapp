@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { InteractionManager, View, useWindowDimensions } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { InteractionManager, View, useWindowDimensions, findNodeHandle } from 'react-native';
 
 import { useTutorial } from '@/components/tutorial/use-tutorial';
 import { TutorialTooltip } from '@/components/tutorial/tutorial-tooltip';
@@ -20,9 +20,11 @@ function safeRect(rect: Rect, screen: { width: number; height: number }): Rect {
 
 export function TutorialOverlay() {
     const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-    const { isActive, step, stepIndex, stepsCount, getTargetRef, next, back, skip } = useTutorial();
+    const { isActive, step, stepIndex, stepsCount, getTargetRef, getScrollArea, next, back, skip } = useTutorial();
 
     const [rect, setRect] = useState<Rect | null>(null);
+    const [autoScrollTick, setAutoScrollTick] = useState(0);
+    const lastAutoScrollRef = useRef<{ stepId: string; at: number } | null>(null);
 
     useEffect(() => {
         if (!isActive || !step) {
@@ -73,6 +75,61 @@ export function TutorialOverlay() {
         };
     }, [getTargetRef, isActive, step, step?.targetId]);
 
+    // Auto-scroll if the current step target is off-screen (e.g. below the fold)
+    useEffect(() => {
+        if (!isActive || !step || !rect) return;
+
+        const offscreenTop = rect.y < 0;
+        const offscreenBottom = rect.y + rect.height > screenHeight;
+        if (!offscreenTop && !offscreenBottom) return;
+
+        // Avoid spamming scroll commands (especially while measuring repeatedly).
+        const now = Date.now();
+        if (lastAutoScrollRef.current?.stepId === step.id && now - lastAutoScrollRef.current.at < 600) {
+            return;
+        }
+
+        const scrollArea = getScrollArea();
+        if (!scrollArea) return;
+
+        const targetRef = getTargetRef(step.targetId);
+        const node = targetRef?.current;
+        const contentNode = scrollArea.contentRef.current;
+        const scroller = scrollArea.scrollRef.current;
+        if (!node || !contentNode) return;
+        if (typeof node.measureLayout !== 'function') return;
+
+        // Prevent repeated scrolling for the same step unless the target is still offscreen.
+        const onMeasure = (_x: number, y: number) => {
+            const offsetY = step.offsetY ?? 0;
+            const targetY = Math.max(0, y + offsetY - 80);
+            if (typeof scroller?.scrollTo === 'function') {
+                lastAutoScrollRef.current = { stepId: step.id, at: now };
+                scroller.scrollTo({ y: targetY, animated: true });
+                // trigger a re-measure cycle after scroll begins
+                setAutoScrollTick((t) => t + 1);
+            }
+        };
+
+        const onFail = () => {
+            // ignore measure errors
+        };
+
+        // Fabric/new architecture can be picky here; prefer passing the native component ref
+        // and fall back to a node handle if needed.
+        try {
+            node.measureLayout(contentNode as any, onMeasure, onFail);
+        } catch {
+            const relativeTo = findNodeHandle(contentNode);
+            if (!relativeTo) return;
+            try {
+                node.measureLayout(relativeTo as any, onMeasure, onFail);
+            } catch {
+                // ignore
+            }
+        }
+    }, [getScrollArea, getTargetRef, isActive, rect, screenHeight, step]);
+
     const hole = useMemo(() => {
         if (!rect) return null;
         const padding = step?.spotlightPadding ?? 10;
@@ -93,6 +150,7 @@ export function TutorialOverlay() {
         rect,
         screenHeight,
         screenWidth,
+        autoScrollTick,
         step?.offsetX,
         step?.offsetY,
         step?.spotlightPadding,

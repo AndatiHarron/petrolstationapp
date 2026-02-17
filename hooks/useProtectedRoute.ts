@@ -36,9 +36,9 @@ export function useProtectedRoute() {
                     const roles = userResponse.data.roles;
 
                     if (roles.includes('manager')) {
-                        if (segments[0] !== '(station-manager)') {
+                        if (segments[0] !== 'station-manager') {
                             console.log('DEBUG: Redirecting to station-manager');
-                            router.replace('/(station-manager)');
+                            router.replace('/station-manager');
                         }
                     } else if (roles.includes('super-admin')) {
                         if (segments[0] !== 'super-admin') {

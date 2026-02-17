@@ -8,6 +8,7 @@ export const MANAGER_TUTORIAL_STEPS: TutorialStep[] = [
         title: 'Shift Management',
         description: 'Start and lock shifts to control what can be recorded during operations.',
         placement: 'bottom',
+        offsetY: 34,
     },
     {
         id: 'manager_customers_tab',
@@ -16,7 +17,9 @@ export const MANAGER_TUTORIAL_STEPS: TutorialStep[] = [
         title: 'Customers',
         description: 'Manage customers and track credit sales.',
         placement: 'top',
-        spotlightPadding: 4,
+        offsetY: 34,
+        offsetX: -2,
+        spotlightPadding: 1,
         spotlightRadius: 8,
     },
     {
@@ -26,7 +29,8 @@ export const MANAGER_TUTORIAL_STEPS: TutorialStep[] = [
         title: 'Liftings',
         description: 'Record new liftings and review supplier deliveries.',
         placement: 'top',
-        spotlightPadding: 4,
+        offsetY: 34,
+        spotlightPadding: 1,
         spotlightRadius: 8,
     },
     {
@@ -36,7 +40,8 @@ export const MANAGER_TUTORIAL_STEPS: TutorialStep[] = [
         title: 'Shifts',
         description: 'View current and historical shift summaries.',
         placement: 'top',
-        spotlightPadding: 4,
+        offsetY: 34,
+        spotlightPadding: 1,
         spotlightRadius: 8,
     },
     {
@@ -46,6 +51,9 @@ export const MANAGER_TUTORIAL_STEPS: TutorialStep[] = [
         title: 'Activity Feed',
         description: 'See the most recent transactions and events as they happen.',
         placement: 'top',
+        offsetY: 34,
+        spotlightPadding: 1,
+        spotlightRadius: 8,
     },
 ];
 
