@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { SymbolView } from 'expo-symbols';
 import { useAuthStore } from '@/store/useAuthStore';
 import { LogoutModal } from '@/components/station-manager/logout-modal';
+import { TutorialTarget } from '@/components/tutorial/tutorial-target';
 
 export function AdminHeader() {
     const logout = useAuthStore((state) => state.logout);
@@ -30,13 +31,15 @@ export function AdminHeader() {
             </View>
 
             <View className="flex-row items-center gap-3">
-                <TouchableOpacity
-                    onPress={() => setLogoutModalVisible(true)}
-                    className="flex-row items-center bg-slate-800 px-3 py-2 rounded-full border border-slate-700 gap-2 active:bg-slate-700"
-                >
-                    <SymbolView name="power" size={14} tintColor="#ef4444" />
-                    <Text className="text-slate-300 font-bold text-xs uppercase tracking-wider">Log Out</Text>
-                </TouchableOpacity>
+                <TutorialTarget id="admin-logout">
+                    <TouchableOpacity
+                        onPress={() => setLogoutModalVisible(true)}
+                        className="flex-row items-center bg-slate-800 px-3 py-2 rounded-full border border-slate-700 gap-2 active:bg-slate-700"
+                    >
+                        <SymbolView name="power" size={14} tintColor="#ef4444" />
+                        <Text className="text-slate-300 font-bold text-xs uppercase tracking-wider">Log Out</Text>
+                    </TouchableOpacity>
+                </TutorialTarget>
             </View>
 
             <LogoutModal

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View } from 'react-native';
+import { View, Pressable, Text } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated from 'react-native-reanimated';
@@ -10,8 +10,11 @@ import { ShiftSection } from '../../components/station-manager/shift-section';
 import { ProductsSection } from '../../components/station-manager/products-section';
 import { TanksSection } from '../../components/station-manager/tanks-section';
 import { CustomersSection } from '../../components/station-manager/customers-section';
+import { TutorialTarget } from '@/components/tutorial/tutorial-target';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 export default function StationManagerDashboard() {
+    const { start } = useTutorial();
     const [creditModalVisible, setCreditModalVisible] = useState(false);
     const [isShiftActive, setIsShiftActive] = useState(false);
 
@@ -28,15 +31,28 @@ export default function StationManagerDashboard() {
                     contentContainerStyle={{ paddingBottom: 40 }}
                     showsVerticalScrollIndicator={false}
                 >
+                    <View className="flex-row justify-end mt-4">
+                        <Pressable
+                            onPress={() => start({ force: true })}
+                            className="bg-emerald-500 px-4 py-2 rounded-full active:opacity-80"
+                        >
+                            <Text className="text-white font-black text-xs uppercase tracking-wider">Tutorial</Text>
+                        </Pressable>
+                    </View>
+
                     {/* Shift Section with header - fetches its own data */}
-                    <ShiftSection onShiftChange={handleShiftChange} />
+                    <TutorialTarget id="manager-shift-section">
+                        <ShiftSection onShiftChange={handleShiftChange} />
+                    </TutorialTarget>
 
                     {/* Station Overview Section */}
                     <View className={!isShiftActive ? 'opacity-30' : ''}>
                         <ProductsSection />
                         <TanksSection />
                         <CustomersSection />
-                        <ActivityFeed />
+                        <TutorialTarget id="manager-activity-feed">
+                            <ActivityFeed />
+                        </TutorialTarget>
                     </View>
                 </Animated.ScrollView>
             </SafeAreaView>

@@ -1,10 +1,36 @@
 import { Tabs } from 'expo-router';
 import { LayoutDashboard, Banknote, Settings, Package, Building2, ClipboardList } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { Pressable } from 'react-native';
+
+import { TutorialProvider } from '@/components/tutorial/tutorial-provider';
+import { TutorialTarget } from '@/components/tutorial/tutorial-target';
+import { ADMIN_TUTORIAL_STEPS } from '@/lib/tutorial/admin-tutorial-steps';
+
+function tabButton(tutorialId: string) {
+    return function TutorialTabBarButton(props: any) {
+        return (
+            <TutorialTarget id={tutorialId} style={props.style}>
+                <Pressable
+                    onPress={props.onPress}
+                    onLongPress={props.onLongPress}
+                    accessibilityRole={props.accessibilityRole}
+                    accessibilityState={props.accessibilityState}
+                    accessibilityLabel={props.accessibilityLabel}
+                    testID={props.testID}
+                    style={{ flex: 1 }}
+                >
+                    {props.children}
+                </Pressable>
+            </TutorialTarget>
+        );
+    };
+}
 
 export default function AdminLayout() {
     return (
-        <>
+        <TutorialProvider role="admin" steps={ADMIN_TUTORIAL_STEPS} autoStart>
             <StatusBar style="light" backgroundColor="#0f172a" />
             <Tabs
                 screenOptions={{
@@ -29,6 +55,7 @@ export default function AdminLayout() {
                     options={{
                         title: 'Finance',
                         tabBarIcon: ({ color, size }) => <Banknote size={size} color={color} />,
+                        tabBarButton: tabButton('admin-tab-finance'),
                     }}
                 />
                 <Tabs.Screen
@@ -43,6 +70,7 @@ export default function AdminLayout() {
                     options={{
                         title: 'System',
                         tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
+                        tabBarButton: tabButton('admin-tab-system'),
                     }}
                 />
                 <Tabs.Screen
@@ -50,6 +78,7 @@ export default function AdminLayout() {
                     options={{
                         title: 'Inventory',
                         tabBarIcon: ({ color, size }) => <Package size={size} color={color} />,
+                        tabBarButton: tabButton('admin-tab-inventory'),
                     }}
                 />
                 <Tabs.Screen
@@ -57,10 +86,11 @@ export default function AdminLayout() {
                     options={{
                         title: 'Infrastructure',
                         tabBarIcon: ({ color, size }) => <Building2 size={size} color={color} />,
+                        tabBarButton: tabButton('admin-tab-infrastructure'),
                     }}
                 />
             </Tabs>
-        </>
+        </TutorialProvider>
     );
 }
 

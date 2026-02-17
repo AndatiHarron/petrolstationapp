@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, RefreshControl, Modal, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, RefreshControl, Modal, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuditLogIndex, useAuditLogShow } from '../../features/api/audit-log/audit-log';
 import type { AuditLogIndex200, AuditLogResource } from '@/features/api/model';
+import { useTutorial } from '@/components/tutorial/use-tutorial';
 
 // Skeleton loader for a single audit log row
 function AuditLogSkeleton() {
@@ -83,6 +84,7 @@ const AuditLogItem = React.memo(({
 });
 
 export default function SystemTab() {
+    const { start } = useTutorial();
     const { data: auditLogsResponse, isLoading, refetch } = useAuditLogIndex();
     const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -180,8 +182,18 @@ export default function SystemTab() {
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 py-4 border-b border-slate-800">
-                    <Text className="text-2xl font-bold text-white">System</Text>
-                    <Text className="text-slate-500 text-sm mt-1">Audit trail and activity log</Text>
+                    <View className="flex-row items-start justify-between gap-4">
+                        <View className="flex-1">
+                            <Text className="text-2xl font-bold text-white">System</Text>
+                            <Text className="text-slate-500 text-sm mt-1">Audit trail and activity log</Text>
+                        </View>
+                        <Pressable
+                            onPress={() => start({ force: true })}
+                            className="bg-emerald-500 px-4 py-2 rounded-full active:opacity-80"
+                        >
+                            <Text className="text-white font-black text-xs uppercase tracking-wider">Show tutorial</Text>
+                        </Pressable>
+                    </View>
                 </View>
 
                 {/* Audit Logs List */}
