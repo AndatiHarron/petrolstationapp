@@ -7,10 +7,12 @@ interface InputFieldProps extends TextInputProps {
   error?: string | null;
   delay?: number;
   className?: string; // Add className prop for flexibility
+  inputClassName?: string;
+  rightAccessory?: React.ReactNode;
 }
 
 export const InputField = forwardRef<TextInput, InputFieldProps>(
-  ({ label, error, style, delay = 0, className, ...props }, ref) => {
+  ({ label, error, style, delay = 0, className, inputClassName, rightAccessory, ...props }, ref) => {
     return (
       <Animated.View
         entering={FadeInDown.delay(delay).duration(400).springify()}
@@ -20,15 +22,22 @@ export const InputField = forwardRef<TextInput, InputFieldProps>(
         <Text className="mb-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
           {label}
         </Text>
-        <TextInput
-          ref={ref}
-          className={`h-14 w-full rounded-xl bg-slate-800 px-4 text-base text-white border ${error
-              ? 'border-red-500 bg-red-500/10'
-              : 'border-transparent focus:border-slate-600'
-            }`}
-          placeholderTextColor="#64748b" // Slate 500
-          {...props}
-        />
+        <View className="relative">
+          <TextInput
+            ref={ref}
+            className={`h-14 w-full rounded-xl bg-slate-800 px-4 text-base text-white border ${error
+                ? 'border-red-500 bg-red-500/10'
+                : 'border-transparent focus:border-slate-600'
+              } ${inputClassName ?? ''}`}
+            placeholderTextColor="#64748b" // Slate 500
+            {...props}
+          />
+          {rightAccessory ? (
+            <View className="absolute right-4 top-0 bottom-0 justify-center">
+              {rightAccessory}
+            </View>
+          ) : null}
+        </View>
         {error && (
           <Animated.Text
             entering={FadeIn}

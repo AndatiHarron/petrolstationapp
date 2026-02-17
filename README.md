@@ -43,7 +43,7 @@ pnpm web
 - `app/`: routes (Expo Router)
   - `app/(auth)/login.tsx`: login screen
   - `app/(main)/`: main dashboard stack
-  - `app/(station-manager)/`: station manager tab routes
+  - `app/station-manager/`: station manager tab routes
   - `app/admin/`: admin tab routes
   - `app/super-admin/`: super admin routes
 - `components/`: UI + feature components

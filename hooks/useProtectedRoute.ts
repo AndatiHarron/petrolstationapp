@@ -12,6 +12,12 @@ export function useProtectedRoute() {
     const { data: userData, isLoading: isUserLoading } = useGetV1User({
         query: {
             enabled: !!token,
+            // Reduce refetch churn; roles don't change often during a session.
+            staleTime: 5 * 60 * 1000,
+            gcTime: 10 * 60 * 1000,
+            refetchOnMount: false,
+            refetchOnReconnect: true,
+            retry: 1,
         }
     });
 

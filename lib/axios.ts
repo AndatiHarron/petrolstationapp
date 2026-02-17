@@ -1,7 +1,17 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
 
 export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+// Keep the auth token in memory to avoid SecureStore I/O on every request.
+let inMemoryAuthToken: string | null = null;
+
+export function setApiAuthToken(token: string | null) {
+  inMemoryAuthToken = token;
+}
+
+export function getApiAuthToken() {
+  return inMemoryAuthToken;
+}
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -13,17 +23,20 @@ export const api = axios.create({
 });
 
 // 1. Interceptor: Auto-attach Token
-api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('auth_token');
+api.interceptors.request.use((config) => {
+  const token = inMemoryAuthToken;
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers = {
+      ...(config.headers ?? {}),
+      Authorization: `Bearer ${token}`,
+    };
   }
 
-  // 👇 ADD THIS BLOCK TO SEE THE URL
-  console.log('------------------------------------------------');
-  console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL, config.url);
-  console.log('------------------------------------------------');
-
+  if (__DEV__) {
+    console.log('------------------------------------------------');
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL, config.url);
+    console.log('------------------------------------------------');
+  }
   return config;
 });
 

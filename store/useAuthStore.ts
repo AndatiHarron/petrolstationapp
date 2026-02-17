@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { queryClient } from '@/lib/queryClient';
+import { setApiAuthToken } from '@/lib/axios';
 
 interface AuthState {
     token: string | null;
@@ -18,17 +19,27 @@ export const useAuthStore = create<AuthState>((set) => ({
     isLoading: true,
 
     login: async (token) => {
-        await SecureStore.setItemAsync('auth_token', token);
-        // Don't route here - let useProtectedRoute handle role-based routing
+        // Set in-memory token immediately (avoid SecureStore delay for first API calls)
+        setApiAuthToken(token);
         set({ token, isLoading: false });
+
+        // Persist in the background
+        SecureStore.setItemAsync('auth_token', token).catch(() => {
+            // ignore persistence errors; session will just not survive restart
+        });
     },
     logout: async () => {
-        await SecureStore.deleteItemAsync('auth_token');
+        // Clear in-memory token immediately
+        setApiAuthToken(null);
+        set({ token: null });
 
         // Clear all React Query cache to prevent stale role data
         queryClient.clear();
 
-        set({ token: null });
+        // Best-effort persistence cleanup
+        SecureStore.deleteItemAsync('auth_token').catch(() => {
+            // ignore
+        });
         router.replace('/(auth)/login');
     },
     checkSession: async () => {
@@ -36,12 +47,14 @@ export const useAuthStore = create<AuthState>((set) => ({
             const token = await SecureStore.getItemAsync('auth_token');
 
             if (token) {
-                // Don't route here - let useProtectedRoute handle role-based routing
+                setApiAuthToken(token);
                 set({ token, isLoading: false });
             } else {
+                setApiAuthToken(null);
                 set({ token: null, isLoading: false });
             }
         } catch (error) {
+            setApiAuthToken(null);
             set({ isLoading: false });
         }
     },
