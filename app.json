@@ -33,6 +33,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "59b8585b-2d00-401c-86a2-455b2fefb9c8"
+      }
     }
   }
 }
