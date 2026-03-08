@@ -32,7 +32,9 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.jjmbeba.petrolintegrity",
+      "versionCode": 1
     },
     "extra": {
       "router": {},
