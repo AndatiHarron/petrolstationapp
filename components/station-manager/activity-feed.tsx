@@ -46,9 +46,11 @@ export function ActivityFeed() {
         );
     }
 
+    const auditLogsResponse = auditLogs as unknown as AuditLogIndex200;
+
     // Type guard to ensure we have valid data
-    const data = (auditLogs.data as unknown as AuditLogIndex200['data']) || [];
-    const meta = (auditLogs.data as unknown as AuditLogIndex200['meta']) || null;
+    const data = (auditLogsResponse?.data) || [];
+    const meta = (auditLogsResponse?.meta) || null;
 
     const currentPage = meta?.current_page || 1;
     const lastPage = meta?.last_page || 1;
