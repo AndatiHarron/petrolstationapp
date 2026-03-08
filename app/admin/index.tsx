@@ -10,7 +10,6 @@ import { ProductPrices } from '../../components/admin/dashboard/product-prices';
 import { RecentActivity } from '../../components/admin/dashboard/recent-activity';
 import { FinancialReports } from '../../components/admin/reports/financial-reports';
 import { InventoryReports } from '../../components/admin/reports/inventory-reports';
-import { TutorialTarget } from '@/components/tutorial/tutorial-target';
 
 export default function AdminDashboard() {
     return (
@@ -28,9 +27,7 @@ export default function AdminDashboard() {
                     </View>
 
                     {/* Quick Stats Row */}
-                    <TutorialTarget id="admin-quick-stats">
-                        <QuickStats />
-                    </TutorialTarget>
+                    <QuickStats />
 
                     {/* Wet Stock Section */}
                     <WetStockLevels />
