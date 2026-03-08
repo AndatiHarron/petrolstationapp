@@ -148,6 +148,12 @@ export default function CustomersScreen() {
         setPage(newPage);
     }, []);
 
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
+
     if (error) {
         return (
             <View className="flex-1 items-center justify-center bg-slate-900">
@@ -230,12 +236,6 @@ export default function CustomersScreen() {
             ]
         );
     };
-
-    const onRefresh = React.useCallback(async () => {
-        setRefreshing(true);
-        await refetch();
-        setRefreshing(false);
-    }, [refetch]);
 
     return (
         <SafeAreaView className="flex-1 bg-slate-900" edges={['top']}>

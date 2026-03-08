@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Share } from 'react-native';
 
 interface Props {
     children: ReactNode;
@@ -28,6 +28,24 @@ export class ErrorBoundary extends Component<Props, State> {
         console.error(`[ErrorBoundary${this.props.label ? ` — ${this.props.label}` : ''}]`, error, errorInfo);
     }
 
+    private getErrorText(): string {
+        const parts: string[] = [];
+        if (this.props.label) parts.push(`Label: ${this.props.label}`);
+        if (this.state.error?.message) parts.push(`Error: ${this.state.error.message}`);
+        if (this.state.error?.stack) parts.push(`\nStack:\n${this.state.error.stack}`);
+        if (this.state.errorInfo?.componentStack) parts.push(`\nComponent Stack:\n${this.state.errorInfo.componentStack}`);
+        return parts.join('\n');
+    }
+
+    private handleCopy = async () => {
+        const text = this.getErrorText();
+        try {
+            await Share.share({ message: text });
+        } catch {
+            Alert.alert('Error details', text);
+        }
+    };
+
     render() {
         if (this.state.hasError) {
             return (
@@ -50,18 +68,32 @@ export class ErrorBoundary extends Component<Props, State> {
                             </Text>
                         )}
                     </ScrollView>
-                    <TouchableOpacity
-                        onPress={() => this.setState({ hasError: false, error: null, errorInfo: null })}
-                        style={{
-                            marginTop: 20,
-                            backgroundColor: '#3b82f6',
-                            paddingVertical: 14,
-                            borderRadius: 12,
-                            alignItems: 'center',
-                        }}
-                    >
-                        <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Try Again</Text>
-                    </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
+                        <TouchableOpacity
+                            onPress={this.handleCopy}
+                            style={{
+                                flex: 1,
+                                backgroundColor: '#334155',
+                                paddingVertical: 14,
+                                borderRadius: 12,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>📋 Copy Error</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => this.setState({ hasError: false, error: null, errorInfo: null })}
+                            style={{
+                                flex: 1,
+                                backgroundColor: '#3b82f6',
+                                paddingVertical: 14,
+                                borderRadius: 12,
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Try Again</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             );
         }
