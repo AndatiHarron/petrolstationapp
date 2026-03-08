@@ -2,10 +2,11 @@ import { Tabs } from 'expo-router';
 import { LayoutDashboard, Users, Droplets, Clock } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import { ErrorBoundary } from '../../components/error-boundary';
 
 export default function StationManagerLayout() {
     return (
-        <>
+        <ErrorBoundary label="Station Manager">
             <StatusBar style="light" backgroundColor="#0f172a" />
             <Tabs
                 screenOptions={{
@@ -47,6 +48,6 @@ export default function StationManagerLayout() {
                     }}
                 />
             </Tabs>
-        </>
+        </ErrorBoundary>
     );
 }
