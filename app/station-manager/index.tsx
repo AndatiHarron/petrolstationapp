@@ -32,7 +32,7 @@ export default function StationManagerDashboard() {
                         <ShiftSection onShiftChange={handleShiftChange} />
 
                     {/* Station Overview Section */}
-                    <View className={!isShiftActive ? 'opacity-30' : ''}>
+                    <View style={{ opacity: isShiftActive ? 1 : 0.3 }}>
                         <ProductsSection />
                         <TanksSection />
                         <CustomersSection />

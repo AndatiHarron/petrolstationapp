@@ -25,30 +25,33 @@ export function StationManagerHeader({ isShiftActive = false }: StationManagerHe
                 <Text className="text-slate-400 text-sm font-medium uppercase tracking-wider">
                     {currentDate}
                 </Text>
-                <Text
-                    className="text-white text-2xl font-bold mt-1"
-                    style={isShiftActive ? { display: 'none' } : undefined}
-                >
-                    Overview
-                </Text>
+                {!isShiftActive && (
+                    <Text className="text-white text-2xl font-bold mt-1">
+                        Overview
+                    </Text>
+                )}
             </View>
 
             <View className="flex-row items-center gap-3">
-                {isShiftActive ? (
-                    <View className="bg-emerald-500/20 px-4 py-2 rounded-full border border-emerald-500/50 flex-row items-center gap-2">
-                        <View className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <Text className="text-emerald-400 font-bold text-xs uppercase tracking-widest">
-                            SHIFT OPEN
-                        </Text>
-                    </View>
-                ) : (
-                    <View className="bg-slate-700/50 px-4 py-2 rounded-full border border-slate-600 flex-row items-center gap-2">
-                        <View className="w-2 h-2 rounded-full bg-slate-500" />
-                        <Text className="text-slate-400 font-bold text-xs uppercase tracking-widest">
-                            OFF SHIFT
-                        </Text>
-                    </View>
-                )}
+                <View
+                    className="px-4 py-2 rounded-full flex-row items-center gap-2"
+                    style={{
+                        backgroundColor: isShiftActive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(51, 65, 85, 0.5)',
+                        borderWidth: 1,
+                        borderColor: isShiftActive ? 'rgba(16, 185, 129, 0.5)' : '#475569',
+                    }}
+                >
+                    <View
+                        className="w-2 h-2 rounded-full"
+                        style={{ backgroundColor: isShiftActive ? '#10b981' : '#64748b' }}
+                    />
+                    <Text
+                        className="font-bold text-xs uppercase tracking-widest"
+                        style={{ color: isShiftActive ? '#34d399' : '#94a3b8' }}
+                    >
+                        {isShiftActive ? 'SHIFT OPEN' : 'OFF SHIFT'}
+                    </Text>
+                </View>
 
                 <TouchableOpacity
                     onPress={() => setLogoutModalVisible(true)}
