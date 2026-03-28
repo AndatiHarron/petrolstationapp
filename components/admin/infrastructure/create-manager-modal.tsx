@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { X, ChevronDown } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useStationsIndex } from '@/features/api/station/station';
 import { useStoreUser } from '@/features/api/user/store-user';
 import type { StationResource, StationsIndex200 } from '@/features/api/model';
@@ -27,6 +28,7 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
     const [password, setPassword] = useState('');
     const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
     const [showStationPicker, setShowStationPicker] = useState(false);
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const { data: stationsResponse } = useStationsIndex();
     const stations: StationResource[] =
@@ -41,6 +43,7 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
             setPassword('');
             setSelectedStationId(null);
             setShowStationPicker(false);
+            setIsPasswordVisible(false);
         }
     }, [visible]);
 
@@ -158,16 +161,31 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                             <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
                                 Password * (min 8 characters)
                             </Text>
-                            <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-emerald-500 mb-4"
-                                placeholder="Enter password"
-                                placeholderTextColor="#475569"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                autoCorrect={false}
-                            />
+                            <View className="relative mb-4">
+                                <TextInput
+                                    className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-emerald-500 pr-12"
+                                    placeholder="Enter password"
+                                    placeholderTextColor="#475569"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!isPasswordVisible}
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                />
+                                <Pressable
+                                    accessibilityRole="button"
+                                    accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+                                    onPress={() => setIsPasswordVisible((v) => !v)}
+                                    hitSlop={10}
+                                    className="absolute right-4 top-0 bottom-0 justify-center"
+                                >
+                                    <Ionicons
+                                        name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                                        size={20}
+                                        color="#94a3b8"
+                                    />
+                                </Pressable>
+                            </View>
 
                             <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
                                 Station *

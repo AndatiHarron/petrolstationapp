@@ -124,6 +124,22 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
 
     const handleSubmit = async () => {
         if (isSubmitting) return;
+
+        // Validate closing readings >= opening readings
+        const invalidReadings = closingData.nozzles.filter(nozzle => {
+            const closing = Number(meterReadings[nozzle.nozzle_id]);
+            return closing < nozzle.opening_reading;
+        });
+
+        if (invalidReadings.length > 0) {
+            const names = invalidReadings.map(n => n.pump_name).join(', ');
+            Alert.alert(
+                'Invalid Meter Readings',
+                `Closing reading cannot be less than opening reading for: ${names}`
+            );
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const metersWithEvidence = Object.entries(meterReadings).map(([id, val]) => {
