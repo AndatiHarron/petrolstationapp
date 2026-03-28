@@ -8,6 +8,7 @@ use App\Http\Resources\ClosingShiftResource;
 use App\Http\Resources\InvoiceResource;
 use App\Http\Resources\ShiftResource;
 use App\Models\Invoice;
+use App\Models\Nozzle;
 use App\Models\Shift;
 use App\Services\ShiftReconciliationService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -90,6 +91,14 @@ class ShiftController extends Controller
             return response()->json([
                 'message' => 'User is not assigned to a station.',
             ], 400);
+        }
+
+        $hasNozzles = Nozzle::where('station_id', $stationId)->exists();
+
+        if (! $hasNozzles) {
+            return response()->json([
+                'message' => 'Cannot start shift: no nozzles are configured for this station.',
+            ], 422);
         }
 
         $shift = Shift::create([

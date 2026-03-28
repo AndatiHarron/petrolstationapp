@@ -6,8 +6,6 @@ use App\Filament\Resources\Customers\RelationManagers\CreditSalesRelationManager
 use App\Filament\Resources\Shifts\Pages\CreateShift;
 use App\Filament\Resources\Shifts\Pages\EditShift;
 use App\Filament\Resources\Shifts\Pages\ListShifts;
-use App\Filament\Resources\Shifts\Schemas\ShiftForm;
-use App\Filament\Resources\Shifts\Tables\ShiftsTable;
 use App\Models\Customer;
 use App\Models\Nozzle;
 use App\Models\Shift;
@@ -17,13 +15,11 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
@@ -36,6 +32,7 @@ use Illuminate\Database\Eloquent\Builder;
 class ShiftResource extends Resource
 {
     protected static ?string $model = Shift::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClock;
 
     public static function getEloquentQuery(): Builder
@@ -43,7 +40,7 @@ class ShiftResource extends Resource
         $query = parent::getEloquentQuery();
         $user = auth()->user();
 
-        if($user->hasRole('manager')) {
+        if ($user->hasRole('manager')) {
             return $query->where('station_id', $user->station_id);
         }
 
@@ -56,22 +53,22 @@ class ShiftResource extends Resource
     {
         return $schema->schema([
             Section::make('Shift Details')
-            ->schema([
-                Select::make('station_id')
-                    ->relationship('station', 'name')
-                    ->disabled(fn() => auth()->user()->hasRole('manager'))
-                    ->default(fn() => auth()->user()->station_id)
-                    ->dehydrated()
-                    ->required(),
+                ->schema([
+                    Select::make('station_id')
+                        ->relationship('station', 'name')
+                        ->disabled(fn () => auth()->user()->hasRole('manager'))
+                        ->default(fn () => auth()->user()->station_id)
+                        ->dehydrated()
+                        ->required(),
 
-                Hidden::make('started_by_user_id')
-                    ->default(auth()->id())
-                    ->required(),
+                    Hidden::make('started_by_user_id')
+                        ->default(auth()->id())
+                        ->required(),
 
-                DateTimePicker::make('started_at')
-                    ->default(now())
-                    ->required()
-            ])
+                    DateTimePicker::make('started_at')
+                        ->default(now())
+                        ->required(),
+                ]),
         ]);
     }
 
@@ -82,11 +79,11 @@ class ShiftResource extends Resource
                 TextColumn::make('station.name')
                     ->label('Station')
                     ->sortable()
-                    ->hidden(fn() => auth()->user()->hasRole('manager')),
+                    ->hidden(fn () => auth()->user()->hasRole('manager')),
 
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'OPEN' => 'gray',
                         'LOCKED' => 'warning',
                         'APPROVED' => 'success',
@@ -103,16 +100,16 @@ class ShiftResource extends Resource
                 TextColumn::make('cash_variance')
                     ->money('KES')
                     ->label('Cash Variance')
-                    ->color(fn(string $state): string => $state < 0 ? 'danger' : 'success')
-                    ->visible(fn() => auth()->user()->hasRole('admin')),
+                    ->color(fn (string $state): string => $state < 0 ? 'danger' : 'success')
+                    ->visible(fn () => auth()->user()->hasRole('admin')),
 
                 TextColumn::make('stock_variance_liters')
                     ->label('Stock Variance')
                     ->numeric(2)
                     ->suffix(' L')
                     ->sortable()
-                    ->color(fn(string $state): string => $state < 0 ? 'danger' : 'success')
-                    ->visible(fn() => auth()->user()->hasRole('admin'))
+                    ->color(fn (string $state): string => $state < 0 ? 'danger' : 'success')
+                    ->visible(fn () => auth()->user()->hasRole('admin'))
                     ->toggleable(),
             ])
             ->filters([
@@ -120,7 +117,7 @@ class ShiftResource extends Resource
                     ->options([
                         'LOCKED' => 'Pending Approval',
                         'APPROVED' => 'Approved',
-                    ])
+                    ]),
             ])
             ->recordActions([
                 Action::make('lock')
@@ -129,14 +126,14 @@ class ShiftResource extends Resource
                     ->color('warning')
                     ->requiresConfirmation()
                     ->modalWidth('xl')
-                    ->visible(fn(Shift $record) => $record->status === 'OPEN')
+                    ->visible(fn (Shift $record) => $record->status === 'OPEN')
                     ->schema([
                         TextInput::make('total_collected_cash')
-                        ->label('Total Collected')
-                        ->numeric()
-                        ->prefix('KES')
-                        ->required()
-                        ->helperText('Enter the total cash physically held by the attendant.'),
+                            ->label('Total Collected')
+                            ->numeric()
+                            ->prefix('KES')
+                            ->required()
+                            ->helperText('Enter the total cash physically held by the attendant.'),
                     ])
                     ->steps([
                         Step::make('Meter Readings')
@@ -148,7 +145,7 @@ class ShiftResource extends Resource
                                 foreach ($nozzles as $nozzle) {
                                     $schema[] = TextInput::make("meters.{$nozzle->id}")
                                         ->label("{$nozzle->name}")
-                                        ->helperText("Opening: " . $nozzle->current_reading)
+                                        ->helperText('Opening: '.$nozzle->current_reading)
                                         ->numeric()
                                         ->required()
                                         ->minValue($nozzle->current_reading)
@@ -166,7 +163,7 @@ class ShiftResource extends Resource
 
                                 foreach ($tanks as $tank) {
                                     $schema[] = TextInput::make("tanks.{$tank->id}")
-                                        ->label($tank->name . "({$tank->product->name})")
+                                        ->label($tank->name."({$tank->product->name})")
                                         ->numeric()
                                         ->required()
                                         ->suffix('mm');
@@ -199,12 +196,12 @@ class ShiftResource extends Resource
                                             ->createOptionForm([
                                                 TextInput::make('name')->required(),
                                                 TextInput::make('email')->required(),
-                                                TextInput::make('phone')
+                                                TextInput::make('phone'),
                                             ])
                                             ->createOptionUsing(function (array $data) {
                                                 return Customer::create($data + [
-                                                    'organization_id' => auth()->user()->organization_id
-                                                    ])->id;
+                                                    'organization_id' => auth()->user()->organization_id,
+                                                ])->id;
                                             }),
 
                                         TextInput::make('amount')
@@ -216,28 +213,28 @@ class ShiftResource extends Resource
 
                                         TextInput::make('vehicle_reg')
                                             ->label('Vehicle Reg')
-                                            ->columnSpan(1)
+                                            ->columnSpan(1),
                                     ])
-                                ->columns(2)
-                                ->addActionLabel('Add Credit Customer')
-                            ])
+                                    ->columns(2)
+                                    ->addActionLabel('Add Credit Customer'),
+                            ]),
                     ])
                     ->action(function (Shift $record, array $data, ShiftReconciliationService $service) {
                         $formattedMeters = [];
                         $nozzles = Nozzle::where('station_id', $record->station_id)->get();
 
-                        foreach($data['meters'] as $nozzleId => $closingReading) {
+                        foreach ($data['meters'] ?? [] as $nozzleId => $closingReading) {
                             $nozzle = $nozzles->find($nozzleId);
                             $formattedMeters[] = [
                                 'nozzle_id' => $nozzleId,
                                 'opening_reading' => $nozzle->current_reading,
                                 'closing_reading' => $closingReading,
-                                'evidence_path' => null
+                                'evidence_path' => null,
                             ];
                         }
 
                         $formattedDips = [];
-                        foreach ($data['tanks'] as $tankId => $dipMm) {
+                        foreach ($data['tanks'] ?? [] as $tankId => $dipMm) {
                             $formattedDips[] = [
                                 'tank_id' => $tankId,
                                 'dip_mm' => $dipMm,
@@ -267,7 +264,7 @@ class ShiftResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn(Shift $record) => auth()->user()->can('approve', $record))
+                    ->visible(fn (Shift $record) => auth()->user()->can('approve', $record))
                     ->action(function (Shift $record) {
                         $record->update(['status' => 'APPROVED']);
 
@@ -278,10 +275,10 @@ class ShiftResource extends Resource
                     }),
 
                 Action::make('download_report')
-                ->label('Download Report')
-                ->icon('heroicon-o-document-arrow-down')
-                ->url(fn (Shift $record) => route('shift.report', $record))
-                ->openUrlInNewTab(),
+                    ->label('Download Report')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->url(fn (Shift $record) => route('shift.report', $record))
+                    ->openUrlInNewTab(),
             ])
             ->defaultSort('started_at', 'desc');
     }
@@ -289,7 +286,7 @@ class ShiftResource extends Resource
     public static function getRelations(): array
     {
         return [
-            CreditSalesRelationManager::class
+            CreditSalesRelationManager::class,
         ];
     }
 

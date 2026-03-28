@@ -30,7 +30,7 @@ class LockShiftRequest extends FormRequest
             'meters' => 'required|array',
             'meters.*.nozzle_id' => 'required|exists:nozzles,id',
             'meters.*.opening_reading' => 'required|numeric',
-            'meters.*.closing_reading' => 'required|numeric',
+            'meters.*.closing_reading' => 'required|numeric|gte:meters.*.opening_reading',
             'meters.*.evidence' => 'nullable|image|max:8192',
             'meters.*.gps_coordinates' => 'nullable|json',
 
@@ -61,7 +61,7 @@ class LockShiftRequest extends FormRequest
                 'type' => 'object',
                 'description' => 'JSON object: {"lat": -1.2, "lng": 36.4}',
                 'example' => ['lat' => -1.2921, 'lng' => 36.8219],
-            ]
+            ],
         ];
     }
 }
