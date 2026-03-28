@@ -48,6 +48,14 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.jjmbeba.petrolintegrity",
+      "versionCode": 1
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3948e489-7317-4c8f-a2fa-abbae0ef88a9"
       }
     },
     "extra": {
