@@ -5,8 +5,9 @@
   },
   "build": {
     "development": {
-      "developmentClient": true,
-      "distribution": "internal"
+      "developme/clean-upntClient": true,
+      "distribution": "internal",
+      "autoIncrement": true
     },
     "preview": {
       "distribution": "internal"
@@ -16,6 +17,7 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {},
+    "development": {}
   }
 }

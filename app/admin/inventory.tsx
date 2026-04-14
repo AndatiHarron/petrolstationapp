@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -10,6 +10,12 @@ import { useTanksIndex, getTanksIndexQueryKey } from '../../features/api/tank/ta
 import { useStationsIndex } from '../../features/api/station/station';
 import { useCreditorsIndex } from '../../features/api/creditor/creditor';
 import { getAuditLogIndexQueryKey } from '../../features/api/audit-log/audit-log';
+import {
+    getReportPlQueryKey,
+    getReportTaxSummaryQueryKey,
+    getReportDebtAgingQueryKey,
+    getReportVarianceTrendQueryKey,
+} from '../../features/api/report/report';
 import type {
     LiftingsIndex200,
     LiftingsIndex200Meta,
@@ -69,6 +75,10 @@ export default function InventoryTab() {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setIsCreateModalOpen(false);
                 Alert.alert('Success', 'Lifting recorded successfully.');
             },
@@ -84,6 +94,10 @@ export default function InventoryTab() {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setSelectedLifting(null);
                 Alert.alert('Success', 'Lifting deleted successfully.');
             },
@@ -141,7 +155,7 @@ export default function InventoryTab() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800">
@@ -225,7 +239,7 @@ export default function InventoryTab() {
                                 <DetailRow label="Price/Liter" value={`KES ${selectedLifting?.buying_price_per_liter.toLocaleString()}`} mono />
                                 <DetailRow label="Total Cost" value={`KES ${selectedLifting?.total_cost.toLocaleString()}`} highlight mono />
                                 <DetailRow label="Tax Paid" value={`KES ${selectedLifting?.tax_paid.toLocaleString()}`} mono />
-                                <DetailRow label="Supplier" value={selectedLifting?.supplier_name || 'N/A'} />
+                                <DetailRow label="Supplier" value={selectedLifting?.supplier?.name || 'N/A'} />
                                 <DetailRow label="Payment" value={selectedLifting?.is_credit ? 'Credit' : 'Cash'} highlight={!selectedLifting?.is_credit} last />
                             </View>
 

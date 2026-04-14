@@ -55,7 +55,7 @@ const ProductCard = memo(function ProductCard({
                     </View>
                     <View className="flex-row items-center">
                         <Text className="text-emerald-400 font-bold text-lg ml-1">{formattedPrice}</Text>
-                        <Text className="text-slate-500 text-xs ml-2">VAT: {product.vat_rate}%</Text>
+                        <Text className="text-slate-500 text-xs ml-2">VAT: {product.vat_rate * 100}%</Text>
                     </View>
                 </View>
                 <View className="flex-row items-center gap-2">

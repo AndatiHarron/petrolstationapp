@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { InputField } from '@/components/input-field';
 import { Button } from '@/components/button';
@@ -34,7 +35,10 @@ import type {
 import { getShiftIndexQueryKey, useShiftIndex } from '@/features/api/shift/shift';
 import { useNozzlesIndex } from '@/features/api/nozzle/nozzle';
 import { useTanksIndex } from '@/features/api/tank/tank';
-import { useEditRequestsStore } from '@/features/api/edit-request/edit-request';
+import {
+    getEditRequestsIndexQueryKey,
+    useEditRequestsStore,
+} from '@/features/api/edit-request/edit-request';
 
 // ── Memoised list item (list-performance-item-memo) ──
 const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress: (item: ShiftResource) => void }) => {
@@ -45,8 +49,6 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
             hour: '2-digit', minute: '2-digit',
         });
     };
-
-    const variance = item.financials?.variance ?? 0;
 
     return (
         <TouchableOpacity
@@ -65,12 +67,8 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
                 </View>
             </View>
 
-            <View className="flex-row gap-3 mt-2">
-                <View className="flex-1 bg-slate-700/40 p-2 rounded-lg">
-                    <Text className="text-slate-500 text-[10px] uppercase">Expected</Text>
-                    <Text className="text-white text-sm font-bold">Sh {item.financials?.expected?.toLocaleString() ?? '0'}</Text>
-                </View>
-                <View className="flex-1 bg-slate-700/40 p-2 rounded-lg">
+            <View className="mt-2">
+                <View className="bg-slate-700/40 p-2 rounded-lg">
                     <Text className="text-slate-500 text-[10px] uppercase">Collected</Text>
                     <Text className="text-emerald-400 text-sm font-bold">Sh {item.financials?.collected?.toLocaleString() ?? '0'}</Text>
                 </View>
@@ -81,6 +79,7 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
 
 // ── Main component ──
 export function ShiftHistoryTab() {
+    const queryClient = useQueryClient();
     // ---- Data ----
     const [historyPage, setHistoryPage] = useState(1);
     const { data: shiftsRaw, isLoading, isFetching, refetch } = useShiftIndex({
@@ -131,6 +130,7 @@ export function ShiftHistoryTab() {
     const editRequestMutation = useEditRequestsStore({
         mutation: {
             onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: getEditRequestsIndexQueryKey() });
                 setIsEditModalOpen(false);
                 setEditReason('');
                 setEditStep(1);
@@ -317,28 +317,11 @@ export function ShiftHistoryTab() {
 
                         <View className="bg-slate-800 p-4 rounded-xl mb-4">
                             <Text className="text-slate-400 text-xs uppercase mb-3 font-bold">Financial Summary</Text>
-                            <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                <Text className="text-slate-300">Expected</Text>
-                                <Text className="text-amber-400 font-bold font-mono">Sh {selectedShift?.financials?.expected?.toLocaleString() ?? '0'}</Text>
-                            </View>
-                            <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
+                            <View className="flex-row justify-between">
                                 <Text className="text-slate-300">Collected</Text>
                                 <Text className="text-emerald-400 font-bold font-mono">Sh {selectedShift?.financials?.collected?.toLocaleString() ?? '0'}</Text>
                             </View>
-                            <View className="flex-row justify-between">
-                                <Text className="text-slate-300">Variance</Text>
-                                <Text className={`font-bold font-mono ${(selectedShift?.financials?.variance ?? 0) < 0 ? 'text-red-400' : 'text-white'}`}>
-                                    Sh {selectedShift?.financials?.variance?.toLocaleString() ?? '0'}
-                                </Text>
-                            </View>
                         </View>
-
-                        {selectedShift?.variance_alert && (
-                            <View className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl mb-4 flex-row items-center gap-2">
-                                <Ionicons name="warning" size={16} color="#ef4444" />
-                                <Text className="text-red-400 text-sm font-medium">Variance alert flagged for this shift</Text>
-                            </View>
-                        )}
 
                         <View className="mt-auto pt-4 mb-16">
                             <Button
@@ -358,8 +341,10 @@ export function ShiftHistoryTab() {
                 onRequestClose={() => setIsEditModalOpen(false)}
             >
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[92%] rounded-t-3xl shadow-2xl flex overflow-hidden">
                         {/* Header */}
@@ -380,7 +365,12 @@ export function ShiftHistoryTab() {
                             <View className={`h-full bg-blue-500 ${editStep === 1 ? 'w-1/3' : editStep === 2 ? 'w-2/3' : 'w-full'}`} />
                         </View>
 
-                        <ScrollView className="flex-1" contentContainerStyle={{ padding: 24, paddingBottom: 100 }}>
+                        <ScrollView
+                            className="flex-1"
+                            contentContainerStyle={{ padding: 24, paddingBottom: 100 }}
+                            keyboardShouldPersistTaps="handled"
+                            showsVerticalScrollIndicator={false}
+                        >
                             <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
                                 <Text className="text-blue-400 text-sm">
                                     Correct the shift data below. An admin will review your changes before they are applied.

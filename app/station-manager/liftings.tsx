@@ -7,8 +7,15 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useLiftingsStore, useLiftingsDestroy, getLiftingsIndexQueryKey } from '../../features/api/lifting/lifting';
 import { useGetV1User } from '../../features/api/default/default';
-import { useTanksIndex } from '../../features/api/tank/tank';
+import { useTanksIndex, getTanksIndexQueryKey } from '../../features/api/tank/tank';
 import { useCreditorsIndex } from '../../features/api/creditor/creditor';
+import { getAuditLogIndexQueryKey } from '../../features/api/audit-log/audit-log';
+import {
+    getReportPlQueryKey,
+    getReportTaxSummaryQueryKey,
+    getReportDebtAgingQueryKey,
+    getReportVarianceTrendQueryKey,
+} from '../../features/api/report/report';
 import { LiftingsIndex200, StoreLiftingRequest, LiftingResource, TanksIndex200, LiftingsIndex200Meta, LiftingsIndex200Links, CreditorsIndex200, SupplierResource } from '../../features/api/model';
 import { InputField } from '../../components/input-field';
 import { Button } from '../../components/button';
@@ -53,8 +60,8 @@ const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item:
             <View className="flex-row justify-between items-center mt-2">
                 <View>
                     <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
-                    {item.supplier_name ? (
-                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier_name}</Text>
+                    {item.supplier?.name ? (
+                        <Text className="text-sky-400 text-xs mt-0.5">{item.supplier?.name}</Text>
                     ) : null}
                 </View>
                 <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
@@ -129,7 +136,12 @@ export default function LiftingsScreen() {
         mutation: {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
-                queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+                queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setIsCreateModalOpen(false);
                 resetForm();
                 Alert.alert("Success", "Lifting recorded successfully.");
@@ -144,7 +156,12 @@ export default function LiftingsScreen() {
         mutation: {
             onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: getLiftingsIndexQueryKey() });
-                queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+                queryClient.invalidateQueries({ queryKey: getTanksIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportPlQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportTaxSummaryQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
+                queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setSelectedLifting(null);
                 Alert.alert("Success", "Lifting deleted successfully.");
             },
@@ -177,7 +194,7 @@ export default function LiftingsScreen() {
         // Calculate tax based on selected tank's VAT rate
         const selectedTank = tanks.find(t => t.id === selectedTankId);
         const vatRate = selectedTank?.product_vat_rate || 0;
-        updated.tax_paid = totalCost * (vatRate / 100);
+        updated.tax_paid = totalCost * (vatRate);
 
         setNewItem(updated);
     };
@@ -339,8 +356,10 @@ export default function LiftingsScreen() {
                 onRequestClose={() => setIsCreateModalOpen(false)}
             >
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[90%] rounded-t-3xl shadow-2xl">
                         <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
@@ -350,7 +369,12 @@ export default function LiftingsScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 40 }}>
+                        <ScrollView
+                            className="flex-1 p-6"
+                            contentContainerStyle={{ paddingBottom: 40 }}
+                            keyboardShouldPersistTaps="handled"
+                            showsVerticalScrollIndicator={false}
+                        >
                             {/* Station (Read-only) */}
                             <View className="mb-4">
                                 <Text className="text-slate-400 text-sm font-medium mb-1">Station</Text>
@@ -536,7 +560,7 @@ export default function LiftingsScreen() {
                                 </View>
                                 <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
                                     <Text className="text-slate-300">Supplier</Text>
-                                    <Text className="text-sky-400 font-medium">{selectedLifting?.supplier_name || 'N/A'}</Text>
+                                    <Text className="text-sky-400 font-medium">{selectedLifting?.supplier?.name || 'N/A'}</Text>
                                 </View>
                                 <View className="flex-row justify-between">
                                     <Text className="text-slate-300">Payment</Text>

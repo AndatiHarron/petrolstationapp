@@ -2,10 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, RefreshControl, Modal, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
-import { StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuditLogIndex, useAuditLogShow } from '../../features/api/audit-log/audit-log';
 import type { AuditLogIndex200, AuditLogResource } from '@/features/api/model';
+
 
 // Skeleton loader for a single audit log row
 function AuditLogSkeleton() {
@@ -83,6 +84,7 @@ const AuditLogItem = React.memo(({
 });
 
 export default function SystemTab() {
+
     const { data: auditLogsResponse, isLoading, refetch } = useAuditLogIndex();
     const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
     const [refreshing, setRefreshing] = useState(false);
@@ -176,12 +178,14 @@ export default function SystemTab() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 py-4 border-b border-slate-800">
-                    <Text className="text-2xl font-bold text-white">System</Text>
-                    <Text className="text-slate-500 text-sm mt-1">Audit trail and activity log</Text>
+                    <View>
+                        <Text className="text-2xl font-bold text-white">System</Text>
+                        <Text className="text-slate-500 text-sm mt-1">Audit trail and activity log</Text>
+                    </View>
                 </View>
 
                 {/* Audit Logs List */}

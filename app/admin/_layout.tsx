@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { LayoutDashboard, Banknote, Settings, Package, Building2, ClipboardList } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
+import React from 'react';
 
 export default function AdminLayout() {
     return (
@@ -63,4 +64,3 @@ export default function AdminLayout() {
         </>
     );
 }
-

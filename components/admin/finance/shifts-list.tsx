@@ -19,6 +19,11 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
         onPress(item.id);
     }, [item.id, onPress]);
 
+    const literFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+    const literIntegerFormatter = new Intl.NumberFormat('en-US', {
+        maximumFractionDigits: 0,
+    });
+
     const formattedDate = new Date(item.started_at).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
@@ -39,6 +44,17 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
 
     const variance = item.financials.variance;
     const hasVarianceAlert = item.variance_alert;
+
+    const wetVarianceLiters = item.wet_stock?.variance_liters;
+    const wetSoldLiters = item.wet_stock?.total_sold_liters;
+    const wetVarianceText =
+        typeof wetVarianceLiters === 'number'
+            ? `${wetVarianceLiters > 0 ? '+' : ''}${literFormatter.format(wetVarianceLiters)} L`
+            : '—';
+    const wetSoldText =
+        typeof wetSoldLiters === 'number'
+            ? `${literIntegerFormatter.format(wetSoldLiters)} L sold`
+            : '';
 
     // Status badge color
     const statusColors = {
@@ -90,6 +106,27 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
                     <Text className="text-slate-500 text-sm">Collected</Text>
                     <Text className="text-emerald-400 font-semibold">{formattedCollected}</Text>
                 </View>
+            </View>
+
+            <View className="bg-slate-900/40 rounded-xl px-3 py-2 mb-2">
+                <View className="flex-row items-center justify-between">
+                    <Text className="text-slate-500 text-sm">Wet stock variance</Text>
+                    <Text
+                        className={`font-bold text-sm ${typeof wetVarianceLiters === 'number'
+                            ? wetVarianceLiters > 0
+                                ? 'text-emerald-400'
+                                : wetVarianceLiters < 0
+                                    ? 'text-red-400'
+                                    : 'text-slate-400'
+                            : 'text-slate-500'
+                            }`}
+                    >
+                        {wetVarianceText}
+                    </Text>
+                </View>
+                {wetSoldText ? (
+                    <Text className="text-slate-600 text-xs mt-1">{wetSoldText}</Text>
+                ) : null}
             </View>
 
             <View className="flex-row items-center justify-between">

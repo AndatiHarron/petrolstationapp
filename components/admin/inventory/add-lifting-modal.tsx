@@ -51,6 +51,7 @@ export function AddLiftingModal({
         return tanks.filter(t => t.station_id === selectedStationId);
     }, [tanks, selectedStationId]);
 
+
     const handleStationChange = (stationId: string) => {
         setSelectedStationId(stationId);
         setSelectedTankId(null); // Reset tank when station changes
@@ -64,7 +65,7 @@ export function AddLiftingModal({
         const totalCost = formData.total_cost || 0;
         setFormData(prev => ({
             ...prev,
-            tax_paid: totalCost * (vatRate / 100),
+            tax_paid: totalCost * (vatRate),
         }));
     };
 
@@ -78,7 +79,7 @@ export function AddLiftingModal({
 
         const selectedTank = tanks.find(t => t.id === selectedTankId);
         const vatRate = selectedTank?.product_vat_rate || 0;
-        updated.tax_paid = totalCost * (vatRate / 100);
+        updated.tax_paid = totalCost * (vatRate);
 
         setFormData(updated);
     };
@@ -130,8 +131,10 @@ export function AddLiftingModal({
             onRequestClose={handleClose}
         >
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior="padding"
+                enabled={Platform.OS === 'ios'}
                 className="flex-1 justify-end"
+                keyboardVerticalOffset={0}
             >
                 <View className="bg-slate-900 border-t border-slate-700 h-[92%] rounded-t-3xl shadow-2xl">
                     {/* Header */}
@@ -147,7 +150,12 @@ export function AddLiftingModal({
                         </TouchableOpacity>
                     </View>
 
-                    <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 40 }}>
+                    <ScrollView
+                        className="flex-1 p-6"
+                        contentContainerStyle={{ paddingBottom: 40 }}
+                        keyboardShouldPersistTaps="handled"
+                        showsVerticalScrollIndicator={false}
+                    >
                         {/* Station Selector */}
                         <View className="mb-5">
                             <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Station *</Text>

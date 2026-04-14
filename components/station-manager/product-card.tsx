@@ -19,7 +19,7 @@ export const ProductCard = memo(function ProductCard({ product }: ProductCardPro
                 Sh {product.current_price.toLocaleString()}
             </Text>
             <Text className="text-slate-500 text-xs mt-1">
-                VAT: {product.vat_rate}%
+                VAT: {product.vat_rate * 100}%
             </Text>
         </View>
     );

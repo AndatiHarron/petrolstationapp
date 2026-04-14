@@ -9,14 +9,16 @@ import type { DipReading } from './dipReading';
 import type { MeterReading } from './meterReading';
 import type { Payment } from './payment';
 import type { ShiftResourceFinancials } from './shiftResourceFinancials';
+import type { ShiftResourceWetStock } from './shiftResourceWetStock';
 
 export interface ShiftResource {
   id: string;
   station_name: string;
   started_at: string;
   status: string;
-  variance_alert: boolean;
+  variance_alert: string;
   financials: ShiftResourceFinancials;
+  wet_stock: ShiftResourceWetStock;
   readings?: MeterReading[];
   dips?: DipReading[];
   payments?: Payment[];

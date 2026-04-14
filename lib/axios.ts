@@ -1,7 +1,17 @@
 import axios, { AxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
 
 export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
+// Keep the auth token in memory to avoid SecureStore I/O on every request.
+let inMemoryAuthToken: string | null = null;
+
+export function setApiAuthToken(token: string | null) {
+  inMemoryAuthToken = token;
+}
+
+export function getApiAuthToken() {
+  return inMemoryAuthToken;
+}
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -13,17 +23,20 @@ export const api = axios.create({
 });
 
 // 1. Interceptor: Auto-attach Token
-api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('auth_token');
+api.interceptors.request.use((config) => {
+  const token = inMemoryAuthToken;
   if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers = {
+      ...(config.headers ?? {}),
+      Authorization: `Bearer ${token}`,
+    };
   }
 
-  // 👇 ADD THIS BLOCK TO SEE THE URL
-  console.log('------------------------------------------------');
-  console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL, config.url);
-  console.log('------------------------------------------------');
-
+  if (__DEV__) {
+    console.log('------------------------------------------------');
+    console.log('🚀 API Request:', config.method?.toUpperCase(), config.baseURL, config.url);
+    console.log('------------------------------------------------');
+  }
   return config;
 });
 
@@ -44,6 +57,9 @@ export const customInstance = <T>(
   if (data instanceof FormData) {
     const newData = new FormData();
 
+    const isRNFileDescriptor = (val: unknown): val is { uri: string; type?: string; name?: string } =>
+      typeof val === 'object' && val !== null && 'uri' in val && typeof (val as { uri: unknown }).uri === 'string';
+
     const appendRecursive = (formData: FormData, data: any, rootKey: string) => {
       if (rootKey === 'evidence' && data instanceof Blob) {
         formData.append(rootKey, data);
@@ -52,6 +68,8 @@ export const customInstance = <T>(
       if (data instanceof Date) {
         formData.append(rootKey, data.toISOString());
       } else if (data instanceof Blob || data instanceof File) {
+        formData.append(rootKey, data);
+      } else if (isRNFileDescriptor(data)) {
         formData.append(rootKey, data);
       } else if (Array.isArray(data)) {
         data.forEach((value, index) => {
@@ -136,6 +154,10 @@ export const customInstance = <T>(
       ...options,
       data: newData,
       cancelToken: source.token,
+      headers: {
+        ...options?.headers,
+        'Content-Type': false as unknown as string,
+      },
     }).then(({ data }) => data);
 
     // @ts-ignore

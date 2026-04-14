@@ -1,10 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { CreditSalesList } from '@/components/admin/finance/credit-sales-list';
 import { ShiftsList } from '@/components/admin/finance/shifts-list';
-import { DebtorsList } from '@/components/admin/finance/debtors-list';
+import { CreditorsList } from '@/components/admin/finance/creditors-list';
 import { CreditSaleDetailModal } from '@/components/admin/finance/credit-sale-detail-modal';
 import { ShiftDetailModal } from '@/components/admin/finance/shift-detail-modal';
 
@@ -30,7 +30,7 @@ export default function FinanceTab() {
 
     return (
         <View className="flex-1 bg-slate-900">
-            <StatusBar barStyle="light-content" />
+            <StatusBar style="light" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 <ScrollView
                     className="flex-1 px-4"
@@ -42,7 +42,7 @@ export default function FinanceTab() {
                         <Text className="text-slate-500 text-sm mt-1">Financial reporting and analysis</Text>
                     </View>
 
-                    <DebtorsList />
+                    <CreditorsList />
                     <CreditSalesList onItemPress={handleCreditSalePress} />
                     <ShiftsList onItemPress={handleShiftPress} />
                 </ScrollView>

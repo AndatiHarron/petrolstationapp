@@ -1,9 +1,8 @@
 import { loginSchema } from '@/features/auth/schema';
 import { useAuthStore } from '@/store/useAuthStore';
 import { revalidateLogic, useForm } from '@tanstack/react-form';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Pressable } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Button } from './button';
 import { InputField } from './input-field';
@@ -11,16 +10,21 @@ import { getErrorMessage } from '@/lib/utils';
 import { usePostLogin } from '@/features/api/default/default';
 import { toast } from 'sonner-native';
 import { getApiErrorMessage } from '@/lib/api-error';
+import { Ionicons } from '@expo/vector-icons';
 
 export const LoginForm = () => {
-  const router = useRouter();
   const { login: setAuth } = useAuthStore();
+  const [isCompletingLogin, setIsCompletingLogin] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const { mutate: login, isPending: isLoginPending } = usePostLogin({
     mutation: {
       onSuccess: async (data) => {
         // API returns { token: "..." } directly
         const response = data as unknown as { token?: string };
         if (response?.token) {
+          // Keep UI in a "Signing in..." state while useProtectedRoute fetches roles + redirects.
+          // This component will unmount on navigation, so no need to reset.
+          setIsCompletingLogin(true);
           await setAuth(response.token);
         }
       },
@@ -55,7 +59,7 @@ export const LoginForm = () => {
 
 
   return (
-    <View className="w-full">
+    <View className="w-full gap-5">
       <form.Field name="email">
         {(field) => (
           <InputField
@@ -66,6 +70,7 @@ export const LoginForm = () => {
             onChangeText={field.handleChange}
             onBlur={field.handleBlur}
             error={getErrorMessage(field.state.meta.errors, field.state.meta.isTouched, form.state.isSubmitted)}
+            className="mb-0"
           />
         )}
       </form.Field>
@@ -79,25 +84,46 @@ export const LoginForm = () => {
             onChangeText={field.handleChange}
             onBlur={field.handleBlur}
             error={getErrorMessage(field.state.meta.errors, field.state.meta.isTouched, form.state.isSubmitted)}
-            secureTextEntry
+            secureTextEntry={!isPasswordVisible}
+            inputClassName="pr-12"
+            rightAccessory={
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={isPasswordVisible ? 'Hide password' : 'Show password'}
+                onPress={() => setIsPasswordVisible((v) => !v)}
+                hitSlop={10}
+              >
+                <Ionicons
+                  name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color="#94a3b8"
+                />
+              </Pressable>
+            }
             delay={200}
+            className="mb-0"
           />
         )}
       </form.Field>
 
       <Animated.View
         entering={FadeInDown.delay(300).duration(400).springify()}
-        className="mt-2"
+        className="mt-1"
       >
-        <Button className='rounded-lg' title="Sign In" onPress={() => form.handleSubmit()} loading={form.state.isSubmitting || isLoginPending} />
+        <Button
+          className="rounded-lg"
+          title={isCompletingLogin ? 'Signing in…' : 'Sign In'}
+          onPress={() => form.handleSubmit()}
+          loading={form.state.isSubmitting || isLoginPending || isCompletingLogin}
+        />
       </Animated.View>
 
       <Animated.View
         entering={FadeInDown.delay(400).duration(400).springify()}
-        className="mt-8 items-center"
+        className="items-center"
       >
         <Text className="text-sm font-medium text-slate-500">
-          Forgot your password? <Text className="font-bold text-white underline">Get help</Text>
+          Forgot your password? <Text className="font-semibold text-slate-400">Get help</Text>
         </Text>
       </Animated.View>
     </View>

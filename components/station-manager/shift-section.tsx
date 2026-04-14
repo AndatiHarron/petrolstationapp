@@ -2,7 +2,8 @@ import React, { memo } from 'react';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { useShiftCurrent } from '@/features/api/shift/shift';
-import type { ShiftIndex200, AuthenticationExceptionResponse, ShiftCurrent200 } from '@/features/api/model';
+import type { AuthenticationExceptionResponse, ShiftCurrent200 } from '@/features/api/model';
+import { getActiveShiftQueryKey } from '@/lib/query-invalidations';
 import { StartShiftView } from './start-shift-view';
 import { StationManagerHeader } from './header';
 import { SkeletonCard } from './skeleton-card';
@@ -21,7 +22,7 @@ interface ShiftSectionProps {
 export const ShiftSection = memo(function ShiftSection({ onShiftChange }: ShiftSectionProps) {
     const { data: activeShift, isLoading } = useShiftCurrent({
         query: {
-            queryKey: ['activeShift'],
+            queryKey: getActiveShiftQueryKey(),
         },
     });
 

@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import {
     View,
     Text,
@@ -8,10 +8,13 @@ import {
     StyleSheet,
     ActivityIndicator,
     Alert,
+    UIManager,
 } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { X, Clock, FileText, Download } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import { Galeria } from '@nandorojo/galeria';
+import { X, Clock, FileText, Download, Camera, Droplets } from 'lucide-react-native';
 import type {
     InvoiceResource,
     ShiftGenerateInvoices200,
@@ -26,11 +29,33 @@ import {
 } from '@/features/api/shift/shift';
 import { Button } from '@/components/button';
 import { downloadAndShareInvoice } from '@/lib/invoice-download';
+import { fetchEvidenceAsDataUri } from '@/lib/evidence-image';
+import { downloadAndShareEvidence } from '@/lib/evidence-download';
+import type { MeterReading } from '@/features/api/model';
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'KES',
 });
+
+const LITER_FORMATTER = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+const LITER_INTEGER_FORMATTER = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+
+type EvidenceDisplayItem = {
+    id: string;
+    nozzleName: string;
+    evidencePath: string;
+    uri: string;
+};
+
+function slugifyFilename(input: string): string {
+    const s = input
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    return s || 'evidence';
+}
 
 interface ShiftDetailModalProps {
     shiftId: string | null;
@@ -92,6 +117,10 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
     const queryClient = useQueryClient();
     const [lastGenerationWasEmpty, setLastGenerationWasEmpty] = useState(false);
     const [downloadingId, setDownloadingId] = useState<string | null>(null);
+    const [evidenceItems, setEvidenceItems] = useState<EvidenceDisplayItem[] | null>(null);
+    const [isEvidenceLoading, setIsEvidenceLoading] = useState(false);
+    const [evidenceDownloadingId, setEvidenceDownloadingId] = useState<string | null>(null);
+    const [selectedEvidenceIndex, setSelectedEvidenceIndex] = useState<number | null>(null);
 
     useEffect(() => {
         setLastGenerationWasEmpty(false);
@@ -119,8 +148,6 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
     const invoicesToShow: InvoiceResource[] = hasInvoicesData(invoicesResponse)
         ? (Array.isArray(invoicesResponse.data) ? invoicesResponse.data : [])
         : [];
-
-        console.log("invoicesResponse", JSON.stringify(invoicesResponse, null, 2), invoicesToShow.length)
 
     const generateMutation = useShiftGenerateInvoices({
         mutation: {
@@ -163,6 +190,107 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
         }
     }, []);
 
+    const readingsWithEvidence = useMemo(() => {
+        const readings = shift?.readings ?? [];
+        return readings.filter(
+            (r): r is MeterReading & { nozzle?: { name?: string } } => !!r.evidence_path,
+        );
+    }, [shift?.readings]);
+
+    const evidenceFetchKey = useMemo(() => {
+        return readingsWithEvidence
+            .map((r) => `${r.id}:${r.evidence_path ?? ''}:${r.nozzle_id}`)
+            .join('|');
+    }, [readingsWithEvidence]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        if (!shiftId || readingsWithEvidence.length === 0) {
+            setEvidenceItems(readingsWithEvidence.length === 0 ? [] : null);
+            setIsEvidenceLoading(false);
+            return () => {
+                cancelled = true;
+            };
+        }
+
+        setIsEvidenceLoading(true);
+        setEvidenceItems(null);
+
+        (async () => {
+            const resolved = await Promise.all(
+                readingsWithEvidence.map(async (r) => {
+                    if (!r.evidence_path) return null;
+                    const uri = await fetchEvidenceAsDataUri(r.evidence_path);
+                    if (!uri) return null;
+                    const nozzleName =
+                        (r as MeterReading & { nozzle?: { name?: string } }).nozzle?.name ??
+                        `Nozzle ${r.nozzle_id.slice(0, 8)}`;
+                    return {
+                        id: r.id,
+                        nozzleName,
+                        evidencePath: r.evidence_path,
+                        uri,
+                    } satisfies EvidenceDisplayItem;
+                }),
+            );
+
+            if (cancelled) return;
+            setEvidenceItems(
+                resolved.filter((x): x is EvidenceDisplayItem => x != null),
+            );
+            setIsEvidenceLoading(false);
+        })().catch(() => {
+            if (cancelled) return;
+            setEvidenceItems([]);
+            setIsEvidenceLoading(false);
+        });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [shiftId, evidenceFetchKey, readingsWithEvidence]);
+
+    const handleEvidenceDownload = useCallback(
+        async (item: EvidenceDisplayItem) => {
+            setEvidenceDownloadingId(item.id);
+            try {
+                const filename = `meter-evidence-${slugifyFilename(item.nozzleName)}`;
+                await downloadAndShareEvidence(item.uri, filename);
+            } catch (e) {
+                const message =
+                    e instanceof Error ? e.message : 'Failed to download evidence image';
+                Alert.alert('Error', message);
+            } finally {
+                setEvidenceDownloadingId(null);
+            }
+        },
+        [],
+    );
+
+    const isGaleriaAvailable = useMemo(() => {
+        try {
+            // If the native ViewManager isn't registered (Expo Go / no dev-client rebuild),
+            // attempting to render Galeria will throw "Can't find ViewManager".
+            const cfg =
+                typeof UIManager.getViewManagerConfig === 'function'
+                    ? UIManager.getViewManagerConfig('Galeria')
+                    : null;
+            return !!cfg;
+        } catch {
+            return false;
+        }
+    }, []);
+
+    const closeEvidenceViewer = useCallback(() => {
+        setSelectedEvidenceIndex(null);
+    }, []);
+
+    const selectedEvidence =
+        selectedEvidenceIndex != null && evidenceItems && evidenceItems[selectedEvidenceIndex]
+            ? evidenceItems[selectedEvidenceIndex]
+            : null;
+
     if (!shiftId) return null;
 
     const formattedDate = shift?.started_at
@@ -187,12 +315,23 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
         ? CURRENCY_FORMATTER.format(financials.variance)
         : '';
 
+    const wetStock = shift?.wet_stock;
+    const wetVarianceLiters = wetStock?.variance_liters;
+    const wetSoldLiters = wetStock?.total_sold_liters;
+    const formattedWetVariance =
+        typeof wetVarianceLiters === 'number'
+            ? `${wetVarianceLiters > 0 ? '+' : ''}${LITER_FORMATTER.format(wetVarianceLiters)} L`
+            : '';
+    const formattedWetSold =
+        typeof wetSoldLiters === 'number'
+            ? `${LITER_INTEGER_FORMATTER.format(wetSoldLiters)} L`
+            : '';
+
     return (
         <Modal
             visible={!!shiftId}
             animationType="slide"
             presentationStyle="formSheet"
-            transparent
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
@@ -279,6 +418,186 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                     </View>
                                 </View>
 
+                                <View style={[styles.card, { marginBottom: 16 }]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Droplets size={18} color="#64748b" />
+                                        <Text style={styles.sectionTitle}>Wet Stock Variance</Text>
+                                    </View>
+                                    {typeof wetVarianceLiters === 'number' &&
+                                    typeof wetSoldLiters === 'number' ? (
+                                        <View style={styles.innerCard}>
+                                            <View
+                                                style={[
+                                                    styles.financialRow,
+                                                    styles.financialRowBorder,
+                                                ]}
+                                            >
+                                                <Text style={styles.fieldLabel}>
+                                                    Variance (L)
+                                                </Text>
+                                                <Text
+                                                    style={[
+                                                        styles.fieldValue,
+                                                        wetVarianceLiters < 0
+                                                            ? styles.varianceNegative
+                                                            : wetVarianceLiters > 0
+                                                              ? styles.variancePositive
+                                                              : undefined,
+                                                    ]}
+                                                >
+                                                    {formattedWetVariance}
+                                                </Text>
+                                            </View>
+                                            <View style={styles.financialRow}>
+                                                <Text style={styles.fieldLabel}>
+                                                    Total sold (L)
+                                                </Text>
+                                                <Text style={styles.fieldValue}>
+                                                    {formattedWetSold}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                    ) : (
+                                        <Text style={styles.hintText}>
+                                            No wet stock data recorded for this shift.
+                                        </Text>
+                                    )}
+                                </View>
+
+                                <View style={[styles.card, { marginBottom: 16 }]}>
+                                    <View style={styles.sectionHeader}>
+                                        <Camera size={18} color="#64748b" />
+                                        <Text style={styles.sectionTitle}>Meter Evidence</Text>
+                                    </View>
+                                    {readingsWithEvidence.length === 0 ? (
+                                        <Text style={styles.hintText}>
+                                            No meter evidence recorded for this shift.
+                                        </Text>
+                                    ) : isEvidenceLoading && !evidenceItems ? (
+                                        <View style={styles.evidenceGrid}>
+                                            {Array.from({ length: Math.min(6, readingsWithEvidence.length) }).map(
+                                                (_, idx) => (
+                                                    <View key={idx} style={styles.evidenceItem}>
+                                                        <View style={styles.evidenceThumbWrap}>
+                                                            <View style={styles.evidenceThumbnailSkeleton}>
+                                                                <ActivityIndicator
+                                                                    size="small"
+                                                                    color="#64748b"
+                                                                />
+                                                            </View>
+                                                        </View>
+                                                        <View
+                                                            style={[
+                                                                styles.skeleton,
+                                                                { height: 10, width: 64 },
+                                                            ]}
+                                                        />
+                                                    </View>
+                                                ),
+                                            )}
+                                        </View>
+                                    ) : evidenceItems && evidenceItems.length > 0 ? (
+                                        isGaleriaAvailable ? (
+                                            <Galeria urls={evidenceItems.map((x) => x.uri)}>
+                                                <View style={styles.evidenceGrid}>
+                                                    {evidenceItems.map((item, index) => (
+                                                        <View
+                                                            key={item.id}
+                                                            style={styles.evidenceItem}
+                                                        >
+                                                            <View style={styles.evidenceThumbWrap}>
+                                                                <Galeria.Image index={index}>
+                                                                    <Image
+                                                                        source={{ uri: item.uri }}
+                                                                        style={styles.evidenceThumbnail}
+                                                                        contentFit="cover"
+                                                                        transition={200}
+                                                                    />
+                                                                </Galeria.Image>
+                                                                <Pressable
+                                                                    onPress={() =>
+                                                                        handleEvidenceDownload(
+                                                                            item,
+                                                                        )
+                                                                    }
+                                                                    disabled={
+                                                                        evidenceDownloadingId ===
+                                                                        item.id
+                                                                    }
+                                                                    style={({ pressed }) => [
+                                                                        styles.evidenceDownloadOverlay,
+                                                                        pressed &&
+                                                                            styles.downloadButtonPressed,
+                                                                        evidenceDownloadingId ===
+                                                                            item.id &&
+                                                                            styles.downloadButtonDisabled,
+                                                                    ]}
+                                                                >
+                                                                    {evidenceDownloadingId ===
+                                                                    item.id ? (
+                                                                        <ActivityIndicator
+                                                                            size="small"
+                                                                            color="#10b981"
+                                                                        />
+                                                                    ) : (
+                                                                        <Download
+                                                                            size={16}
+                                                                            color="#10b981"
+                                                                        />
+                                                                    )}
+                                                                </Pressable>
+                                                            </View>
+                                                            <Text
+                                                                style={styles.evidenceLabel}
+                                                                numberOfLines={2}
+                                                            >
+                                                                {item.nozzleName}
+                                                            </Text>
+                                                        </View>
+                                                    ))}
+                                                </View>
+                                            </Galeria>
+                                        ) : (
+                                            <View style={styles.evidenceGrid}>
+                                                {evidenceItems.map((item, index) => (
+                                                    <View key={item.id} style={styles.evidenceItem}>
+                                                        <View style={styles.evidenceThumbWrap}>
+                                                            <Pressable
+                                                                onPress={() =>
+                                                                    setSelectedEvidenceIndex(
+                                                                        index,
+                                                                    )
+                                                                }
+                                                                style={({ pressed }) => [
+                                                                    pressed && styles.downloadButtonPressed,
+                                                                ]}
+                                                            >
+                                                                <Image
+                                                                    source={{ uri: item.uri }}
+                                                                    style={styles.evidenceThumbnail}
+                                                                    contentFit="cover"
+                                                                    transition={200}
+                                                                />
+                                                            </Pressable>
+                                                            
+                                                        </View>
+                                                        <Text
+                                                            style={styles.evidenceLabel}
+                                                            numberOfLines={2}
+                                                        >
+                                                            {item.nozzleName}
+                                                        </Text>
+                                                    </View>
+                                                ))}
+                                            </View>
+                                        )
+                                    ) : (
+                                        <Text style={styles.hintText}>
+                                            Evidence images could not be loaded.
+                                        </Text>
+                                    )}
+                                </View>
+
                                 {shift.variance_alert ? (
                                     <View style={styles.alertBox}>
                                         <Text style={styles.alertText}>
@@ -337,6 +656,46 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                     </ScrollView>
                 </View>
             </View>
+
+            {/* Fallback fullscreen viewer when Galeria native view isn't available */}
+            <Modal
+                visible={selectedEvidenceIndex != null && !isGaleriaAvailable}
+                transparent
+                animationType="fade"
+                onRequestClose={closeEvidenceViewer}
+            >
+                <View style={styles.fullscreenOverlay}>
+                    <Pressable
+                        style={StyleSheet.absoluteFill}
+                        onPress={closeEvidenceViewer}
+                    />
+                    <View style={styles.fullscreenHeader}>
+                        <Pressable
+                            onPress={closeEvidenceViewer}
+                            style={styles.fullscreenIconButton}
+                        >
+                            <X size={22} color="#e2e8f0" />
+                        </Pressable>
+
+                        {selectedEvidence ? (
+                            <Pressable
+                                onPress={() => handleEvidenceDownload(selectedEvidence)}
+                                style={styles.fullscreenIconButton}
+                            >
+                                <Download size={20} color="#10b981" />
+                            </Pressable>
+                        ) : null}
+                    </View>
+
+                    {selectedEvidence ? (
+                        <Image
+                            source={{ uri: selectedEvidence.uri }}
+                            style={styles.fullscreenImage}
+                            contentFit="contain"
+                        />
+                    ) : null}
+                </View>
+            </Modal>
         </Modal>
     );
 });
@@ -545,5 +904,81 @@ const styles = StyleSheet.create({
         color: '#64748b',
         fontSize: 14,
         marginBottom: 16,
+    },
+    evidenceGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        gap: 12,
+    },
+    evidenceItem: {
+        width: 80,
+        alignItems: 'center',
+        gap: 6,
+    },
+    evidenceThumbnail: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        borderCurve: 'continuous',
+        backgroundColor: 'rgba(30,41,59,0.5)',
+    },
+    evidenceThumbWrap: {
+        width: 80,
+        height: 80,
+        position: 'relative',
+    },
+    evidenceThumbnailSkeleton: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        borderCurve: 'continuous',
+        backgroundColor: 'rgba(51,65,85,0.5)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    evidenceDownloadOverlay: {
+        position: 'absolute',
+        right: 6,
+        top: 6,
+        padding: 6,
+        borderRadius: 9999,
+        backgroundColor: 'rgba(15,23,42,0.8)',
+        borderWidth: 1,
+        borderColor: 'rgba(16,185,129,0.25)',
+    },
+    fullscreenOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.92)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+    },
+    fullscreenHeader: {
+        position: 'absolute',
+        top: 56,
+        left: 16,
+        right: 16,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        zIndex: 10,
+    },
+    fullscreenIconButton: {
+        padding: 10,
+        borderRadius: 9999,
+        backgroundColor: 'rgba(15,23,42,0.7)',
+        borderWidth: 1,
+        borderColor: 'rgba(148,163,184,0.25)',
+    },
+    fullscreenImage: {
+        width: '100%',
+        height: '80%',
+        borderRadius: 16,
+        borderCurve: 'continuous',
+    },
+    evidenceLabel: {
+        color: '#94a3b8',
+        fontSize: 11,
+        textAlign: 'center',
     },
 });

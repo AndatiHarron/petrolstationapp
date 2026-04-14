@@ -148,6 +148,12 @@ export default function CustomersScreen() {
         setPage(newPage);
     }, []);
 
+    const onRefresh = React.useCallback(async () => {
+        setRefreshing(true);
+        await refetch();
+        setRefreshing(false);
+    }, [refetch]);
+
     if (error) {
         return (
             <View className="flex-1 items-center justify-center bg-slate-900">
@@ -231,12 +237,6 @@ export default function CustomersScreen() {
         );
     };
 
-    const onRefresh = React.useCallback(async () => {
-        setRefreshing(true);
-        await refetch();
-        setRefreshing(false);
-    }, [refetch]);
-
     return (
         <SafeAreaView className="flex-1 bg-slate-900" edges={['top']}>
             <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800 bg-slate-900">
@@ -303,8 +303,10 @@ export default function CustomersScreen() {
                 onRequestClose={() => setIsCreateModalOpen(false)}
             >
                 <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    behavior="padding"
+                    enabled={Platform.OS === 'ios'}
                     className="flex-1 justify-end"
+                    keyboardVerticalOffset={0}
                 >
                     <View className="bg-slate-900 border-t border-slate-700 h-[85%] rounded-t-3xl shadow-2xl">
                         <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
@@ -314,7 +316,12 @@ export default function CustomersScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <ScrollView className="flex-1 p-6" contentContainerStyle={{ paddingBottom: 40 }}>
+                        <ScrollView
+                            className="flex-1 p-6"
+                            contentContainerStyle={{ paddingBottom: 40 }}
+                            keyboardShouldPersistTaps="handled"
+                            showsVerticalScrollIndicator={false}
+                        >
                             {editingId && (
                                 <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
                                     <Text className="text-blue-400 text-sm">

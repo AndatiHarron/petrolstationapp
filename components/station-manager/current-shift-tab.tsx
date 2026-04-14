@@ -20,11 +20,15 @@ import type {
     ShiftResource,
 } from '@/features/api/model';
 import {
-    getShiftIndexQueryKey,
     useShiftCurrent,
     useShiftLock,
     useShiftStore,
 } from '@/features/api/shift/shift';
+import {
+    getActiveShiftQueryKey,
+    invalidateOnShiftLock,
+    invalidateOnShiftStart,
+} from '@/lib/query-invalidations';
 
 export function CurrentShiftTab() {
     const queryClient = useQueryClient();
@@ -32,7 +36,7 @@ export function CurrentShiftTab() {
 
     // ---- Data ----
     const { data: shiftResponse, isLoading, refetch, isRefetching } = useShiftCurrent({
-        query: { queryKey: ['activeShift'] },
+        query: { queryKey: getActiveShiftQueryKey() },
     });
 
     const actualShiftData = shiftResponse as unknown as
@@ -44,8 +48,7 @@ export function CurrentShiftTab() {
     const { mutate: startShift, isPending: isStarting } = useShiftStore({
         mutation: {
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['activeShift'] });
-                queryClient.invalidateQueries({ queryKey: getShiftIndexQueryKey() });
+                invalidateOnShiftStart(queryClient);
             },
             onError: (error: any) => {
                 Alert.alert('Error', error?.message || 'Failed to start shift. Please try again.');
@@ -55,11 +58,11 @@ export function CurrentShiftTab() {
 
     const { mutate: lockShift, isPending: isLocking } = useShiftLock({
         mutation: {
-            onSuccess: () => {
+            onSuccess: (_res, variables) => {
                 setLockModalVisible(false);
-                queryClient.invalidateQueries({ queryKey: ['activeShift'] });
-                queryClient.invalidateQueries({ queryKey: getShiftIndexQueryKey() });
-                queryClient.invalidateQueries({ queryKey: ['audit-logs'] });
+                // Force UI update immediately to show "No Active Shift"
+                queryClient.setQueryData(getActiveShiftQueryKey(), null);
+                invalidateOnShiftLock(queryClient, variables?.shift);
             },
             onError: (error: any) => {
                 Alert.alert('Error', error?.message || 'Failed to lock shift. Please try again.');
@@ -152,19 +155,10 @@ export function CurrentShiftTab() {
                                         <Text className="text-white font-bold">
                                             Collected: <Text className="text-emerald-400">Sh {activeShift.financials?.collected?.toLocaleString() || '0'}</Text>
                                         </Text>
-                                        <Text className="text-white font-bold">
-                                            Expected: <Text className="text-amber-400">Sh {activeShift.financials?.expected?.toLocaleString() || '0'}</Text>
-                                        </Text>
                                     </View>
                                 </View>
                             </View>
 
-                            {activeShift.variance_alert && (
-                                <View className="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex-row items-center gap-2">
-                                    <SymbolView name="exclamationmark.triangle.fill" size={18} tintColor="#ef4444" />
-                                    <Text className="text-red-400 font-medium text-sm">Variance detected in this shift</Text>
-                                </View>
-                            )}
                         </View>
 
                         <View className="p-5 pt-0">

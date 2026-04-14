@@ -12,6 +12,12 @@ export function useProtectedRoute() {
     const { data: userData, isLoading: isUserLoading } = useGetV1User({
         query: {
             enabled: !!token,
+            // Reduce refetch churn; roles don't change often during a session.
+            staleTime: 5 * 60 * 1000,
+            gcTime: 10 * 60 * 1000,
+            refetchOnMount: false,
+            refetchOnReconnect: true,
+            retry: 1,
         }
     });
 
@@ -36,9 +42,9 @@ export function useProtectedRoute() {
                     const roles = userResponse.data.roles;
 
                     if (roles.includes('manager')) {
-                        if (segments[0] !== '(station-manager)') {
+                        if (segments[0] !== 'station-manager') {
                             console.log('DEBUG: Redirecting to station-manager');
-                            router.replace('/(station-manager)');
+                            router.replace('/station-manager');
                         }
                     } else if (roles.includes('super-admin')) {
                         if (segments[0] !== 'super-admin') {

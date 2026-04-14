@@ -1,128 +1,130 @@
-import React from 'react';
-import { View, Text, Pressable, ScrollView } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { MoreVertical, Fuel, CheckCircle2, AlertCircle, Clock } from 'lucide-react-native';
-import { Tenant } from './mock-data';
+import React, { useCallback, memo } from 'react';
+import { View, Text, Pressable, RefreshControl } from 'react-native';
+import { FlashList, type ListRenderItemInfo } from '@shopify/flash-list';
+import { Building2, Plus } from 'lucide-react-native';
+import { useOrganizationsIndex } from '@/features/api/organization/organization';
+import type { OrganizationResource, OrganizationsIndex200 } from '@/features/api/model';
 
-interface TenantTableProps {
-    data: Tenant[];
-}
-
-export function TenantTable({ data }: TenantTableProps) {
-    const renderItem = ({ item }: { item: Tenant }) => {
-        let StatusIcon = Clock;
-        let statusColor = 'text-slate-400';
-        let statusBg = 'bg-slate-700/50';
-        let statusBorder = 'border-slate-600';
-
-        if (item.status === 'active') {
-            StatusIcon = CheckCircle2;
-            statusColor = 'text-emerald-400';
-            statusBg = 'bg-emerald-500/10';
-            statusBorder = 'border-emerald-500/20';
-        } else if (item.status === 'suspended') {
-            StatusIcon = AlertCircle;
-            statusColor = 'text-red-400';
-            statusBg = 'bg-red-500/10';
-            statusBorder = 'border-red-500/20';
-        } else {
-            StatusIcon = Clock;
-            statusColor = 'text-amber-400';
-            statusBg = 'bg-amber-500/10';
-            statusBorder = 'border-amber-500/20';
-        }
-
-        return (
-            <View className="flex-row items-center py-4 border-b border-slate-800 hover:bg-slate-800/30 transition-colors">
-                {/* Organization */}
-                <View className="w-[250px] flex-row items-center gap-3 pl-6">
-                    <View className="w-10 h-10 bg-slate-800 rounded-full items-center justify-center border border-slate-700">
-                        <Fuel size={18} color="#cbd5e1" />
-                    </View>
-                    <View>
-                        <Text className="text-white font-medium text-sm">{item.name}</Text>
-                        <Text className="text-slate-500 text-xs">ID: {item.id}</Text>
-                    </View>
+function OrganizationCardSkeleton() {
+    return (
+        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+            <View className="flex-row items-center justify-between">
+                <View className="flex-1">
+                    <View className="h-5 w-40 bg-slate-700 rounded mb-2" />
+                    <View className="h-3 w-24 bg-slate-700 rounded" />
                 </View>
-
-                {/* Owner */}
-                <View className="w-[150px]">
-                    <Text className="text-slate-300 text-sm">{item.ownerName}</Text>
-                    <Text className="text-slate-500 text-xs">{item.ownerEmail}</Text>
-                </View>
-
-                {/* Status */}
-                <View className="w-40">
-                    <View className={`flex-row items-center self-start gap-1.5 px-2.5 py-1 rounded-full border ${statusBg} ${statusBorder}`}>
-                        <StatusIcon size={12} className={statusColor} color={item.status === 'active' ? '#34d399' : item.status === 'suspended' ? '#f87171' : '#fbbf24'} />
-                        <Text className={`text-xs font-medium capitalize ${statusColor}`}>
-                            {item.status}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Stats */}
-                <View className="w-32">
-                    <Text className="text-slate-300 text-sm font-medium">{item.stationsCount} Stations</Text>
-                </View>
-                <View className="w-32">
-                    <Text className="text-white text-sm font-medium">{item.revenue}</Text>
-                </View>
-
-                {/* Date */}
-                <View className="w-32">
-                    <Text className="text-slate-400 text-sm">{item.onboardedAt}</Text>
-                </View>
-
-                {/* Actions */}
-                <View className="w-16 items-center pr-4">
-                    <Pressable className="p-2 hover:bg-slate-700 rounded-lg">
-                        <MoreVertical size={16} color="#94a3b8" />
-                    </Pressable>
-                </View>
+                <View className="h-6 w-20 bg-slate-700 rounded-full" />
             </View>
-        );
-    };
-
-    const ListHeader = () => (
-        <View className="flex-row py-3 bg-slate-800 border-y border-slate-700">
-            <Text className="w-[250px] pl-6 text-xs font-semibold text-slate-400 uppercase tracking-wider">Organization</Text>
-            <Text className="w-[150px] text-xs font-semibold text-slate-400 uppercase tracking-wider">Owner</Text>
-            <Text className="w-40 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</Text>
-            <Text className="w-32 text-xs font-semibold text-slate-400 uppercase tracking-wider">Stations</Text>
-            <Text className="w-32 text-xs font-semibold text-slate-400 uppercase tracking-wider">Revenue</Text>
-            <Text className="w-32 text-xs font-semibold text-slate-400 uppercase tracking-wider">Onboarded</Text>
-            <Text className="w-16 pr-4 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</Text>
         </View>
     );
+}
+
+const OrganizationCard = memo(function OrganizationCard({
+    organization,
+}: {
+    organization: OrganizationResource;
+}) {
+    const statusColor = organization.status === 'active' ? 'bg-emerald-500/20' : 'bg-slate-700/50';
+    const statusTextColor = organization.status === 'active' ? 'text-emerald-400' : 'text-slate-400';
 
     return (
-        <View className="flex-1 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden pb-2">
-            {/* Table Header Wrapper */}
-            {/* Table Header Wrapper - Responsive */}
-            <View className="p-4 border-b border-slate-800 flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-800/30">
-                <View>
-                    <Text className="text-lg font-bold text-white">Registered Tenants</Text>
-                    <Text className="text-slate-500 text-sm">Manage all independent petrol station organizations.</Text>
+        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+            <View className="flex-row items-start justify-between">
+                <View className="flex-1">
+                    <View className="flex-row items-center mb-2">
+                        <Building2 size={18} color="#94a3b8" />
+                        <Text className="text-white font-semibold text-base ml-2">{organization.name}</Text>
+                    </View>
+                    <Text className="text-slate-500 text-xs ml-6">{organization.slug}</Text>
+                    {organization.created_at ? (
+                        <Text className="text-slate-500 text-xs ml-6 mt-1">
+                            Created {new Date(organization.created_at).toLocaleDateString()}
+                        </Text>
+                    ) : null}
                 </View>
-                <View>
-                    <Pressable className="bg-orange-500 px-4 py-2 rounded-lg shadow-lg shadow-orange-500/20 active:bg-orange-600">
-                        <Text className="text-white font-semibold text-sm">+ Add Tenant</Text>
-                    </Pressable>
+                <View className={`px-2.5 py-1 rounded-full ${statusColor}`}>
+                    <Text className={`text-xs font-medium capitalize ${statusTextColor}`}>
+                        {organization.status}
+                    </Text>
                 </View>
+            </View>
+        </View>
+    );
+});
+
+interface TenantTableProps {
+    onAddOrganization: () => void;
+}
+
+export function TenantTable({ onAddOrganization }: TenantTableProps) {
+    const { data: response, isLoading, refetch, isRefetching } = useOrganizationsIndex();
+    const organizations: OrganizationResource[] = (response as OrganizationsIndex200 | undefined)?.data ?? [];
+
+    const renderItem = useCallback(({ item }: ListRenderItemInfo<OrganizationResource>) => (
+        <OrganizationCard organization={item} />
+    ), []);
+
+    const keyExtractor = useCallback((item: OrganizationResource) => item.id, []);
+
+    if (isLoading) {
+        return (
+            <View className="flex-1">
+                <View className="flex-row items-center justify-between mb-4">
+                    <View>
+                        <Text className="text-lg font-bold text-white">Organizations</Text>
+                        <Text className="text-slate-500 text-sm">Manage tenant organizations</Text>
+                    </View>
+                </View>
+                <OrganizationCardSkeleton />
+                <OrganizationCardSkeleton />
+                <OrganizationCardSkeleton />
+            </View>
+        );
+    }
+
+    return (
+        <View className="flex-1">
+            <View className="flex-row items-center justify-between mb-4">
+                <View>
+                    <Text className="text-lg font-bold text-white">Organizations</Text>
+                    <Text className="text-slate-500 text-sm">Manage tenant organizations</Text>
+                </View>
+                <Pressable
+                    onPress={onAddOrganization}
+                    className="flex-row items-center gap-2 bg-orange-500 px-4 py-2.5 rounded-xl active:bg-orange-600"
+                >
+                    <Plus size={18} color="#ffffff" />
+                    <Text className="text-white font-semibold text-sm">Add Organization</Text>
+                </Pressable>
             </View>
 
-            <View className="flex-1 min-h-[300px]">
-                <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ minWidth: 980 }}>
-                    <View className="flex-1 w-full">
-                        <FlashList
-                            data={data}
-                            renderItem={renderItem}
-                            ListHeaderComponent={ListHeader}
-                        />
+            <FlashList<OrganizationResource>
+                data={organizations}
+                renderItem={renderItem}
+                keyExtractor={keyExtractor}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={isRefetching && !isLoading}
+                        onRefresh={() => refetch()}
+                        tintColor="#94a3b8"
+                    />
+                }
+                ListEmptyComponent={
+                    <View className="py-12 items-center">
+                        <View className="w-16 h-16 rounded-full bg-slate-800 items-center justify-center mb-4">
+                            <Building2 size={32} color="#64748b" />
+                        </View>
+                        <Text className="text-slate-400 text-base font-medium">No organizations yet</Text>
+                        <Text className="text-slate-500 text-sm mt-1">Add your first organization to get started</Text>
+                        <Pressable
+                            onPress={onAddOrganization}
+                            className="mt-4 bg-orange-500 px-6 py-3 rounded-xl active:bg-orange-600"
+                        >
+                            <Text className="text-white font-semibold">Add Organization</Text>
+                        </Pressable>
                     </View>
-                </ScrollView>
-            </View>
+                }
+            />
         </View>
     );
 }
