@@ -50,7 +50,7 @@ export const Dashboard = () => {
 
   return (
     <ScrollView
-      className="flex-1 bg-slate-900"
+      className="flex-1 bg-white"
       contentContainerStyle={{ paddingBottom: 0 }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />

@@ -68,7 +68,7 @@ export function ChartCard({
     children,
 }: ChartCardProps) {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-4">
+        <View className="bg-gray-100 border border-gray-300 rounded-xl p-4 mb-4">
             {/* Header */}
             <View className="mb-4">
                 <Text className="text-white font-bold text-base">{title}</Text>

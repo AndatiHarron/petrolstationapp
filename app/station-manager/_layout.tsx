@@ -7,11 +7,11 @@ import { ErrorBoundary } from '../../components/error-boundary';
 export default function StationManagerLayout() {
     return (
         <ErrorBoundary label="Station Manager">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+            <StatusBar style="dark" backgroundColor="#ffffff" />
             <Tabs
                 screenOptions={{
                     tabBarStyle: {
-                        backgroundColor: '#0f172a',
+                        backgroundColor: '#ffffff',
                         borderTopColor: '#1e293b',
                     },
                     tabBarActiveTintColor: '#10b981',

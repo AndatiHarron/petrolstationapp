@@ -128,7 +128,7 @@ export default function SystemTab() {
     // Render changes in a formatted way
     const renderChanges = (changes: any) => {
         if (!changes || typeof changes !== 'object') {
-            return <Text className="text-slate-400 text-sm">No changes recorded</Text>;
+            return <Text className="text-gray-600 text-sm">No changes recorded</Text>;
         }
 
         const { old: oldValue, new: newValue } = changes;
@@ -140,7 +140,7 @@ export default function SystemTab() {
                 return (
                     <View className="mb-2">
                         <Text className={`${color} text-xs font-bold mb-1`}>{label}</Text>
-                        <Text className="text-slate-500 text-sm ml-2 font-mono">{'{}'}</Text>
+                        <Text className="text-gray-600 text-sm ml-2 font-mono">{'{}'}</Text>
                     </View>
                 );
             }
@@ -183,8 +183,8 @@ export default function SystemTab() {
                 {/* Header */}
                 <View className="px-4 py-4 border-b border-slate-800">
                     <View>
-                        <Text className="text-2xl font-bold text-white">System</Text>
-                        <Text className="text-slate-500 text-sm mt-1">Audit trail and activity log</Text>
+                        <Text className="text-2xl font-bold text-black">System</Text>
+                        <Text className="text-gray-600 text-sm mt-1">Audit trail and activity log</Text>
                     </View>
                 </View>
 
@@ -220,7 +220,7 @@ export default function SystemTab() {
                             ListEmptyComponent={() => (
                                 <View className="items-center justify-center p-10">
                                     <Ionicons name="document-text-outline" size={48} color="#475569" />
-                                    <Text className="text-slate-500 text-center mt-4">No audit logs found</Text>
+                                    <Text className="text-gray-600 text-center mt-4">No audit logs found</Text>
                                     <Text className="text-slate-600 text-center text-sm mt-2">
                                         Activity will appear here as it happens
                                     </Text>
@@ -241,7 +241,7 @@ export default function SystemTab() {
                         <View className="bg-slate-900 border-t border-slate-700 rounded-t-3xl shadow-2xl" style={{ maxHeight: '85%' }}>
                             {/* Modal Header */}
                             <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
-                                <Text className="text-xl font-bold text-white">Activity Details</Text>
+                                <Text className="text-xl font-bold text-black">Activity Details</Text>
                                 <TouchableOpacity onPress={handleCloseModal}>
                                     <Ionicons name="close-circle" size={28} color="#64748b" />
                                 </TouchableOpacity>
@@ -255,7 +255,7 @@ export default function SystemTab() {
                                     </View>
                                 ) : !selectedLog ? (
                                     <View className="items-center py-10">
-                                        <Text className="text-slate-500">No details available</Text>
+                                        <Text className="text-gray-600">No details available</Text>
                                         <Text className="text-slate-600 text-xs mt-2">ID: {selectedLogId}</Text>
                                     </View>
                                 ) : (

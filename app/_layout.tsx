@@ -69,8 +69,8 @@ function InitialLayout() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>
-        <StatusBar style="light" backgroundColor="#0f172a" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ffffff' }}>
+        <StatusBar style="dark" backgroundColor="#ffffff" />
         <ActivityIndicator size="large" color="#ffffff" />
       </View>
     );

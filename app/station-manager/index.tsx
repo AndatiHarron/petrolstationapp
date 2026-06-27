@@ -19,8 +19,8 @@ export default function StationManagerDashboard() {
     }, []);
 
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-white">
+            <StatusBar style="dark" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1">
                 <ScrollView
                     className="flex-1"

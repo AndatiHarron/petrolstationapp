@@ -39,15 +39,37 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
   const getVariantStyle = () => {
     switch (variant) {
       case 'primary':
-        return 'bg-amber-500 shadow-xl shadow-amber-500/20 border-transparent'; // Dashboard Amber
       case 'secondary':
-        return 'bg-slate-800 border-slate-700 border';
+        return 'border-transparent';
       case 'outline':
-        return 'bg-transparent border-slate-600 border-2';
+        return 'bg-transparent border-2';
       case 'ghost':
         return 'bg-transparent border-transparent';
       default:
-        return 'bg-amber-500';
+        return '';
+    }
+  };
+
+  const getBackgroundColor = () => {
+    switch (variant) {
+      case 'primary':
+      case 'secondary':
+        return '#020473';
+      case 'outline':
+        return 'transparent';
+      case 'ghost':
+        return 'transparent';
+      default:
+        return '#020473';
+    }
+  };
+
+  const getBorderColor = () => {
+    switch (variant) {
+      case 'outline':
+        return '#020473';
+      default:
+        return 'transparent';
     }
   };
 
@@ -58,7 +80,7 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       case 'secondary':
         return 'text-white';
       case 'outline':
-        return 'text-white';
+        return 'text-black';
       case 'ghost':
         return 'text-slate-400';
       default:
@@ -73,7 +95,7 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       onPress={handlePress}
       disabled={loading || props.disabled}
       className={`h-16 w-full items-center justify-center rounded-full ${getVariantStyle()} ${loading || props.disabled ? 'opacity-70' : ''} ${className}`}
-      style={[animatedStyle, style as any]}
+      style={[animatedStyle, { backgroundColor: getBackgroundColor(), borderColor: getBorderColor(), borderWidth: variant === 'outline' ? 2 : 0 }, style as any]}
       {...props}
     >
       {loading ? (

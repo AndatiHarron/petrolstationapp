@@ -13,8 +13,8 @@ import { InventoryReports } from '../../components/admin/reports/inventory-repor
 
 export default function AdminDashboard() {
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-white">
+            <StatusBar style="dark" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1">
                 <Animated.ScrollView
                     className="flex-1 px-4"

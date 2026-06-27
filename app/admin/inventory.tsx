@@ -160,7 +160,7 @@ export default function InventoryTab() {
                 {/* Header */}
                 <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800">
                     <View className="flex-row items-center gap-2">
-                        <Text className="text-2xl font-bold text-white">Inventory</Text>
+                        <Text className="text-2xl font-bold text-black">Inventory</Text>
                         {meta && (
                             <View className="bg-blue-500/20 px-2.5 py-1 rounded-full">
                                 <Text className="text-blue-400 text-xs font-bold">{meta.total}</Text>
@@ -173,7 +173,7 @@ export default function InventoryTab() {
                         activeOpacity={0.8}
                     >
                         <Ionicons name="add" size={18} color="#fff" />
-                        <Text className="text-white font-bold text-sm">Add Lifting</Text>
+                        <Text className="text-black font-bold text-sm">Add Lifting</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -215,8 +215,8 @@ export default function InventoryTab() {
                         <View className="bg-slate-900 border-t border-slate-700 h-[70%] rounded-t-3xl shadow-2xl p-6">
                             <View className="flex-row justify-between items-start mb-6">
                                 <View className="flex-1 mr-4">
-                                    <Text className="text-2xl font-bold text-white">{selectedLifting?.tank_name}</Text>
-                                    <Text className="text-slate-400 text-sm mt-1">
+                                    <Text className="text-2xl font-bold text-black">{selectedLifting?.tank_name}</Text>
+                                    <Text className="text-gray-600 text-sm mt-1">
                                         {selectedLifting?.product_name} • {selectedLifting?.station_name}
                                     </Text>
                                 </View>
@@ -227,7 +227,7 @@ export default function InventoryTab() {
 
                             {/* Delivery Details */}
                             <View className="bg-slate-800 p-4 rounded-xl mb-4">
-                                <Text className="text-slate-400 text-xs uppercase mb-3 font-bold tracking-wider">Delivery Details</Text>
+                                <Text className="text-gray-600 text-xs uppercase mb-3 font-bold tracking-wider">Delivery Details</Text>
                                 <DetailRow label="Date" value={selectedLifting?.lifting_date ? new Date(selectedLifting.lifting_date).toLocaleDateString() : 'N/A'} />
                                 <DetailRow label="Invoice #" value={selectedLifting?.invoice_number || 'N/A'} mono />
                                 <DetailRow label="Volume" value={`${selectedLifting?.volume_liters.toLocaleString()} L`} highlight last />
@@ -235,7 +235,7 @@ export default function InventoryTab() {
 
                             {/* Financial Details */}
                             <View className="bg-slate-800 p-4 rounded-xl">
-                                <Text className="text-slate-400 text-xs uppercase mb-3 font-bold tracking-wider">Financial</Text>
+                                <Text className="text-gray-600 text-xs uppercase mb-3 font-bold tracking-wider">Financial</Text>
                                 <DetailRow label="Price/Liter" value={`KES ${selectedLifting?.buying_price_per_liter.toLocaleString()}`} mono />
                                 <DetailRow label="Total Cost" value={`KES ${selectedLifting?.total_cost.toLocaleString()}`} highlight mono />
                                 <DetailRow label="Tax Paid" value={`KES ${selectedLifting?.tax_paid.toLocaleString()}`} mono />

@@ -67,8 +67,8 @@ const RequestItem = memo(({ item, onPress }: { item: EditRequestResource; onPres
         >
             <View className="flex-row justify-between items-start mb-2">
                 <View className="flex-1 mr-3">
-                    <Text className="text-white text-base font-bold">{modelLabel} Edit</Text>
-                    <Text className="text-slate-400 text-sm mt-0.5">
+                    <Text className="text-black text-base font-bold">{modelLabel} Edit</Text>
+                    <Text className="text-gray-600 text-sm mt-0.5">
                         by {item.user?.name ?? 'Unknown'} • {formatDate(item.created_at)}
                     </Text>
                 </View>
@@ -81,7 +81,7 @@ const RequestItem = memo(({ item, onPress }: { item: EditRequestResource; onPres
 
             {item.reason && (
                 <View className="bg-slate-700/40 p-2.5 rounded-lg mt-1">
-                    <Text className="text-slate-400 text-xs uppercase mb-1">Reason</Text>
+                    <Text className="text-gray-600 text-xs uppercase mb-1">Reason</Text>
                     <Text className="text-slate-300 text-sm" numberOfLines={2}>{item.reason}</Text>
                 </View>
             )}
@@ -95,7 +95,7 @@ const DataDiff = ({ label, original, requested }: { label: string; original: any
         const keys = [...new Set([...Object.keys(original || {}), ...Object.keys(requested || {})])];
         return (
             <View className="mb-3">
-                <Text className="text-slate-400 text-xs uppercase mb-2 font-bold">{label}</Text>
+                    <Text className="text-gray-600 text-xs uppercase mb-2 font-bold">{label}</Text>
                 {keys.map((key) => (
                     <DataDiff
                         key={key}
@@ -112,7 +112,7 @@ const DataDiff = ({ label, original, requested }: { label: string; original: any
 
     return (
         <View className="flex-row justify-between items-center py-2 border-b border-slate-700/50">
-            <Text className="text-slate-400 text-sm flex-1 capitalize">{label.replace(/_/g, ' ')}</Text>
+            <Text className="text-gray-600 text-sm flex-1 capitalize">{label.replace(/_/g, ' ')}</Text>
             <View className="flex-row items-center gap-2">
                 <Text className={`text-sm font-mono ${changed ? 'text-red-400 line-through' : 'text-slate-300'}`}>
                     {String(original ?? '—')}
@@ -230,7 +230,7 @@ export default function AdminRequestsScreen() {
                                         : 'bg-slate-800 border-slate-700'
                                         }`}
                                 >
-                                    <Text className={`text-sm font-semibold ${filterStatus === btn.value ? 'text-white' : 'text-slate-400'
+                                    <Text className={`text-sm font-semibold ${filterStatus === btn.value ? 'text-black' : 'text-gray-600'}
                                         }`}>
                                         {btn.label}
                                     </Text>
@@ -244,7 +244,7 @@ export default function AdminRequestsScreen() {
                 {isLoading ? (
                     <View className="flex-1 items-center justify-center">
                         <ActivityIndicator size="large" color="#60a5fa" />
-                        <Text className="text-slate-400 mt-4">Loading requests...</Text>
+                        <Text className="text-gray-600 mt-4">Loading requests...</Text>
                     </View>
                 ) : (
                     <FlatList<EditRequestResource>

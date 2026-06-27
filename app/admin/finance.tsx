@@ -29,8 +29,8 @@ export default function FinanceTab() {
     }, []);
 
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-white">
+            <StatusBar style="dark" backgroundColor="#0f172a" />
             <SafeAreaView className="flex-1">
                 <ScrollView
                     className="flex-1 px-4"

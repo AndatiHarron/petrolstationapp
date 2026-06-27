@@ -14,7 +14,7 @@ export function InventorySection() {
 
     return (
         <View className="flex gap-6 mb-8">
-            <View className="flex-[2] bg-slate-800 border border-slate-700/50 rounded-xl p-6 shadow-sm overflow-hidden">
+            <View className="flex-[2] bg-gray-100 border border-gray-300 rounded-xl p-6 shadow-sm overflow-hidden">
                 <View className="mb-6">
                     <Text className="text-white font-bold text-lg">Fuel Loss/Gain Trend</Text>
                     <Text className="text-slate-500 text-xs">Physical vs. Book Stock Variance (Liters)</Text>
@@ -44,7 +44,7 @@ export function InventorySection() {
             </View>
 
             {/* Wet Stock Overview */}
-            <View className="flex-1 bg-slate-800 border border-slate-700/50 rounded-xl p-6 shadow-sm">
+            <View className="flex-1 bg-gray-100 border border-gray-300 rounded-xl p-6 shadow-sm">
                 <View className="mb-6">
                     <Text className="text-white font-bold text-lg">Wet Stock Levels</Text>
                     <Text className="text-slate-500 text-xs">Current Tank Readings</Text>

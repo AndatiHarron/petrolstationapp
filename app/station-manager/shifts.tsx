@@ -13,8 +13,8 @@ export default function ShiftsScreen() {
     const [activeTab, setActiveTab] = useState<TabMode>('current');
 
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-white">
+            <StatusBar style="dark" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1" edges={['top']}>
                 {/* Header */}
                 <View className="px-4 pt-4 pb-2">

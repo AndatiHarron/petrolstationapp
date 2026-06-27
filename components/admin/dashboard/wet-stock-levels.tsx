@@ -6,7 +6,7 @@ import type { TanksIndex200, TankResource } from '@/features/api/model';
 // ─── Skeleton Loader ───────────────────────────────────────────────
 function TankCardSkeleton() {
     return (
-        <View className="w-40 mr-3 bg-slate-800 border border-slate-700/50 rounded-2xl p-4">
+        <View className="w-40 mr-3 bg-gray-100 border border-gray-300 rounded-2xl p-4">
             <View className="flex-row items-center justify-between mb-3">
                 <View className="h-4 w-16 bg-slate-700 rounded animate-pulse" />
                 <View className="h-5 w-12 bg-slate-700 rounded-full animate-pulse" />
@@ -49,7 +49,7 @@ function TankCard({ tank }: { tank: TankResource }) {
     };
 
     return (
-        <View className="w-44 mr-3 bg-slate-800 border border-slate-700/50 rounded-2xl p-4">
+        <View className="w-44 mr-3 bg-gray-100 border border-gray-300 rounded-2xl p-4">
             {/* Header: tank name + percentage badge */}
             <View className="flex-row items-center justify-between mb-1">
                 <Text className="text-white font-bold text-sm flex-1 mr-2" numberOfLines={1}>

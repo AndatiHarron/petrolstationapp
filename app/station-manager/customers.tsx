@@ -156,7 +156,7 @@ export default function CustomersScreen() {
 
     if (error) {
         return (
-            <View className="flex-1 items-center justify-center bg-slate-900">
+            <View className="flex-1 items-center justify-center bg-white">
                 <Text className="text-white text-lg font-bold">Error fetching customers: {(error as Error).message}</Text>
             </View>
         );
@@ -238,8 +238,8 @@ export default function CustomersScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-slate-900" edges={['top']}>
-            <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800 bg-slate-900">
+        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+            <View className="px-4 py-4 flex-row justify-between items-center border-b border-gray-200 bg-white">
                 <View className="flex-row items-center gap-2">
                     <Text className="text-2xl font-bold text-white">Customers</Text>
                     {meta && (

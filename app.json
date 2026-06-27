@@ -43,26 +43,20 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.octane.petrolintegrity",
+      "package": "com.jjmbeba.petrolintegrity",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.jjmbeba.petrolintegrity",
       "versionCode": 1
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "3948e489-7317-4c8f-a2fa-abbae0ef88a9"
+        "projectId": "a967a9ab-6c91-4a1e-a913-6160e4448766"
       }
     },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "3948e489-7317-4c8f-a2fa-abbae0ef88a9"
-      }
-    }
+    "owner": "harronandati"
   }
 }
