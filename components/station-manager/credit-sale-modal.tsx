@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { X } from 'lucide-react-native';
 import { View, Text, Modal, TouchableOpacity, TextInput, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { SymbolView } from 'expo-symbols';
 import { BlurView } from 'expo-blur';
 
 interface CreditSaleModalProps {
@@ -21,6 +21,8 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
     const [amount, setAmount] = useState('');
     const [notes, setNotes] = useState('');
 
+    if (!visible) return null;
+
     return (
         <Modal
             animationType="slide"
@@ -35,23 +37,23 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 h-[85%]">
+                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border h-[85%]">
                         {/* Handle Bar */}
                         <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-slate-700 rounded-full" />
+                            <View className="w-12 h-1 bg-surface-border rounded-full" />
                         </View>
 
                         {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-slate-800">
+                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
                             <View>
-                                <Text className="text-white text-2xl font-bold">New Credit Sale</Text>
-                                <Text className="text-slate-400 text-sm">Link purchase to debtor account</Text>
+                                <Text className="text-ink text-2xl font-bold">New Credit Sale</Text>
+                                <Text className="text-ink-muted text-sm">Link purchase to debtor account</Text>
                             </View>
                             <TouchableOpacity
                                 onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center"
+                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             >
-                                <SymbolView name="xmark" size={16} tintColor="#94a3b8" />
+                                <X size={16} color="#8b8b99" />
                             </TouchableOpacity>
                         </View>
 
@@ -62,15 +64,15 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                             showsVerticalScrollIndicator={false}
                         >
                             {/* Amount Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">Total Amount (KES)</Text>
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">Total Amount (KES)</Text>
                             <View className="relative mb-8">
                                 <View className="absolute left-4 top-4 z-10">
-                                    <Text className="text-slate-500 text-lg font-bold">KES</Text>
+                                    <Text className="text-ink-muted text-lg font-bold">KES</Text>
                                 </View>
                                 <TextInput
-                                    className="bg-slate-800 text-white font-black text-3xl p-4 pl-16 rounded-xl border border-slate-700 focus:border-blue-500 focus:bg-slate-800/80 h-20"
+                                    className="bg-surface text-ink font-black text-3xl p-4 pl-16 rounded-xl border border-surface-border focus:border-blue-500 focus:bg-surface h-20"
                                     placeholder="0.00"
-                                    placeholderTextColor="#475569"
+                                    placeholderTextColor="#5c5c6b"
                                     keyboardType="numeric"
                                     value={amount}
                                     onChangeText={setAmount}
@@ -79,7 +81,7 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                             </View>
 
                             {/* Customer Selection */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">Select Customer</Text>
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">Select Customer</Text>
                             <ScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
@@ -92,10 +94,10 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                                         onPress={() => setSelectedCustomer(customer)}
                                         className={`mr-3 px-4 py-3 rounded-xl border ${selectedCustomer === customer
                                                 ? 'bg-blue-600 border-blue-500'
-                                                : 'bg-slate-800 border-slate-700'
+                                                : 'bg-surface border-surface-border'
                                             }`}
                                     >
-                                        <Text className={`font-bold ${selectedCustomer === customer ? 'text-white' : 'text-slate-400'
+                                        <Text className={`font-bold ${selectedCustomer === customer ? 'text-ink' : 'text-ink-muted'
                                             }`}>
                                             {customer}
                                         </Text>
@@ -104,11 +106,11 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                             </ScrollView>
 
                             {/* Notes */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">Additional Notes</Text>
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">Additional Notes</Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-blue-500 focus:bg-slate-800/80 min-h-[100px] mb-8"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 focus:bg-surface min-h-[100px] mb-8"
                                 placeholder="Driver name, vehicle registration..."
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 multiline
                                 textAlignVertical="top"
                                 value={notes}
@@ -117,12 +119,12 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                         </ScrollView>
 
                         {/* Footer */}
-                        <View className="p-6 border-t border-slate-800 bg-slate-900 pb-10">
+                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <TouchableOpacity
                                 className="bg-blue-600 rounded-xl py-4 items-center shadow-lg shadow-blue-900/20"
                                 onPress={onClose} // Functionality would go here
                             >
-                                <Text className="text-white font-bold text-lg">Confirm Credit Sale</Text>
+                                <Text className="text-ink font-bold text-lg">Confirm Credit Sale</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

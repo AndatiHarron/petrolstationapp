@@ -1,6 +1,6 @@
 import React from 'react';
+import { AppIcon } from '../app-icon';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { SymbolView } from 'expo-symbols';
 import * as Haptics from 'expo-haptics';
 
 interface ActionButtonProps {
@@ -16,7 +16,7 @@ const ActionButton = ({ label, icon, color, onPress }: ActionButtonProps) => (
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
             onPress();
         }}
-        className="bg-slate-800 rounded-xl p-6 mb-4 w-[48%] active:bg-slate-700 active:scale-95 transition-all"
+        className="bg-surface rounded-xl p-6 mb-4 w-[48%] active:bg-surface-border active:scale-95 transition-all"
         style={{
             shadowColor: color,
             shadowOffset: { width: 0, height: 4 },
@@ -29,13 +29,9 @@ const ActionButton = ({ label, icon, color, onPress }: ActionButtonProps) => (
             className="w-12 h-12 rounded-full items-center justify-center mb-3"
             style={{ backgroundColor: `${color}20` }}
         >
-            <SymbolView
-                name={icon as any}
-                size={24}
-                tintColor={color}
-            />
+            <AppIcon name={icon as any} size={24} color={color} />
         </View>
-        <Text className="text-white font-bold text-lg leading-6">
+        <Text className="text-ink font-bold text-lg leading-6">
             {label}
         </Text>
     </TouchableOpacity>
@@ -65,7 +61,7 @@ export function QuickActionsHero() {
             <ActionButton
                 label="Record Expenses"
                 icon="banknote.fill"
-                color="#ef4444"
+                color="#bf0a30"
                 onPress={() => console.log('Record Expense')}
             />
         </View>

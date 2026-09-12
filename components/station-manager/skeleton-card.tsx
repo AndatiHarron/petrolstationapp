@@ -27,12 +27,12 @@ export const SkeletonCard = memo(function SkeletonCard({ variant, style }: Skele
     if (variant === 'product') {
         return (
             <Animated.View
-                style={[animatedStyle, { width: 140 }, style]}
-                className="bg-slate-800/70 rounded-xl p-4 border border-slate-700/50"
+                style={[animatedStyle, { minWidth: 150 }, style]}
+                className="bg-surface rounded-xl p-4 border border-surface-border"
             >
-                <View className="h-3 w-16 bg-slate-700 rounded mb-2" />
-                <View className="h-6 w-24 bg-slate-700 rounded mb-2" />
-                <View className="h-3 w-12 bg-slate-700 rounded" />
+                <View className="h-3 w-16 bg-surface-border rounded mb-2" />
+                <View className="h-6 w-24 bg-surface-border rounded mb-2" />
+                <View className="h-3 w-12 bg-surface-border rounded" />
             </Animated.View>
         );
     }
@@ -41,20 +41,20 @@ export const SkeletonCard = memo(function SkeletonCard({ variant, style }: Skele
         return (
             <Animated.View
                 style={[animatedStyle, style]}
-                className="bg-slate-800/70 rounded-xl p-4 border border-slate-700/50"
+                className="bg-surface rounded-xl p-4 border border-surface-border"
             >
                 <View className="flex-row justify-between mb-2">
                     <View className="flex-1">
-                        <View className="h-4 w-24 bg-slate-700 rounded mb-1" />
-                        <View className="h-3 w-16 bg-slate-700 rounded" />
+                        <View className="h-4 w-24 bg-surface-border rounded mb-1" />
+                        <View className="h-3 w-16 bg-surface-border rounded" />
                     </View>
                     <View className="items-end">
-                        <View className="h-4 w-20 bg-slate-700 rounded mb-1" />
-                        <View className="h-3 w-14 bg-slate-700 rounded" />
+                        <View className="h-4 w-20 bg-surface-border rounded mb-1" />
+                        <View className="h-3 w-14 bg-surface-border rounded" />
                     </View>
                 </View>
-                <View className="h-3 bg-slate-700 rounded-full mt-2" />
-                <View className="h-3 w-12 bg-slate-700 rounded mt-1 self-end" />
+                <View className="h-3 bg-surface-border rounded-full mt-2" />
+                <View className="h-3 w-12 bg-surface-border rounded mt-1 self-end" />
             </Animated.View>
         );
     }
@@ -62,12 +62,12 @@ export const SkeletonCard = memo(function SkeletonCard({ variant, style }: Skele
     if (variant === 'customer') {
         return (
             <Animated.View
-                style={[animatedStyle, { width: 160 }, style]}
-                className="bg-slate-800/70 rounded-xl p-4 border border-slate-700/50"
+                style={[animatedStyle, { minWidth: 160 }, style]}
+                className="bg-surface rounded-xl p-4 border border-surface-border"
             >
-                <View className="bg-slate-700 w-10 h-10 rounded-full mb-2" />
-                <View className="h-4 w-24 bg-slate-700 rounded mb-2" />
-                <View className="h-3 w-20 bg-slate-700 rounded" />
+                <View className="bg-surface-border w-10 h-10 rounded-full mb-2" />
+                <View className="h-4 w-24 bg-surface-border rounded mb-2" />
+                <View className="h-3 w-20 bg-surface-border rounded" />
             </Animated.View>
         );
     }
@@ -76,18 +76,18 @@ export const SkeletonCard = memo(function SkeletonCard({ variant, style }: Skele
         return (
             <Animated.View
                 style={[animatedStyle, style]}
-                className="bg-slate-800/70 rounded-xl p-4 border border-slate-700/50"
+                className="bg-surface rounded-xl p-4 border border-surface-border"
             >
                 <View className="flex-row justify-between mb-2">
                     <View className="flex-1">
-                        <View className="h-5 w-32 bg-slate-700 rounded mb-2" />
-                        <View className="h-3 w-20 bg-slate-700 rounded" />
+                        <View className="h-5 w-32 bg-surface-border rounded mb-2" />
+                        <View className="h-3 w-20 bg-surface-border rounded" />
                     </View>
-                    <View className="h-6 w-20 bg-slate-700 rounded-full" />
+                    <View className="h-6 w-20 bg-surface-border rounded-full" />
                 </View>
                 <View className="flex-row justify-between items-center mt-3">
-                    <View className="h-3 w-24 bg-slate-700 rounded" />
-                    <View className="h-4 w-24 bg-slate-700 rounded" />
+                    <View className="h-3 w-24 bg-surface-border rounded" />
+                    <View className="h-4 w-24 bg-surface-border rounded" />
                 </View>
             </Animated.View>
         );
@@ -97,34 +97,34 @@ export const SkeletonCard = memo(function SkeletonCard({ variant, style }: Skele
         return (
             <Animated.View
                 style={[animatedStyle, style]}
-                className="bg-slate-800/70 rounded-3xl p-6 border border-slate-700/50 w-full"
+                className="bg-surface rounded-3xl p-6 border border-surface-border w-full"
             >
                 {/* Header skeleton */}
                 <View className="flex-row items-center justify-between mb-6">
                     <View className="flex-row items-center">
-                        <View className="bg-slate-700 w-12 h-12 rounded-xl mr-3" />
+                        <View className="bg-surface-border w-12 h-12 rounded-xl mr-3" />
                         <View>
-                            <View className="h-5 w-28 bg-slate-700 rounded mb-2" />
-                            <View className="h-3 w-36 bg-slate-700 rounded" />
+                            <View className="h-5 w-28 bg-surface-border rounded mb-2" />
+                            <View className="h-3 w-36 bg-surface-border rounded" />
                         </View>
                     </View>
-                    <View className="bg-slate-700 px-4 py-2 rounded-full w-20 h-7" />
+                    <View className="bg-surface-border px-4 py-2 rounded-full w-20 h-7" />
                 </View>
 
                 {/* Details skeleton */}
-                <View className="bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 mb-6">
+                <View className="bg-surface-sunken rounded-xl p-4 border border-surface-border mb-6">
                     <View className="flex-row justify-between items-center mb-3">
-                        <View className="h-3 w-16 bg-slate-700 rounded" />
-                        <View className="h-4 w-24 bg-slate-700 rounded" />
+                        <View className="h-3 w-16 bg-surface-border rounded" />
+                        <View className="h-4 w-24 bg-surface-border rounded" />
                     </View>
                     <View className="flex-row justify-between items-center">
-                        <View className="h-3 w-16 bg-slate-700 rounded" />
-                        <View className="h-4 w-20 bg-slate-700 rounded" />
+                        <View className="h-3 w-16 bg-surface-border rounded" />
+                        <View className="h-4 w-20 bg-surface-border rounded" />
                     </View>
                 </View>
 
                 {/* Button skeleton */}
-                <View className="bg-slate-700 h-14 w-full rounded-xl" />
+                <View className="bg-surface-border h-14 w-full rounded-xl" />
             </Animated.View>
         );
     }

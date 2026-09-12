@@ -14,7 +14,7 @@ const getTankFillPercentage = (tank: TankResource) => {
 
 // Get fill color based on percentage
 const getFillColor = (percentage: number) => {
-    if (percentage < 20) return 'bg-red-500';
+    if (percentage < 20) return 'bg-accent';
     if (percentage < 40) return 'bg-amber-500';
     return 'bg-emerald-500';
 };
@@ -24,31 +24,31 @@ export const TankCard = memo(function TankCard({ tank }: TankCardProps) {
     const fillColor = getFillColor(fillPercent);
 
     return (
-        <View className="bg-slate-800/70 rounded-xl p-4 border border-slate-700/50">
+        <View className="bg-surface rounded-xl p-4 border border-surface-border">
             <View className="flex-row justify-between items-start mb-2">
-                <View className="flex-1">
-                    <Text className="text-white font-bold">{tank.name}</Text>
-                    <Text className="text-slate-400 text-xs">
+                <View className="flex-1 mr-3">
+                    <Text className="text-ink font-bold" numberOfLines={2}>{tank.name}</Text>
+                    <Text className="text-ink-muted text-xs">
                         {tank.product_name || 'Unknown Product'}
                     </Text>
                 </View>
-                <View className="items-end">
-                    <Text className="text-white font-bold">
+                <View className="items-end shrink-0">
+                    <Text className="text-ink font-bold">
                         {tank.current_volume.toLocaleString()} L
                     </Text>
-                    <Text className="text-slate-500 text-xs">
+                    <Text className="text-ink-muted text-xs">
                         of {tank.capacity_liters.toLocaleString()} L
                     </Text>
                 </View>
             </View>
             {/* Tank gauge */}
-            <View className="h-3 bg-slate-700 rounded-full overflow-hidden">
+            <View className="h-3 bg-surface-border rounded-full overflow-hidden">
                 <View
                     className={`h-full ${fillColor} rounded-full`}
                     style={{ width: `${fillPercent}%` }}
                 />
             </View>
-            <Text className="text-slate-400 text-xs mt-1 text-right">
+            <Text className="text-ink-muted text-xs mt-1 text-right">
                 {fillPercent}% full
             </Text>
         </View>

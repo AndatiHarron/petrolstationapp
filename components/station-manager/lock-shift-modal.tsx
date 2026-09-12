@@ -1,8 +1,8 @@
 import { useCustomersIndex } from '@/features/api/customer/customer';
+import { Camera, Gauge, Plus, Ruler, Trash2, TriangleAlert, X } from 'lucide-react-native';
 import type { ShiftClosingData200, ShiftResource } from '@/features/api/model';
 import { useShiftClosingData } from '@/features/api/shift/shift';
 import * as ImagePicker from 'expo-image-picker';
-import { SymbolView } from 'expo-symbols';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, InteractionManager, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
@@ -239,19 +239,19 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
         return (
             <Modal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
                 <View className="flex-1 bg-black/60 justify-center items-center p-6">
-                    <View className="bg-slate-900 p-6 rounded-2xl border border-slate-700 w-full max-w-sm items-center">
-                        <View className="bg-red-500/10 p-4 rounded-full mb-4">
-                            <SymbolView name="exclamationmark.triangle.fill" size={32} tintColor="#ef4444" />
+                    <View className="bg-surface-sunken p-6 rounded-2xl border border-surface-border w-full max-w-sm items-center">
+                        <View className="bg-accent-subtle p-4 rounded-full mb-4">
+                            <TriangleAlert size={32} color="#bf0a30" />
                         </View>
-                        <Text className="text-white font-bold text-lg mb-2">Failed to Load Data</Text>
-                        <Text className="text-slate-400 text-center mb-6 leading-5">
+                        <Text className="text-ink font-bold text-lg mb-2">Failed to Load Data</Text>
+                        <Text className="text-ink-muted text-center mb-6 leading-5">
                             Could not fetch closing data for this shift. Please check your connection and try again.
                         </Text>
                         <TouchableOpacity
                             onPress={onClose}
-                            className="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl w-full items-center active:bg-slate-700"
+                            className="bg-surface border border-surface-border px-6 py-3 rounded-xl w-full items-center active:bg-surface-border"
                         >
-                            <Text className="text-white font-bold">Close</Text>
+                            <Text className="text-ink font-bold">Close</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -274,23 +274,23 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                     <Animated.View
                         entering={SlideInDown.duration(250)}
                         exiting={SlideOutDown}
-                        className="bg-slate-900 h-[92%] rounded-t-3xl border-t border-slate-700 w-full flex overflow-hidden"
+                        className="bg-surface-sunken h-[92%] rounded-t-3xl border-t border-surface-border w-full flex overflow-hidden"
                     >
                     {/* Header */}
-                    <View className="px-6 py-4 border-b border-slate-800 flex-row items-center justify-between bg-slate-900/90 z-10">
+                    <View className="px-6 py-4 border-b border-surface-border flex-row items-center justify-between bg-surface-sunken/90 z-10">
                         <View>
-                            <Text className="text-white text-xl font-bold">End Shift</Text>
-                            <Text className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+                            <Text className="text-ink text-xl font-bold">End Shift</Text>
+                            <Text className="text-ink-muted text-xs font-medium uppercase tracking-wider">
                                 Step {step} of 3: {step === 1 ? 'Meter Readings' : step === 2 ? 'Tank Dips' : 'Payments & Reconciliation'}
                             </Text>
                         </View>
-                        <TouchableOpacity onPress={onClose} className="bg-slate-800 p-2 rounded-full">
-                            <SymbolView name="xmark" size={20} tintColor="#94a3b8" />
+                        <TouchableOpacity onPress={onClose} className="bg-surface p-2 rounded-full">
+                            <X size={20} color="#8b8b99" />
                         </TouchableOpacity>
                     </View>
 
                     {/* Progress Bar */}
-                    <View className="flex-row h-1 w-full bg-slate-800">
+                    <View className="flex-row h-1 w-full bg-surface">
                         <View className={`h-full bg-blue-500 transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`} />
                     </View>
 
@@ -304,28 +304,28 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         {/* -------------------- STEP 1: METERS -------------------- */}
                         {step === 1 && (
                             <Animated.View entering={FadeIn}>
-                                <Text className="text-slate-300 mb-6 leading-6">
+                                <Text className="text-ink mb-6 leading-6">
                                     Enter the closing reading for each pump nozzle and capture a photo of the meter display for audit compliance.
                                 </Text>
                                 {!canProceedFromStep1 ? (
                                     <View className="mb-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
-                                        <Text className="text-amber-400 text-sm">Photo evidence required for each nozzle before proceeding.</Text>
+                                        <Text className="text-amber-700 text-sm">Photo evidence required for each nozzle before proceeding.</Text>
                                     </View>
                                 ) : null}
                                 {closingData.nozzles.map((nozzle, index) => (
-                                    <View key={`${nozzle.nozzle_id}-${index}`} className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50 gap-3">
+                                    <View key={`${nozzle.nozzle_id}-${index}`} className="mb-6 bg-surface-sunken p-4 rounded-xl border border-surface-border gap-3">
                                         <View className="flex-row justify-between mb-1">
-                                            <Text className="text-slate-200 font-bold">{nozzle.pump_name}</Text>
-                                            <Text className="text-slate-400 text-xs">Prev: {nozzle.opening_reading}</Text>
+                                            <Text className="text-ink font-bold">{nozzle.pump_name}</Text>
+                                            <Text className="text-ink-muted text-xs">Prev: {nozzle.opening_reading}</Text>
                                         </View>
-                                        <View className="flex-row items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden h-12">
-                                            <View className="pl-3 pr-2 h-full justify-center border-r border-slate-700 bg-slate-800/30">
-                                                <SymbolView name="gauge.with.needle" size={18} tintColor="#64748b" />
+                                        <View className="flex-row items-center bg-surface-sunken border border-surface-border rounded-lg overflow-hidden h-12">
+                                            <View className="pl-3 pr-2 h-full justify-center border-r border-surface-border bg-surface/30">
+                                                <Gauge size={18} color="#5c5c6b" />
                                             </View>
                                             <TextInput
-                                                className="flex-1 text-white px-3 font-mono text-base h-full"
+                                                className="flex-1 text-ink px-3 font-mono text-base h-full"
                                                 placeholder="Closing Reading"
-                                                placeholderTextColor="#475569"
+                                                placeholderTextColor="#5c5c6b"
                                                 keyboardType="numeric"
                                                 value={meterReadings[nozzle.nozzle_id]}
                                                 onChangeText={(v) => setMeterReadings(p => ({ ...p, [nozzle.nozzle_id]: v }))}
@@ -336,15 +336,15 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                 <>
                                                     <Image
                                                         source={{ uri: meterEvidence[nozzle.nozzle_id].uri }}
-                                                        className="w-16 h-16 rounded-lg border border-slate-600"
+                                                        className="w-16 h-16 rounded-lg border border-surface-border"
                                                         resizeMode="cover"
                                                     />
                                                     <Pressable
                                                         onPress={() => takeMeterPhoto(nozzle.nozzle_id)}
-                                                        className="flex-row items-center gap-2 px-3 py-2 rounded-lg bg-slate-700 border border-slate-600"
+                                                        className="flex-row items-center gap-2 px-3 py-2 rounded-lg bg-surface-border border border-surface-border"
                                                     >
-                                                        <SymbolView name="camera.fill" size={16} tintColor="#94a3b8" />
-                                                        <Text className="text-slate-300 text-sm font-medium">Retake</Text>
+                                                        <Camera size={16} color="#8b8b99" />
+                                                        <Text className="text-ink text-sm font-medium">Retake</Text>
                                                     </Pressable>
                                                 </>
                                             ) : (
@@ -352,8 +352,8 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                     onPress={() => takeMeterPhoto(nozzle.nozzle_id)}
                                                     className="flex-row items-center gap-2 px-4 py-3 rounded-lg bg-blue-600/20 border border-blue-500/30"
                                                 >
-                                                    <SymbolView name="camera.fill" size={18} tintColor="#60a5fa" />
-                                                    <Text className="text-blue-400 text-sm font-bold">Take Photo</Text>
+                                                    <Camera size={18} color="#60a5fa" />
+                                                    <Text className="text-brand text-sm font-bold">Take Photo</Text>
                                                 </Pressable>
                                             )}
                                         </View>
@@ -365,26 +365,26 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         {/* -------------------- STEP 2: DIPS -------------------- */}
                         {step === 2 && (
                             <Animated.View entering={FadeIn}>
-                                <Text className="text-slate-300 mb-6 leading-6">
+                                <Text className="text-ink mb-6 leading-6">
                                     Record the physical dip levels (in mm) for each underground tank.
                                 </Text>
                                 {closingData.tanks.map((tank, index) => (
-                                    <View key={`${tank.tank_id}-${index}`} className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                                        <Text className="text-slate-200 font-bold mb-3">{tank.tank_name}</Text>
-                                        <View className="flex-row items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden h-12">
-                                            <View className="pl-3 pr-2 h-full justify-center border-r border-slate-700 bg-slate-800/30">
-                                                <SymbolView name="ruler.fill" size={18} tintColor="#64748b" />
+                                    <View key={`${tank.tank_id}-${index}`} className="mb-6 bg-surface-sunken p-4 rounded-xl border border-surface-border">
+                                        <Text className="text-ink font-bold mb-3">{tank.tank_name}</Text>
+                                        <View className="flex-row items-center bg-surface-sunken border border-surface-border rounded-lg overflow-hidden h-12">
+                                            <View className="pl-3 pr-2 h-full justify-center border-r border-surface-border bg-surface/30">
+                                                <Ruler size={18} color="#5c5c6b" />
                                             </View>
                                             <TextInput
-                                                className="flex-1 text-white px-3 font-mono text-base h-full"
+                                                className="flex-1 text-ink px-3 font-mono text-base h-full"
                                                 placeholder="Dip Level (mm)"
-                                                placeholderTextColor="#475569"
+                                                placeholderTextColor="#5c5c6b"
                                                 keyboardType="numeric"
                                                 value={tankDips[tank.tank_id]}
                                                 onChangeText={(v) => setTankDips(p => ({ ...p, [tank.tank_id]: v }))}
                                             />
                                             <View className="px-3">
-                                                <Text className="text-slate-500 font-medium text-xs">mm</Text>
+                                                <Text className="text-ink-muted font-medium text-xs">mm</Text>
                                             </View>
                                         </View>
                                     </View>
@@ -395,21 +395,21 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         {/* -------------------- STEP 3: PAYMENTS -------------------- */}
                         {step === 3 && (
                             <Animated.View entering={FadeIn}>
-                                <Text className="text-slate-300 mb-6 leading-6">
+                                <Text className="text-ink mb-6 leading-6">
                                     Consolidate all cash, M-Pesa, and credit sales for this shift.
                                 </Text>
 
                                 {/* Cash Section */}
                                 <View className="mb-6">
-                                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Cash Collection</Text>
-                                    <View className="flex-row items-center bg-slate-800 border border-slate-700 rounded-xl overflow-hidden h-14">
-                                        <View className="w-12 h-full justify-center items-center bg-slate-700/30 border-r border-slate-700">
-                                            <Text className="text-emerald-400 font-bold text-lg">Sh</Text>
+                                    <Text className="text-ink-muted text-xs font-bold uppercase tracking-wider mb-2">Cash Collection</Text>
+                                    <View className="flex-row items-center bg-surface border border-surface-border rounded-xl overflow-hidden h-14">
+                                        <View className="w-12 h-full justify-center items-center bg-surface-border border-r border-surface-border">
+                                            <Text className="text-emerald-700 font-bold text-lg">Sh</Text>
                                         </View>
                                         <TextInput
-                                            className="flex-1 text-white px-4 font-bold text-lg h-full"
+                                            className="flex-1 text-ink px-4 font-bold text-lg h-full"
                                             placeholder="0.00"
-                                            placeholderTextColor="#475569"
+                                            placeholderTextColor="#5c5c6b"
                                             keyboardType="decimal-pad"
                                             value={cashAmount}
                                             onChangeText={setCashAmount}
@@ -419,15 +419,15 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
 
                                 {/* M-Pesa Section */}
                                 <View className="mb-8">
-                                    <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">M-Pesa Total</Text>
-                                    <View className="flex-row items-center bg-slate-800 border border-slate-700 rounded-xl overflow-hidden h-14">
-                                        <View className="w-12 h-full justify-center items-center bg-slate-700/30 border-r border-slate-700">
-                                            <Text className="text-emerald-400 font-bold text-lg">Sh</Text>
+                                    <Text className="text-ink-muted text-xs font-bold uppercase tracking-wider mb-2">M-Pesa Total</Text>
+                                    <View className="flex-row items-center bg-surface border border-surface-border rounded-xl overflow-hidden h-14">
+                                        <View className="w-12 h-full justify-center items-center bg-surface-border border-r border-surface-border">
+                                            <Text className="text-emerald-700 font-bold text-lg">Sh</Text>
                                         </View>
                                         <TextInput
-                                            className="flex-1 text-white px-4 font-bold text-lg h-full"
+                                            className="flex-1 text-ink px-4 font-bold text-lg h-full"
                                             placeholder="0.00"
-                                            placeholderTextColor="#475569"
+                                            placeholderTextColor="#5c5c6b"
                                             keyboardType="decimal-pad"
                                             value={mpesaAmount}
                                             onChangeText={setMpesaAmount}
@@ -438,44 +438,44 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                 {/* Credit Sales Section */}
                                 <View className="mb-6">
                                     <View className="flex-row justify-between items-center mb-4">
-                                        <Text className="text-slate-200 font-bold text-lg">Credit Sales</Text>
+                                        <Text className="text-ink font-bold text-lg">Credit Sales</Text>
                                         <TouchableOpacity
                                             onPress={addCreditSale}
                                             disabled={!hasCustomers}
-                                            className={`px-3 py-1.5 rounded-full border flex-row items-center gap-1 ${hasCustomers ? 'bg-blue-600/20 border-blue-500/30' : 'bg-slate-800 border-slate-700 opacity-50'}`}
+                                            className={`px-3 py-1.5 rounded-full border flex-row items-center gap-1 ${hasCustomers ? 'bg-blue-600/20 border-blue-500/30' : 'bg-surface border-surface-border opacity-50'}`}
                                         >
-                                            <SymbolView name="plus" size={12} tintColor={hasCustomers ? "#60a5fa" : "#94a3b8"} />
-                                            <Text className={hasCustomers ? "text-blue-400 text-xs font-bold" : "text-slate-400 text-xs font-bold"}>
+                                            <Plus size={12} color={hasCustomers ? "#60a5fa" : "#8b8b99"} />
+                                            <Text className={hasCustomers ? "text-brand text-xs font-bold" : "text-ink-muted text-xs font-bold"}>
                                                 {isLoadingCustomers ? 'Loading...' : hasCustomers ? 'Add Entry' : 'No Customers'}
                                             </Text>
                                         </TouchableOpacity>
                                     </View>
 
                                     {creditSales.length === 0 ? (
-                                        <View className="p-6 border-2 border-dashed border-slate-800 rounded-xl items-center justify-center">
-                                            <Text className="text-slate-500 text-sm">No credit sales recorded</Text>
+                                        <View className="p-6 border-2 border-dashed border-surface-border rounded-xl items-center justify-center">
+                                            <Text className="text-ink-muted text-sm">No credit sales recorded</Text>
                                         </View>
                                     ) : (
                                         creditSales.map((sale, index) => (
                                             <Animated.View
                                                 entering={FadeIn}
                                                 key={sale.id}
-                                                className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 mb-3"
+                                                className="bg-surface p-4 rounded-xl border border-surface-border mb-3"
                                             >
                                                 <View className="flex-row justify-between items-start mb-3">
-                                                    <Text className="text-slate-400 text-xs font-bold uppercase">Entry #{index + 1}</Text>
+                                                    <Text className="text-ink-muted text-xs font-bold uppercase">Entry #{index + 1}</Text>
                                                     <TouchableOpacity
                                                         onPress={() => removeCreditSale(sale.id)}
-                                                        className="bg-red-500/10 px-2 py-1 rounded border border-red-500/20 flex-row items-center gap-1"
+                                                        className="bg-accent-subtle px-2 py-1 rounded border border-accent/20 flex-row items-center gap-1"
                                                     >
-                                                        <SymbolView name="trash" size={12} tintColor="#ef4444" />
-                                                        <Text className="text-red-400 text-xs font-bold">Remove</Text>
+                                                        <Trash2 size={12} color="#bf0a30" />
+                                                        <Text className="text-accent text-xs font-bold">Remove</Text>
                                                     </TouchableOpacity>
                                                 </View>
 
                                                 {/* Customer Dropdown */}
                                                 <View className="mb-3">
-                                                    <Text className="text-slate-500 text-xs mb-1">Customer</Text>
+                                                    <Text className="text-ink-muted text-xs mb-1">Customer</Text>
                                                     {isLoadingCustomers ? (
                                                         <ActivityIndicator size="small" color="#3b82f6" />
                                                     ) : (
@@ -484,9 +484,9 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                                 <TouchableOpacity
                                                                     key={cust.id}
                                                                     onPress={() => updateCreditSale(sale.id, 'customerId', cust.id)}
-                                                                    className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-blue-600 border-blue-500' : 'bg-slate-900 border-slate-700'}`}
+                                                                    className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-blue-600 border-blue-500' : 'bg-surface-sunken border-surface-border'}`}
                                                                 >
-                                                                    <Text className={sale.customerId === cust.id ? 'text-white font-medium text-xs' : 'text-slate-400 text-xs'}>{cust.name}</Text>
+                                                                    <Text className={sale.customerId === cust.id ? 'text-ink font-medium text-xs' : 'text-ink-muted text-xs'}>{cust.name}</Text>
                                                                 </TouchableOpacity>
                                                             ))}
                                                         </ScrollView>
@@ -495,12 +495,12 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
 
                                                 <View className="flex-row gap-3">
                                                     <View className="flex-1">
-                                                        <Text className="text-slate-500 text-xs mb-1">Amount</Text>
-                                                        <View className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                                        <Text className="text-ink-muted text-xs mb-1">Amount</Text>
+                                                        <View className="bg-surface-sunken border border-surface-border rounded-lg px-3 py-2">
                                                             <TextInput
                                                                 placeholder="0.00"
-                                                                placeholderTextColor="#475569"
-                                                                className="text-white text-sm"
+                                                                placeholderTextColor="#5c5c6b"
+                                                                className="text-ink text-sm"
                                                                 keyboardType="decimal-pad"
                                                                 value={sale.amount}
                                                                 onChangeText={(v) => updateCreditSale(sale.id, 'amount', v)}
@@ -508,12 +508,12 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                         </View>
                                                     </View>
                                                     <View className="flex-1">
-                                                        <Text className="text-slate-500 text-xs mb-1">Vehicle Reg</Text>
-                                                        <View className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                                        <Text className="text-ink-muted text-xs mb-1">Vehicle Reg</Text>
+                                                        <View className="bg-surface-sunken border border-surface-border rounded-lg px-3 py-2">
                                                             <TextInput
                                                                 placeholder="KAA 123A"
-                                                                placeholderTextColor="#475569"
-                                                                className="text-white text-sm"
+                                                                placeholderTextColor="#5c5c6b"
+                                                                className="text-ink text-sm"
                                                                 autoCapitalize="characters"
                                                                 value={sale.vehicleReg}
                                                                 onChangeText={(v) => updateCreditSale(sale.id, 'vehicleReg', v)}
@@ -532,13 +532,13 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                     </ScrollView>
 
                     {/* Footer Actions */}
-                    <View className="absolute bottom-0 w-full px-6 py-4 bg-slate-900 border-t border-slate-800 flex-row gap-4">
+                    <View className="absolute bottom-0 w-full px-6 py-4 bg-surface-sunken border-t border-surface-border flex-row gap-4">
                         {step > 1 && (
                             <TouchableOpacity
                                 onPress={handleBack}
-                                className="flex-1 py-4 bg-slate-800 rounded-xl items-center"
+                                className="flex-1 py-4 bg-surface rounded-xl items-center"
                             >
-                                <Text className="text-slate-300 font-bold uppercase tracking-wider">Back</Text>
+                                <Text className="text-ink font-bold uppercase tracking-wider">Back</Text>
                             </TouchableOpacity>
                         )}
 
@@ -546,7 +546,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                             <TouchableOpacity
                                 onPress={handleNext}
                                 disabled={step === 1 && !canProceedFromStep1}
-                                className={`flex-[2] py-4 rounded-xl items-center ${step === 1 && !canProceedFromStep1 ? 'bg-slate-700 opacity-60' : 'bg-blue-600'}`}
+                                className={`flex-[2] py-4 rounded-xl items-center ${step === 1 && !canProceedFromStep1 ? 'bg-surface-border opacity-60' : 'bg-blue-600'}`}
                                 style={step === 1 && !canProceedFromStep1 ? undefined : {
                                     shadowColor: '#1e3a8a',
                                     shadowOffset: { width: 0, height: 4 },
@@ -555,7 +555,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                     elevation: 4,
                                 }}
                             >
-                                <Text className="text-white font-bold uppercase tracking-wider">Next Step</Text>
+                                <Text className="text-ink font-bold uppercase tracking-wider">Next Step</Text>
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
@@ -573,7 +573,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                 {isSubmitting ? (
                                     <ActivityIndicator size="small" color="#ffffff" />
                                 ) : (
-                                    <Text className="text-white font-bold uppercase tracking-wider">Submit & Lock Shift</Text>
+                                    <Text className="text-ink font-bold uppercase tracking-wider">Submit & Lock Shift</Text>
                                 )}
                             </TouchableOpacity>
                         )}

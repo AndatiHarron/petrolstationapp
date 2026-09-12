@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { SymbolView } from 'expo-symbols';
+import { Banknote, Building2, CirclePlay, Clock, Lock, Play, RotateCw } from 'lucide-react-native';
 import React, { useCallback } from 'react';
 import {
     ActivityIndicator,
@@ -108,7 +108,7 @@ export function CurrentShiftTab() {
                 contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 16 }}
                 showsVerticalScrollIndicator={false}
             >
-                <Text className="text-slate-400 text-sm">
+                <Text className="text-ink-muted text-sm">
                     {isLoading ? 'Checking status...' : (activeShift ? 'Active shift in progress' : 'No active shift')}
                 </Text>
 
@@ -117,43 +117,43 @@ export function CurrentShiftTab() {
                 ) : activeShift ? (
                     <Animated.View
                         entering={FadeInDown.duration(400).delay(200)}
-                        className="bg-slate-800/70 rounded-2xl border border-slate-700/50 overflow-hidden"
+                        className="bg-surface rounded-2xl border border-surface-border overflow-hidden"
                     >
-                        <View className="bg-emerald-600/20 border-b border-emerald-500/30 px-5 py-3 flex-row items-center gap-2">
-                            <View className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <Text className="text-emerald-400 font-bold text-sm uppercase tracking-wider">Active Shift</Text>
+                        <View className="bg-emerald-50 border-b border-emerald-600 px-5 py-3 flex-row items-center gap-2">
+                            <View className="w-2.5 h-2.5 rounded-full bg-emerald-600" />
+                            <Text className="text-emerald-700 font-bold text-sm uppercase tracking-wider">Active Shift</Text>
                         </View>
 
                         <View className="p-5">
                             <View className="flex-row items-center gap-3 mb-4">
-                                <View className="bg-blue-500/20 w-12 h-12 rounded-xl items-center justify-center">
-                                    <SymbolView name="clock.fill" size={24} tintColor="#60a5fa" />
+                                <View className="bg-brand-subtle w-12 h-12 rounded-xl items-center justify-center">
+                                    <Clock size={24} color="#040273" />
                                 </View>
                                 <View className="flex-1">
-                                    <Text className="text-slate-400 text-xs uppercase tracking-wider mb-0.5">Started At</Text>
-                                    <Text className="text-white font-bold text-lg">{formatDateTime(activeShift.started_at)}</Text>
+                                    <Text className="text-ink-muted text-xs uppercase tracking-wider mb-0.5">Started At</Text>
+                                    <Text className="text-ink font-bold text-lg">{formatDateTime(activeShift.started_at)}</Text>
                                 </View>
                             </View>
 
                             <View className="flex-row items-center gap-3 mb-4">
-                                <View className="bg-purple-500/20 w-12 h-12 rounded-xl items-center justify-center">
-                                    <SymbolView name="building.2.fill" size={24} tintColor="#a78bfa" />
+                                <View className="bg-brand-subtle w-12 h-12 rounded-xl items-center justify-center">
+                                    <Building2 size={24} color="#040273" />
                                 </View>
                                 <View className="flex-1">
-                                    <Text className="text-slate-400 text-xs uppercase tracking-wider mb-0.5">Station</Text>
-                                    <Text className="text-white font-bold text-lg">{activeShift.station_name}</Text>
+                                    <Text className="text-ink-muted text-xs uppercase tracking-wider mb-0.5">Station</Text>
+                                    <Text className="text-ink font-bold text-lg">{activeShift.station_name}</Text>
                                 </View>
                             </View>
 
                             <View className="flex-row items-center gap-3">
-                                <View className="bg-amber-500/20 w-12 h-12 rounded-xl items-center justify-center">
-                                    <SymbolView name="banknote.fill" size={24} tintColor="#fbbf24" />
+                                <View className="bg-amber-50 w-12 h-12 rounded-xl items-center justify-center">
+                                    <Banknote size={24} color="#b45309" />
                                 </View>
                                 <View className="flex-1">
-                                    <Text className="text-slate-400 text-xs uppercase tracking-wider mb-0.5">Financials</Text>
+                                    <Text className="text-ink-muted text-xs uppercase tracking-wider mb-0.5">Financials</Text>
                                     <View className="flex-row gap-4">
-                                        <Text className="text-white font-bold">
-                                            Collected: <Text className="text-emerald-400">Sh {activeShift.financials?.collected?.toLocaleString() || '0'}</Text>
+                                        <Text className="text-ink font-bold">
+                                            Collected: <Text className="text-emerald-700">Sh {activeShift.financials?.collected?.toLocaleString() || '0'}</Text>
                                         </Text>
                                     </View>
                                 </View>
@@ -165,12 +165,12 @@ export function CurrentShiftTab() {
                             <TouchableOpacity
                                 onPress={handleLockShift}
                                 disabled={isLocking}
-                                className="bg-red-600 py-4 rounded-xl items-center flex-row justify-center gap-2 active:bg-red-700"
+                                className="bg-accent py-4 rounded-xl items-center flex-row justify-center gap-2 active:bg-accent"
                             >
                                 {isLocking ? (
                                     <ActivityIndicator size="small" color="#fff" />
                                 ) : (
-                                    <SymbolView name="lock.fill" size={18} tintColor="#fff" />
+                                    <Lock size={18} color="#fff" />
                                 )}
                                 <Text className="text-white font-bold text-base uppercase tracking-wider">
                                     {isLocking ? 'Locking...' : 'Stop & Lock Shift'}
@@ -181,14 +181,14 @@ export function CurrentShiftTab() {
                 ) : (
                     <Animated.View
                         entering={FadeInDown.duration(400).delay(200)}
-                        className="bg-slate-800/70 rounded-2xl border border-slate-700/50 overflow-hidden"
+                        className="bg-surface rounded-2xl border border-surface-border overflow-hidden"
                     >
                         <View className="p-8 items-center">
-                            <View className="bg-blue-500/20 w-20 h-20 rounded-full items-center justify-center mb-5">
-                                <SymbolView name="play.fill" size={36} tintColor="#60a5fa" />
+                            <View className="bg-brand-subtle w-20 h-20 rounded-full items-center justify-center mb-5">
+                                <Play size={36} color="#040273" />
                             </View>
-                            <Text className="text-white font-bold text-xl mb-2 text-center">No Active Shift</Text>
-                            <Text className="text-slate-400 text-center mb-6 leading-6">
+                            <Text className="text-ink font-bold text-xl mb-2 text-center">No Active Shift</Text>
+                            <Text className="text-ink-muted text-center mb-6 leading-6">
                                 Start a new shift to begin recording pump readings, sales, and transactions.
                             </Text>
                             <TouchableOpacity
@@ -199,7 +199,7 @@ export function CurrentShiftTab() {
                                 {isStarting ? (
                                     <ActivityIndicator size="small" color="#fff" />
                                 ) : (
-                                    <SymbolView name="play.circle.fill" size={20} tintColor="#fff" />
+                                    <CirclePlay size={20} color="#fff" />
                                 )}
                                 <Text className="text-white font-bold text-base uppercase tracking-wider">
                                     {isStarting ? 'Starting...' : 'Start New Shift'}
@@ -212,14 +212,14 @@ export function CurrentShiftTab() {
                 <TouchableOpacity
                     onPress={() => refetch()}
                     disabled={isRefetching}
-                    className="bg-slate-800/50 border border-slate-700/50 py-3 rounded-xl items-center flex-row justify-center gap-2 active:bg-slate-700"
+                    className="bg-surface-sunken border border-surface-border py-3 rounded-xl items-center flex-row justify-center gap-2 active:bg-surface-border"
                 >
                     {isRefetching ? (
-                        <ActivityIndicator size="small" color="#94a3b8" />
+                        <ActivityIndicator size="small" color="#8b8b99" />
                     ) : (
-                        <SymbolView name="arrow.clockwise" size={16} tintColor="#94a3b8" />
+                        <RotateCw size={16} color="#8b8b99" />
                     )}
-                    <Text className="text-slate-400 font-medium">
+                    <Text className="text-ink-muted font-medium">
                         {isRefetching ? 'Refreshing...' : 'Refresh Status'}
                     </Text>
                 </TouchableOpacity>

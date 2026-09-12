@@ -39,35 +39,35 @@ const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item:
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
-            className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700"
+            className="bg-surface p-4 rounded-xl mb-3 border border-surface-border"
         >
             <View className="flex-row justify-between items-start mb-2">
                 <View className="flex-1">
-                    <Text className="text-white text-lg font-bold">{item.tank_name}</Text>
-                    <Text className="text-slate-400 text-sm">{item.product_name}</Text>
+                    <Text className="text-ink text-lg font-bold">{item.tank_name}</Text>
+                    <Text className="text-ink-muted text-sm">{item.product_name}</Text>
                 </View>
                 <View className="items-end gap-1">
-                    <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
-                        <Text className="text-emerald-400 font-bold text-sm">{item.volume_liters.toLocaleString()} L</Text>
+                    <View className="bg-emerald-50 px-3 py-1 rounded-full">
+                        <Text className="text-emerald-700 font-bold text-sm">{item.volume_liters.toLocaleString()} L</Text>
                     </View>
                     {item.is_credit ? (
-                        <View className="bg-amber-500/20 px-2 py-0.5 rounded-full">
-                            <Text className="text-amber-400 text-xs font-bold">Credit</Text>
+                        <View className="bg-amber-50 px-2 py-0.5 rounded-full">
+                            <Text className="text-amber-700 text-xs font-bold">Credit</Text>
                         </View>
                     ) : null}
                 </View>
             </View>
             <View className="flex-row justify-between items-center mt-2">
                 <View>
-                    <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
+                    <Text className="text-ink-muted text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
                     {item.supplier?.name ? (
                         <Text className="text-sky-400 text-xs mt-0.5">{item.supplier?.name}</Text>
                     ) : null}
                 </View>
-                <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
+                <Text className="text-ink font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
             </View>
             {item.invoice_number ? (
-                <Text className="text-slate-600 text-xs mt-1">Inv: {item.invoice_number}</Text>
+                <Text className="text-ink-faint text-xs mt-1">Inv: {item.invoice_number}</Text>
             ) : null}
         </TouchableOpacity>
     );
@@ -230,7 +230,7 @@ export default function LiftingsScreen() {
     if (error) {
         return (
             <View className="flex-1 items-center justify-center bg-white">
-                <Text className="text-white text-lg font-bold">Error fetching liftings: {(error as Error).message}</Text>
+                <Text className="text-ink text-lg font-bold">Error fetching liftings: {(error as Error).message}</Text>
             </View>
         );
     }
@@ -294,10 +294,10 @@ export default function LiftingsScreen() {
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
             <View className="px-4 py-4 flex-row justify-between items-center border-b border-gray-200 bg-white">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-bold text-white">Liftings</Text>
+                    <Text className="text-2xl font-bold text-ink">Liftings</Text>
                     {meta && (
-                        <View className="bg-purple-500/20 px-2 py-0.5 rounded-full">
-                            <Text className="text-purple-400 text-xs font-bold">{meta.total}</Text>
+                        <View className="bg-brand-subtle px-2 py-0.5 rounded-full">
+                            <Text className="text-brand text-xs font-bold">{meta.total}</Text>
                         </View>
                     )}
                 </View>
@@ -327,8 +327,8 @@ export default function LiftingsScreen() {
                         }
                         ListEmptyComponent={() => (
                             <View className="items-center justify-center p-10">
-                                <Text className="text-slate-500 text-center">No liftings found.</Text>
-                                <Text className="text-slate-600 text-center text-sm mt-2">Tap + to record a new fuel delivery.</Text>
+                                <Text className="text-ink-muted text-center">No liftings found.</Text>
+                                <Text className="text-ink-faint text-center text-sm mt-2">Tap + to record a new fuel delivery.</Text>
                             </View>
                         )}
                         ListFooterComponent={() => (
@@ -361,11 +361,11 @@ export default function LiftingsScreen() {
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 border-t border-slate-700 h-[90%] rounded-t-3xl shadow-2xl">
-                        <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
-                            <Text className="text-xl font-bold text-white">New Lifting</Text>
+                    <View className="bg-surface-sunken border-t border-surface-border h-[90%] rounded-t-3xl shadow-2xl">
+                        <View className="p-6 border-b border-surface-border flex-row justify-between items-center bg-surface-sunken rounded-t-3xl">
+                            <Text className="text-xl font-bold text-ink">New Lifting</Text>
                             <TouchableOpacity onPress={() => setIsCreateModalOpen(false)}>
-                                <Ionicons name="close-circle" size={28} color="#64748b" />
+                                <Ionicons name="close-circle" size={28} color="#5c5c6b" />
                             </TouchableOpacity>
                         </View>
 
@@ -377,20 +377,20 @@ export default function LiftingsScreen() {
                         >
                             {/* Station (Read-only) */}
                             <View className="mb-4">
-                                <Text className="text-slate-400 text-sm font-medium mb-1">Station</Text>
-                                <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                                    <Text className="text-white">{userProfile?.station_name || 'N/A'}</Text>
+                                <Text className="text-ink-muted text-sm font-medium mb-1">Station</Text>
+                                <View className="bg-surface border border-surface-border rounded-xl p-4">
+                                    <Text className="text-ink">{userProfile?.station_name || 'N/A'}</Text>
                                 </View>
                             </View>
 
                             {/* Tank Selector */}
                             <View className="mb-4">
-                                <Text className="text-slate-400 text-sm font-medium mb-2">Tank *</Text>
+                                <Text className="text-ink-muted text-sm font-medium mb-2">Tank *</Text>
                                 {isLoadingTanks ? (
                                     <ActivityIndicator size="small" color="#3b82f6" />
                                 ) : tanks.length === 0 ? (
                                     <View className="bg-amber-900/30 border border-amber-700/50 rounded-xl p-4">
-                                        <Text className="text-amber-400 text-sm">No tanks found.</Text>
+                                        <Text className="text-amber-700 text-sm">No tanks found.</Text>
                                     </View>
                                 ) : (
                                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
@@ -398,9 +398,9 @@ export default function LiftingsScreen() {
                                             <TouchableOpacity
                                                 key={tank.id}
                                                 onPress={() => handleTankChange(tank.id)}
-                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedTankId === tank.id ? 'bg-blue-600 border-blue-500' : 'bg-slate-800 border-slate-700'}`}
+                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedTankId === tank.id ? 'bg-blue-600 border-blue-500' : 'bg-surface border-surface-border'}`}
                                             >
-                                                <Text className={selectedTankId === tank.id ? 'text-white font-bold' : 'text-slate-300'}>{tank.name}</Text>
+                                                <Text className={selectedTankId === tank.id ? 'text-ink font-bold' : 'text-ink'}>{tank.name}</Text>
                                             </TouchableOpacity>
                                         ))}
                                     </ScrollView>
@@ -438,17 +438,17 @@ export default function LiftingsScreen() {
                             />
 
                             <View className="mb-4">
-                                <Text className="text-slate-400 text-sm font-medium mb-1">Total Cost (Auto-calculated)</Text>
-                                <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                                    <Text className="text-emerald-400 font-mono font-bold text-lg">
+                                <Text className="text-ink-muted text-sm font-medium mb-1">Total Cost (Auto-calculated)</Text>
+                                <View className="bg-surface border border-surface-border rounded-xl p-4">
+                                    <Text className="text-emerald-700 font-mono font-bold text-lg">
                                         KES {(newItem.total_cost || 0).toLocaleString()}
                                     </Text>
                                 </View>
                             </View>
 
                             <View className="mb-4">
-                                <Text className="text-slate-400 text-sm font-medium mb-1">Tax Paid (Auto-calculated)</Text>
-                                <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                                <Text className="text-ink-muted text-sm font-medium mb-1">Tax Paid (Auto-calculated)</Text>
+                                <View className="bg-surface border border-surface-border rounded-xl p-4">
                                     <Text className="text-orange-400 font-mono font-bold text-lg">
                                         KES {(newItem.tax_paid || 0).toLocaleString()}
                                     </Text>
@@ -457,28 +457,28 @@ export default function LiftingsScreen() {
 
                             {/* Supplier Selector */}
                             <View className="mb-4">
-                                <Text className="text-slate-400 text-sm font-medium mb-2">Supplier (Optional)</Text>
+                                <Text className="text-ink-muted text-sm font-medium mb-2">Supplier (Optional)</Text>
                                 {isLoadingCreditors ? (
                                     <ActivityIndicator size="small" color="#38bdf8" />
                                 ) : creditors.length === 0 ? (
-                                    <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                                        <Text className="text-slate-500 text-sm">No suppliers found. Add one in Admin {'>'} Infrastructure.</Text>
+                                    <View className="bg-surface border border-surface-border rounded-xl p-4">
+                                        <Text className="text-ink-muted text-sm">No suppliers found. Add one in Admin {'>'} Infrastructure.</Text>
                                     </View>
                                 ) : (
                                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                                         <TouchableOpacity
                                             onPress={() => setSelectedSupplierId(null)}
-                                            className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-slate-800 border-slate-700'}`}
+                                            className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-surface border-surface-border'}`}
                                         >
-                                            <Text className={selectedSupplierId === null ? 'text-white font-bold' : 'text-slate-300'}>None</Text>
+                                            <Text className={selectedSupplierId === null ? 'text-ink font-bold' : 'text-ink'}>None</Text>
                                         </TouchableOpacity>
                                         {creditors.map((creditor) => (
                                             <TouchableOpacity
                                                 key={creditor.id}
                                                 onPress={() => setSelectedSupplierId(creditor.id)}
-                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === creditor.id ? 'bg-sky-600 border-sky-500' : 'bg-slate-800 border-slate-700'}`}
+                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === creditor.id ? 'bg-sky-600 border-sky-500' : 'bg-surface border-surface-border'}`}
                                             >
-                                                <Text className={selectedSupplierId === creditor.id ? 'text-white font-bold' : 'text-slate-300'}>{creditor.name}</Text>
+                                                <Text className={selectedSupplierId === creditor.id ? 'text-ink font-bold' : 'text-ink'}>{creditor.name}</Text>
                                             </TouchableOpacity>
                                         ))}
                                     </ScrollView>
@@ -486,13 +486,13 @@ export default function LiftingsScreen() {
                             </View>
 
                             {/* Credit Toggle */}
-                            <View className="mb-4 flex-row items-center justify-between bg-slate-800 border border-slate-700 rounded-xl p-4">
-                                <Text className="text-white font-medium">Bought on Credit?</Text>
+                            <View className="mb-4 flex-row items-center justify-between bg-surface border border-surface-border rounded-xl p-4">
+                                <Text className="text-ink font-medium">Bought on Credit?</Text>
                                 <Switch
                                     value={newItem.is_credit || false}
                                     onValueChange={(val) => setNewItem({ ...newItem, is_credit: val })}
-                                    trackColor={{ false: '#475569', true: '#f59e0b' }}
-                                    thumbColor={newItem.is_credit ? '#ffffff' : '#94a3b8'}
+                                    trackColor={{ false: '#5c5c6b', true: '#f59e0b' }}
+                                    thumbColor={newItem.is_credit ? '#ffffff' : '#8b8b99'}
                                 />
                             </View>
 
@@ -516,56 +516,56 @@ export default function LiftingsScreen() {
                 onRequestClose={() => setSelectedLifting(null)}
             >
                 <View className="flex-1 justify-end">
-                    <View className="bg-slate-900 border-t border-slate-700 h-[70%] rounded-t-3xl shadow-2xl p-6">
+                    <View className="bg-surface-sunken border-t border-surface-border h-[70%] rounded-t-3xl shadow-2xl p-6">
                         <View className="flex-row justify-between items-start mb-6">
                             <View>
-                                <Text className="text-2xl font-bold text-white">{selectedLifting?.tank_name}</Text>
-                                <Text className="text-slate-400 text-sm mt-1">{selectedLifting?.product_name} • {selectedLifting?.station_name}</Text>
+                                <Text className="text-2xl font-bold text-ink">{selectedLifting?.tank_name}</Text>
+                                <Text className="text-ink-muted text-sm mt-1">{selectedLifting?.product_name} • {selectedLifting?.station_name}</Text>
                             </View>
                             <TouchableOpacity onPress={() => setSelectedLifting(null)}>
-                                <Ionicons name="close-circle" size={32} color="#64748b" />
+                                <Ionicons name="close-circle" size={32} color="#5c5c6b" />
                             </TouchableOpacity>
                         </View>
 
                         <View>
-                            <View className="bg-slate-800 p-4 rounded-xl mb-4">
-                                <Text className="text-slate-400 text-xs uppercase mb-2 font-bold">Delivery Details</Text>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Date</Text>
-                                    <Text className="text-white">{selectedLifting?.lifting_date ? new Date(selectedLifting.lifting_date).toLocaleDateString() : 'N/A'}</Text>
+                            <View className="bg-surface p-4 rounded-xl mb-4">
+                                <Text className="text-ink-muted text-xs uppercase mb-2 font-bold">Delivery Details</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Date</Text>
+                                    <Text className="text-ink">{selectedLifting?.lifting_date ? new Date(selectedLifting.lifting_date).toLocaleDateString() : 'N/A'}</Text>
                                 </View>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Invoice #</Text>
-                                    <Text className="text-white font-mono">{selectedLifting?.invoice_number || 'N/A'}</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Invoice #</Text>
+                                    <Text className="text-ink font-mono">{selectedLifting?.invoice_number || 'N/A'}</Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-slate-300">Volume</Text>
-                                    <Text className="text-emerald-400 font-bold">{selectedLifting?.volume_liters.toLocaleString()} L</Text>
+                                    <Text className="text-ink">Volume</Text>
+                                    <Text className="text-emerald-700 font-bold">{selectedLifting?.volume_liters.toLocaleString()} L</Text>
                                 </View>
                             </View>
 
-                            <View className="bg-slate-800 p-4 rounded-xl">
-                                <Text className="text-slate-400 text-xs uppercase mb-2 font-bold">Financial</Text>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Price/Liter</Text>
-                                    <Text className="text-white font-mono">KES {selectedLifting?.buying_price_per_liter.toLocaleString()}</Text>
+                            <View className="bg-surface p-4 rounded-xl">
+                                <Text className="text-ink-muted text-xs uppercase mb-2 font-bold">Financial</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Price/Liter</Text>
+                                    <Text className="text-ink font-mono">KES {selectedLifting?.buying_price_per_liter.toLocaleString()}</Text>
                                 </View>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Total Cost</Text>
-                                    <Text className="text-emerald-400 font-mono font-bold">KES {selectedLifting?.total_cost.toLocaleString()}</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Total Cost</Text>
+                                    <Text className="text-emerald-700 font-mono font-bold">KES {selectedLifting?.total_cost.toLocaleString()}</Text>
                                 </View>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Tax Paid</Text>
-                                    <Text className="text-white font-mono">KES {selectedLifting?.tax_paid.toLocaleString()}</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Tax Paid</Text>
+                                    <Text className="text-ink font-mono">KES {selectedLifting?.tax_paid.toLocaleString()}</Text>
                                 </View>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Supplier</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Supplier</Text>
                                     <Text className="text-sky-400 font-medium">{selectedLifting?.supplier?.name || 'N/A'}</Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-slate-300">Payment</Text>
-                                    <View className={`px-2 py-0.5 rounded-full ${selectedLifting?.is_credit ? 'bg-amber-500/20' : 'bg-emerald-500/20'}`}>
-                                        <Text className={`text-xs font-bold ${selectedLifting?.is_credit ? 'text-amber-400' : 'text-emerald-400'}`}>
+                                    <Text className="text-ink">Payment</Text>
+                                    <View className={`px-2 py-0.5 rounded-full ${selectedLifting?.is_credit ? 'bg-amber-50' : 'bg-emerald-50'}`}>
+                                        <Text className={`text-xs font-bold ${selectedLifting?.is_credit ? 'text-amber-700' : 'text-emerald-700'}`}>
                                             {selectedLifting?.is_credit ? 'Credit' : 'Cash'}
                                         </Text>
                                     </View>
@@ -579,9 +579,9 @@ export default function LiftingsScreen() {
                                 variant="outline"
                                 onPress={handleDeletePress}
                                 loading={deleteMutation.isPending}
-                                style={{ borderColor: '#ef4444' }}
+                                style={{ borderColor: '#bf0a30' }}
                             />
-                            <Text className="text-red-500 text-center mt-2 text-xs">
+                            <Text className="text-accent text-center mt-2 text-xs">
                                 Note: This will reverse the inventory effect.
                             </Text>
                         </View>

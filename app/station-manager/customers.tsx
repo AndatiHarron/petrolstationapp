@@ -27,28 +27,28 @@ const CustomerItem = ({ item, onPress }: { item: CustomersIndex200['data'][numbe
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
-            className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700"
+            className="bg-surface p-4 rounded-xl mb-3 border border-surface-border"
         >
             <View className="flex-row justify-between items-center">
                 <View className="flex-1">
-                    <Text className="text-white text-lg font-bold">{item.name}</Text>
-                    <Text className="text-slate-400 text-sm mt-1">{item.email}</Text>
-                    {item.phone && <Text className="text-slate-500 text-xs mt-0.5">{item.phone}</Text>}
+                    <Text className="text-ink text-lg font-bold">{item.name}</Text>
+                    <Text className="text-ink-muted text-sm mt-1">{item.email}</Text>
+                    {item.phone && <Text className="text-ink-muted text-xs mt-0.5">{item.phone}</Text>}
                 </View>
-                <View className="bg-slate-700 p-2 rounded-full">
-                    <Ionicons name="chevron-forward" size={16} color="#94a3b8" />
+                <View className="bg-surface-border p-2 rounded-full">
+                    <Ionicons name="chevron-forward" size={16} color="#8b8b99" />
                 </View>
             </View>
             <View className="flex-row flex-wrap gap-2 mt-3">
                 {item.current_balance > 0 && (
                     <View className="bg-amber-500/15 border border-amber-500/30 px-2.5 py-1 rounded-lg">
-                        <Text className="text-amber-400 text-xs font-semibold">
+                        <Text className="text-amber-700 text-xs font-semibold">
                             Outstanding: KES {item.current_balance.toLocaleString()}
                         </Text>
                     </View>
                 )}
                 <View className="bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-1 rounded-lg">
-                    <Text className="text-emerald-400 text-xs font-semibold">
+                    <Text className="text-emerald-700 text-xs font-semibold">
                         Available Credit: KES {item.available_credit.toLocaleString()}
                     </Text>
                 </View>
@@ -157,7 +157,7 @@ export default function CustomersScreen() {
     if (error) {
         return (
             <View className="flex-1 items-center justify-center bg-white">
-                <Text className="text-white text-lg font-bold">Error fetching customers: {(error as Error).message}</Text>
+                <Text className="text-ink text-lg font-bold">Error fetching customers: {(error as Error).message}</Text>
             </View>
         );
     }
@@ -241,10 +241,10 @@ export default function CustomersScreen() {
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
             <View className="px-4 py-4 flex-row justify-between items-center border-b border-gray-200 bg-white">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-bold text-white">Customers</Text>
+                    <Text className="text-2xl font-bold text-ink">Customers</Text>
                     {meta && (
-                        <View className="bg-blue-500/20 px-2 py-0.5 rounded-full">
-                            <Text className="text-blue-400 text-xs font-bold">{meta.total}</Text>
+                        <View className="bg-brand-subtle px-2 py-0.5 rounded-full">
+                            <Text className="text-brand text-xs font-bold">{meta.total}</Text>
                         </View>
                     )}
                 </View>
@@ -274,8 +274,8 @@ export default function CustomersScreen() {
                         }
                         ListEmptyComponent={() => (
                             <View className="items-center justify-center p-10">
-                                <Text className="text-slate-500 text-center">No customers found.</Text>
-                                <Text className="text-slate-600 text-center text-sm mt-2">Tap + to add a new customer.</Text>
+                                <Text className="text-ink-muted text-center">No customers found.</Text>
+                                <Text className="text-ink-faint text-center text-sm mt-2">Tap + to add a new customer.</Text>
                             </View>
                         )}
                         ListFooterComponent={() => (
@@ -308,11 +308,11 @@ export default function CustomersScreen() {
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 border-t border-slate-700 h-[85%] rounded-t-3xl shadow-2xl">
-                        <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
-                            <Text className="text-xl font-bold text-white">{editingId ? 'Request Edit' : 'New Customer'}</Text>
+                    <View className="bg-surface-sunken border-t border-surface-border h-[85%] rounded-t-3xl shadow-2xl">
+                        <View className="p-6 border-b border-surface-border flex-row justify-between items-center bg-surface-sunken rounded-t-3xl">
+                            <Text className="text-xl font-bold text-ink">{editingId ? 'Request Edit' : 'New Customer'}</Text>
                             <TouchableOpacity onPress={() => setIsCreateModalOpen(false)}>
-                                <Ionicons name="close-circle" size={28} color="#64748b" />
+                                <Ionicons name="close-circle" size={28} color="#5c5c6b" />
                             </TouchableOpacity>
                         </View>
 
@@ -324,7 +324,7 @@ export default function CustomersScreen() {
                         >
                             {editingId && (
                                 <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
-                                    <Text className="text-blue-400 text-sm">
+                                    <Text className="text-brand text-sm">
                                         You are requesting an update to this customer. An admin will review your changes.
                                     </Text>
                                 </View>
@@ -401,35 +401,35 @@ export default function CustomersScreen() {
                 onRequestClose={() => setSelectedCustomer(null)}
             >
                 <View className="flex-1 justify-end">
-                    <View className="bg-slate-900 border-t border-slate-700 h-[60%] rounded-t-3xl shadow-2xl p-6">
+                    <View className="bg-surface-sunken border-t border-surface-border h-[60%] rounded-t-3xl shadow-2xl p-6">
                         <View className="flex-row justify-between items-start mb-6">
                             <View>
-                                <Text className="text-2xl font-bold text-white max-w-[80%]">{selectedCustomer?.name}</Text>
-                                <Text className="text-slate-400 text-sm mt-1">{selectedCustomer?.email}</Text>
+                                <Text className="text-2xl font-bold text-ink max-w-[80%]">{selectedCustomer?.name}</Text>
+                                <Text className="text-ink-muted text-sm mt-1">{selectedCustomer?.email}</Text>
                             </View>
                             <TouchableOpacity onPress={() => setSelectedCustomer(null)}>
-                                <Ionicons name="close-circle" size={32} color="#64748b" />
+                                <Ionicons name="close-circle" size={32} color="#5c5c6b" />
                             </TouchableOpacity>
                         </View>
 
                         <View>
-                            <View className="bg-slate-800 p-4 rounded-xl mb-6">
-                                <Text className="text-slate-400 text-xs uppercase mb-1 font-bold">Contact Info</Text>
+                            <View className="bg-surface p-4 rounded-xl mb-6">
+                                <Text className="text-ink-muted text-xs uppercase mb-1 font-bold">Contact Info</Text>
                                 <View className="flex-row items-center mb-2">
-                                    <Ionicons name="call" size={16} color="#94a3b8" />
-                                    <Text className="text-white ml-2">{selectedCustomer?.phone || 'N/A'}</Text>
+                                    <Ionicons name="call" size={16} color="#8b8b99" />
+                                    <Text className="text-ink ml-2">{selectedCustomer?.phone || 'N/A'}</Text>
                                 </View>
                             </View>
 
-                            <View className="bg-slate-800 p-4 rounded-xl">
-                                <Text className="text-slate-400 text-xs uppercase mb-2 font-bold">Financial Details</Text>
-                                <View className="flex-row justify-between mb-2 pb-2 border-b border-slate-700">
-                                    <Text className="text-slate-300">Tax PIN</Text>
-                                    <Text className="text-white font-mono">{selectedCustomer?.tax_pin || 'N/A'}</Text>
+                            <View className="bg-surface p-4 rounded-xl">
+                                <Text className="text-ink-muted text-xs uppercase mb-2 font-bold">Financial Details</Text>
+                                <View className="flex-row justify-between mb-2 pb-2 border-b border-surface-border">
+                                    <Text className="text-ink">Tax PIN</Text>
+                                    <Text className="text-ink font-mono">{selectedCustomer?.tax_pin || 'N/A'}</Text>
                                 </View>
                                 <View className="flex-row justify-between">
-                                    <Text className="text-slate-300">Credit Limit</Text>
-                                    <Text className="text-emerald-400 font-mono font-bold">KES {selectedCustomer?.credit_limit?.toLocaleString() || '0.00'}</Text>
+                                    <Text className="text-ink">Credit Limit</Text>
+                                    <Text className="text-emerald-700 font-mono font-bold">KES {selectedCustomer?.credit_limit?.toLocaleString() || '0.00'}</Text>
                                 </View>
                             </View>
                         </View>
@@ -438,7 +438,7 @@ export default function CustomersScreen() {
                             <Button
                                 title="Request Edit"
                                 onPress={handleEditPress}
-                                className="bg-slate-700"
+                                className="bg-surface-border"
                             />
                             <Button
                                 title="Delete Customer"
@@ -446,9 +446,9 @@ export default function CustomersScreen() {
                                 onPress={handleDeletePress}
                                 loading={deleteMutation.isPending}
                                 className="border-red-500/50"
-                                style={{ borderColor: '#ef4444' }}
+                                style={{ borderColor: '#bf0a30' }}
                             />
-                            <Text className="text-red-500 text-center mt-2 text-xs">
+                            <Text className="text-accent text-center mt-2 text-xs">
                                 Note: This action is irreversible.
                             </Text>
                         </View>

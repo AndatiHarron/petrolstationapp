@@ -53,24 +53,24 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
-            className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700"
+            className="bg-surface p-4 rounded-xl mb-3 border border-surface-border"
         >
             <View className="flex-row justify-between items-center mb-2">
                 <View className="flex-1">
-                    <Text className="text-white text-base font-bold">{item.station_name}</Text>
-                    <Text className="text-slate-400 text-sm mt-0.5">{formatDate(item.started_at)}</Text>
+                    <Text className="text-ink text-base font-bold">{item.station_name}</Text>
+                    <Text className="text-ink-muted text-sm mt-0.5">{formatDate(item.started_at)}</Text>
                 </View>
                 <View className={`px-2.5 py-1 rounded-lg ${item.status === 'locked' ? 'bg-slate-600/40' : 'bg-emerald-500/15 border border-emerald-500/30'}`}>
-                    <Text className={`text-xs font-semibold ${item.status === 'locked' ? 'text-slate-400' : 'text-emerald-400'}`}>
+                    <Text className={`text-xs font-semibold ${item.status === 'locked' ? 'text-ink-muted' : 'text-emerald-700'}`}>
                         {item.status?.toUpperCase()}
                     </Text>
                 </View>
             </View>
 
             <View className="mt-2">
-                <View className="bg-slate-700/40 p-2 rounded-lg">
-                    <Text className="text-slate-500 text-[10px] uppercase">Collected</Text>
-                    <Text className="text-emerald-400 text-sm font-bold">Sh {item.financials?.collected?.toLocaleString() ?? '0'}</Text>
+                <View className="bg-surface-border p-2 rounded-lg">
+                    <Text className="text-ink-muted text-[10px] uppercase">Collected</Text>
+                    <Text className="text-emerald-700 text-sm font-bold">Sh {item.financials?.collected?.toLocaleString() ?? '0'}</Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -267,8 +267,8 @@ export function ShiftHistoryTab() {
                         }
                         ListEmptyComponent={() => (
                             <View className="items-center justify-center p-10">
-                                <Ionicons name="time-outline" size={48} color="#475569" />
-                                <Text className="text-slate-500 text-center mt-4">No shift history found.</Text>
+                                <Ionicons name="time-outline" size={48} color="#5c5c6b" />
+                                <Text className="text-ink-muted text-center mt-4">No shift history found.</Text>
                             </View>
                         )}
                         ListFooterComponent={() => (
@@ -296,30 +296,30 @@ export function ShiftHistoryTab() {
                 onRequestClose={() => setSelectedShift(null)}
             >
                 <View className="flex-1 justify-end">
-                    <View className="bg-slate-900 border-t border-slate-700 h-[65%] rounded-t-3xl shadow-2xl p-6">
+                    <View className="bg-surface-sunken border-t border-surface-border h-[65%] rounded-t-3xl shadow-2xl p-6">
                         <View className="flex-row justify-between items-start mb-5">
                             <View className="flex-1">
-                                <Text className="text-2xl font-bold text-white">{selectedShift?.station_name}</Text>
-                                <Text className="text-slate-400 text-sm mt-1">
+                                <Text className="text-2xl font-bold text-ink">{selectedShift?.station_name}</Text>
+                                <Text className="text-ink-muted text-sm mt-1">
                                     {selectedShift?.started_at ? formatDateTime(selectedShift.started_at) : ''}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={() => setSelectedShift(null)}>
-                                <Ionicons name="close-circle" size={32} color="#64748b" />
+                                <Ionicons name="close-circle" size={32} color="#5c5c6b" />
                             </TouchableOpacity>
                         </View>
 
-                        <View className={`self-start px-3 py-1 rounded-lg mb-5 ${selectedShift?.status === 'locked' ? 'bg-slate-700/60' : 'bg-emerald-500/15'}`}>
-                            <Text className={`text-xs font-bold ${selectedShift?.status === 'locked' ? 'text-slate-400' : 'text-emerald-400'}`}>
+                        <View className={`self-start px-3 py-1 rounded-lg mb-5 ${selectedShift?.status === 'locked' ? 'bg-surface-border/60' : 'bg-emerald-500/15'}`}>
+                            <Text className={`text-xs font-bold ${selectedShift?.status === 'locked' ? 'text-ink-muted' : 'text-emerald-700'}`}>
                                 {selectedShift?.status?.toUpperCase()}
                             </Text>
                         </View>
 
-                        <View className="bg-slate-800 p-4 rounded-xl mb-4">
-                            <Text className="text-slate-400 text-xs uppercase mb-3 font-bold">Financial Summary</Text>
+                        <View className="bg-surface p-4 rounded-xl mb-4">
+                            <Text className="text-ink-muted text-xs uppercase mb-3 font-bold">Financial Summary</Text>
                             <View className="flex-row justify-between">
-                                <Text className="text-slate-300">Collected</Text>
-                                <Text className="text-emerald-400 font-bold font-mono">Sh {selectedShift?.financials?.collected?.toLocaleString() ?? '0'}</Text>
+                                <Text className="text-ink">Collected</Text>
+                                <Text className="text-emerald-700 font-bold font-mono">Sh {selectedShift?.financials?.collected?.toLocaleString() ?? '0'}</Text>
                             </View>
                         </View>
 
@@ -346,22 +346,22 @@ export function ShiftHistoryTab() {
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 border-t border-slate-700 h-[92%] rounded-t-3xl shadow-2xl flex overflow-hidden">
+                    <View className="bg-surface-sunken border-t border-surface-border h-[92%] rounded-t-3xl shadow-2xl flex overflow-hidden">
                         {/* Header */}
-                        <View className="px-6 py-4 border-b border-slate-800 flex-row items-center justify-between bg-slate-800/50 rounded-t-3xl">
+                        <View className="px-6 py-4 border-b border-surface-border flex-row items-center justify-between bg-surface-sunken rounded-t-3xl">
                             <View>
-                                <Text className="text-white text-xl font-bold">Request Shift Edit</Text>
-                                <Text className="text-slate-400 text-xs font-medium uppercase tracking-wider">
+                                <Text className="text-ink text-xl font-bold">Request Shift Edit</Text>
+                                <Text className="text-ink-muted text-xs font-medium uppercase tracking-wider">
                                     Step {editStep} of 3: {editStep === 1 ? 'Meter Readings' : editStep === 2 ? 'Tank Dips' : 'Payments & Reason'}
                                 </Text>
                             </View>
                             <TouchableOpacity onPress={() => setIsEditModalOpen(false)}>
-                                <Ionicons name="close-circle" size={28} color="#64748b" />
+                                <Ionicons name="close-circle" size={28} color="#5c5c6b" />
                             </TouchableOpacity>
                         </View>
 
                         {/* Progress Bar */}
-                        <View className="flex-row h-1 w-full bg-slate-800">
+                        <View className="flex-row h-1 w-full bg-surface">
                             <View className={`h-full bg-blue-500 ${editStep === 1 ? 'w-1/3' : editStep === 2 ? 'w-2/3' : 'w-full'}`} />
                         </View>
 
@@ -372,7 +372,7 @@ export function ShiftHistoryTab() {
                             showsVerticalScrollIndicator={false}
                         >
                             <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
-                                <Text className="text-blue-400 text-sm">
+                                <Text className="text-brand text-sm">
                                     Correct the shift data below. An admin will review your changes before they are applied.
                                 </Text>
                             </View>
@@ -380,28 +380,28 @@ export function ShiftHistoryTab() {
                             {/* Step 1: Meter Readings */}
                             {editStep === 1 && (
                                 <Animated.View entering={FadeIn}>
-                                    <Text className="text-slate-300 mb-4 leading-6">
+                                    <Text className="text-ink mb-4 leading-6">
                                         Update closing readings for each pump nozzle.
                                     </Text>
                                     {Object.values(editMeters).length === 0 ? (
-                                        <View className="p-6 border-2 border-dashed border-slate-800 rounded-xl items-center">
-                                            <Text className="text-slate-500 text-sm">No meter readings recorded for this shift.</Text>
+                                        <View className="p-6 border-2 border-dashed border-surface-border rounded-xl items-center">
+                                            <Text className="text-ink-muted text-sm">No meter readings recorded for this shift.</Text>
                                         </View>
                                     ) : (
                                         Object.entries(editMeters).map(([nozzleId, meter]) => (
-                                            <View key={nozzleId} className="mb-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
+                                            <View key={nozzleId} className="mb-4 bg-surface-sunken p-4 rounded-xl border border-surface-border">
                                                 <View className="flex-row justify-between mb-3">
-                                                    <Text className="text-slate-200 font-bold">{meter.name}</Text>
-                                                    <Text className="text-slate-400 text-xs">Opening: {meter.opening_reading}</Text>
+                                                    <Text className="text-ink font-bold">{meter.name}</Text>
+                                                    <Text className="text-ink-muted text-xs">Opening: {meter.opening_reading}</Text>
                                                 </View>
-                                                <View className="flex-row items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden h-12">
-                                                    <View className="pl-3 pr-2 h-full justify-center border-r border-slate-700 bg-slate-800/30">
-                                                        <Ionicons name="speedometer-outline" size={18} color="#64748b" />
+                                                <View className="flex-row items-center bg-surface-sunken border border-surface-border rounded-lg overflow-hidden h-12">
+                                                    <View className="pl-3 pr-2 h-full justify-center border-r border-surface-border bg-surface/30">
+                                                        <Ionicons name="speedometer-outline" size={18} color="#5c5c6b" />
                                                     </View>
                                                     <TextInput
-                                                        className="flex-1 text-white px-3 font-mono text-base h-full"
+                                                        className="flex-1 text-ink px-3 font-mono text-base h-full"
                                                         placeholder="Closing Reading"
-                                                        placeholderTextColor="#475569"
+                                                        placeholderTextColor="#5c5c6b"
                                                         keyboardType="numeric"
                                                         value={meter.closing_reading}
                                                         onChangeText={(v) => setEditMeters(p => ({
@@ -419,25 +419,25 @@ export function ShiftHistoryTab() {
                             {/* Step 2: Tank Dips */}
                             {editStep === 2 && (
                                 <Animated.View entering={FadeIn}>
-                                    <Text className="text-slate-300 mb-4 leading-6">
+                                    <Text className="text-ink mb-4 leading-6">
                                         Update dip levels (in mm) for each tank.
                                     </Text>
                                     {Object.values(editDips).length === 0 ? (
-                                        <View className="p-6 border-2 border-dashed border-slate-800 rounded-xl items-center">
-                                            <Text className="text-slate-500 text-sm">No dip readings recorded for this shift.</Text>
+                                        <View className="p-6 border-2 border-dashed border-surface-border rounded-xl items-center">
+                                            <Text className="text-ink-muted text-sm">No dip readings recorded for this shift.</Text>
                                         </View>
                                     ) : (
                                         Object.entries(editDips).map(([tankId, dip]) => (
-                                            <View key={tankId} className="mb-4 bg-slate-800/50 p-4 rounded-xl border border-slate-700/50">
-                                                <Text className="text-slate-200 font-bold mb-3">{dip.name}</Text>
-                                                <View className="flex-row items-center bg-slate-900 border border-slate-700 rounded-lg overflow-hidden h-12">
-                                                    <View className="pl-3 pr-2 h-full justify-center border-r border-slate-700 bg-slate-800/30">
-                                                        <Ionicons name="resize-outline" size={18} color="#64748b" />
+                                            <View key={tankId} className="mb-4 bg-surface-sunken p-4 rounded-xl border border-surface-border">
+                                                <Text className="text-ink font-bold mb-3">{dip.name}</Text>
+                                                <View className="flex-row items-center bg-surface-sunken border border-surface-border rounded-lg overflow-hidden h-12">
+                                                    <View className="pl-3 pr-2 h-full justify-center border-r border-surface-border bg-surface/30">
+                                                        <Ionicons name="resize-outline" size={18} color="#5c5c6b" />
                                                     </View>
                                                     <TextInput
-                                                        className="flex-1 text-white px-3 font-mono text-base h-full"
+                                                        className="flex-1 text-ink px-3 font-mono text-base h-full"
                                                         placeholder="Dip Level (mm)"
-                                                        placeholderTextColor="#475569"
+                                                        placeholderTextColor="#5c5c6b"
                                                         keyboardType="numeric"
                                                         value={dip.dip_mm}
                                                         onChangeText={(v) => setEditDips(p => ({
@@ -446,7 +446,7 @@ export function ShiftHistoryTab() {
                                                         }))}
                                                     />
                                                     <View className="px-3">
-                                                        <Text className="text-slate-500 font-medium text-xs">mm</Text>
+                                                        <Text className="text-ink-muted font-medium text-xs">mm</Text>
                                                     </View>
                                                 </View>
                                             </View>
@@ -460,15 +460,15 @@ export function ShiftHistoryTab() {
                                 <Animated.View entering={FadeIn}>
                                     {/* Cash */}
                                     <View className="mb-6">
-                                        <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Cash Collection</Text>
-                                        <View className="flex-row items-center bg-slate-800 border border-slate-700 rounded-xl overflow-hidden h-14">
-                                            <View className="w-12 h-full justify-center items-center bg-slate-700/30 border-r border-slate-700">
-                                                <Text className="text-emerald-400 font-bold text-lg">Sh</Text>
+                                        <Text className="text-ink-muted text-xs font-bold uppercase tracking-wider mb-2">Cash Collection</Text>
+                                        <View className="flex-row items-center bg-surface border border-surface-border rounded-xl overflow-hidden h-14">
+                                            <View className="w-12 h-full justify-center items-center bg-surface-border border-r border-surface-border">
+                                                <Text className="text-emerald-700 font-bold text-lg">Sh</Text>
                                             </View>
                                             <TextInput
-                                                className="flex-1 text-white px-4 font-bold text-lg h-full"
+                                                className="flex-1 text-ink px-4 font-bold text-lg h-full"
                                                 placeholder="0.00"
-                                                placeholderTextColor="#475569"
+                                                placeholderTextColor="#5c5c6b"
                                                 keyboardType="decimal-pad"
                                                 value={editCash}
                                                 onChangeText={setEditCash}
@@ -478,15 +478,15 @@ export function ShiftHistoryTab() {
 
                                     {/* M-Pesa */}
                                     <View className="mb-6">
-                                        <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">M-Pesa Total</Text>
-                                        <View className="flex-row items-center bg-slate-800 border border-slate-700 rounded-xl overflow-hidden h-14">
-                                            <View className="w-12 h-full justify-center items-center bg-slate-700/30 border-r border-slate-700">
-                                                <Text className="text-emerald-400 font-bold text-lg">Sh</Text>
+                                        <Text className="text-ink-muted text-xs font-bold uppercase tracking-wider mb-2">M-Pesa Total</Text>
+                                        <View className="flex-row items-center bg-surface border border-surface-border rounded-xl overflow-hidden h-14">
+                                            <View className="w-12 h-full justify-center items-center bg-surface-border border-r border-surface-border">
+                                                <Text className="text-emerald-700 font-bold text-lg">Sh</Text>
                                             </View>
                                             <TextInput
-                                                className="flex-1 text-white px-4 font-bold text-lg h-full"
+                                                className="flex-1 text-ink px-4 font-bold text-lg h-full"
                                                 placeholder="0.00"
-                                                placeholderTextColor="#475569"
+                                                placeholderTextColor="#5c5c6b"
                                                 keyboardType="decimal-pad"
                                                 value={editMpesa}
                                                 onChangeText={setEditMpesa}
@@ -496,25 +496,25 @@ export function ShiftHistoryTab() {
 
                                     {/* Credit Sales */}
                                     <View className="mb-6">
-                                        <Text className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-2">Credit Sales</Text>
+                                        <Text className="text-ink-muted text-xs font-bold uppercase tracking-wider mb-2">Credit Sales</Text>
                                         {editCredits.length === 0 ? (
-                                            <View className="p-4 border-2 border-dashed border-slate-800 rounded-xl items-center">
-                                                <Text className="text-slate-500 text-sm">No credit sales recorded</Text>
+                                            <View className="p-4 border-2 border-dashed border-surface-border rounded-xl items-center">
+                                                <Text className="text-ink-muted text-sm">No credit sales recorded</Text>
                                             </View>
                                         ) : (
                                             editCredits.map((sale, idx) => (
-                                                <View key={sale.id} className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 mb-3">
+                                                <View key={sale.id} className="bg-surface p-4 rounded-xl border border-surface-border mb-3">
                                                     <View className="flex-row justify-between items-center mb-2">
-                                                        <Text className="text-slate-400 text-xs font-bold uppercase">Entry #{idx + 1} — {sale.customer_name}</Text>
+                                                        <Text className="text-ink-muted text-xs font-bold uppercase">Entry #{idx + 1} — {sale.customer_name}</Text>
                                                     </View>
                                                     <View className="flex-row gap-3">
                                                         <View className="flex-1">
-                                                            <Text className="text-slate-500 text-xs mb-1">Amount</Text>
-                                                            <View className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                                            <Text className="text-ink-muted text-xs mb-1">Amount</Text>
+                                                            <View className="bg-surface-sunken border border-surface-border rounded-lg px-3 py-2">
                                                                 <TextInput
                                                                     placeholder="0.00"
-                                                                    placeholderTextColor="#475569"
-                                                                    className="text-white text-sm"
+                                                                    placeholderTextColor="#5c5c6b"
+                                                                    className="text-ink text-sm"
                                                                     keyboardType="decimal-pad"
                                                                     value={sale.amount}
                                                                     onChangeText={(v) => {
@@ -526,12 +526,12 @@ export function ShiftHistoryTab() {
                                                             </View>
                                                         </View>
                                                         <View className="flex-1">
-                                                            <Text className="text-slate-500 text-xs mb-1">Vehicle Reg</Text>
-                                                            <View className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2">
+                                                            <Text className="text-ink-muted text-xs mb-1">Vehicle Reg</Text>
+                                                            <View className="bg-surface-sunken border border-surface-border rounded-lg px-3 py-2">
                                                                 <TextInput
                                                                     placeholder="KAA 123A"
-                                                                    placeholderTextColor="#475569"
-                                                                    className="text-white text-sm"
+                                                                    placeholderTextColor="#5c5c6b"
+                                                                    className="text-ink text-sm"
                                                                     autoCapitalize="characters"
                                                                     value={sale.vehicle_reg}
                                                                     onChangeText={(v) => {
@@ -562,13 +562,13 @@ export function ShiftHistoryTab() {
                         </ScrollView>
 
                         {/* Footer Navigation */}
-                        <View className="absolute bottom-0 w-full px-6 py-4 bg-slate-900 border-t border-slate-800 flex-row gap-4">
+                        <View className="absolute bottom-0 w-full px-6 py-4 bg-surface-sunken border-t border-surface-border flex-row gap-4">
                             {editStep > 1 && (
                                 <TouchableOpacity
                                     onPress={() => setEditStep(prev => (prev - 1) as any)}
-                                    className="flex-1 py-4 bg-slate-800 rounded-xl items-center"
+                                    className="flex-1 py-4 bg-surface rounded-xl items-center"
                                 >
-                                    <Text className="text-slate-300 font-bold uppercase tracking-wider">Back</Text>
+                                    <Text className="text-ink font-bold uppercase tracking-wider">Back</Text>
                                 </TouchableOpacity>
                             )}
 
@@ -577,7 +577,7 @@ export function ShiftHistoryTab() {
                                     onPress={() => setEditStep(prev => (prev + 1) as any)}
                                     className="flex-[2] py-4 bg-blue-600 rounded-xl items-center shadow-lg shadow-blue-900/40"
                                 >
-                                    <Text className="text-white font-bold uppercase tracking-wider">Next Step</Text>
+                                    <Text className="text-ink font-bold uppercase tracking-wider">Next Step</Text>
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity
@@ -588,7 +588,7 @@ export function ShiftHistoryTab() {
                                     {editRequestMutation.isPending ? (
                                         <ActivityIndicator color="#fff" />
                                     ) : (
-                                        <Text className="text-white font-bold uppercase tracking-wider">Submit Edit Request</Text>
+                                        <Text className="text-ink font-bold uppercase tracking-wider">Submit Edit Request</Text>
                                     )}
                                 </TouchableOpacity>
                             )}

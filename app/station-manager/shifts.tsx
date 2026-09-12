@@ -19,18 +19,18 @@ export default function ShiftsScreen() {
                 {/* Header */}
                 <View className="px-4 pt-4 pb-2">
                     <Animated.View entering={FadeInDown.duration(400).delay(100)}>
-                        <Text className="text-white text-2xl font-bold">Shift Management</Text>
+                        <Text className="text-ink text-2xl font-bold">Shift Management</Text>
                     </Animated.View>
                 </View>
 
                 {/* Segmented Control */}
                 <View className="px-4 py-3">
-                    <View className="flex-row bg-slate-800 rounded-xl p-1">
+                    <View className="flex-row bg-surface rounded-xl p-1">
                         <TouchableOpacity
                             onPress={() => setActiveTab('current')}
                             className={`flex-1 py-2.5 rounded-lg items-center ${activeTab === 'current' ? 'bg-blue-600' : ''}`}
                         >
-                            <Text className={`font-semibold text-sm ${activeTab === 'current' ? 'text-white' : 'text-slate-400'}`}>
+                            <Text className={`font-semibold text-sm ${activeTab === 'current' ? 'text-ink' : 'text-ink-muted'}`}>
                                 Current Shift
                             </Text>
                         </TouchableOpacity>
@@ -38,7 +38,7 @@ export default function ShiftsScreen() {
                             onPress={() => setActiveTab('history')}
                             className={`flex-1 py-2.5 rounded-lg items-center ${activeTab === 'history' ? 'bg-blue-600' : ''}`}
                         >
-                            <Text className={`font-semibold text-sm ${activeTab === 'history' ? 'text-white' : 'text-slate-400'}`}>
+                            <Text className={`font-semibold text-sm ${activeTab === 'history' ? 'text-ink' : 'text-ink-muted'}`}>
                                 Shift History
                             </Text>
                         </TouchableOpacity>

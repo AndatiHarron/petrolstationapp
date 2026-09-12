@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
+import { Droplet } from 'lucide-react-native';
 import { View, Text, ActivityIndicator } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { SymbolView } from 'expo-symbols';
 
 import { useTanksIndex } from '@/features/api/tank/tank';
 import type { TanksIndex200, AuthenticationExceptionResponse, TankResource } from '@/features/api/model';
@@ -29,8 +29,8 @@ export const TanksSection = memo(function TanksSection() {
     return (
         <Animated.View entering={FadeInDown.duration(400).delay(300)} className="mb-6">
             <View className="flex-row items-center gap-2 mb-3">
-                <SymbolView name="drop.fill" size={18} tintColor="#a78bfa" />
-                <Text className="text-white font-bold text-lg">Tanks</Text>
+                <Droplet size={18} color="#a78bfa" />
+                <Text className="text-ink font-bold text-lg">Tanks</Text>
                 {isLoading && <ActivityIndicator size="small" color="#a78bfa" />}
             </View>
 
@@ -40,8 +40,8 @@ export const TanksSection = memo(function TanksSection() {
                     <SkeletonCard variant="tank" />
                 </View>
             ) : tanksList.length === 0 ? (
-                <View className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-                    <Text className="text-slate-500 text-center">No tanks found</Text>
+                <View className="bg-surface-sunken rounded-xl p-4 border border-surface-border">
+                    <Text className="text-ink-muted text-center">No tanks found</Text>
                 </View>
             ) : (
                 <View className="gap-3">

@@ -1,8 +1,8 @@
 import React, { memo, useCallback } from 'react';
+import { Fuel } from 'lucide-react-native';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { SymbolView } from 'expo-symbols';
 
 import { useProductsIndex } from '@/features/api/product/product';
 import type { ProductsIndex200, AuthenticationExceptionResponse, ProductResource } from '@/features/api/model';
@@ -40,13 +40,13 @@ export const ProductsSection = memo(function ProductsSection() {
     return (
         <Animated.View entering={FadeInDown.duration(400).delay(200)} className="mb-6">
             <View className="flex-row items-center gap-2 mb-3">
-                <SymbolView name="fuelpump.fill" size={18} tintColor="#60a5fa" />
-                <Text className="text-white font-bold text-lg">Products</Text>
+                <Fuel size={18} color="#60a5fa" />
+                <Text className="text-ink font-bold text-lg">Products</Text>
                 {isLoading && <ActivityIndicator size="small" color="#60a5fa" />}
             </View>
 
             {isLoading ? (
-                <View style={{ height: 120, marginHorizontal: -16 }}>
+                <View style={{ height: 150, marginHorizontal: -16 }}>
                     <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 12 }}>
                         <SkeletonCard variant="product" />
                         <SkeletonCard variant="product" />
@@ -54,11 +54,11 @@ export const ProductsSection = memo(function ProductsSection() {
                     </View>
                 </View>
             ) : productsList.length === 0 ? (
-                <View className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-                    <Text className="text-slate-500 text-center">No products found</Text>
+                <View className="bg-surface-sunken rounded-xl p-4 border border-surface-border">
+                    <Text className="text-ink-muted text-center">No products found</Text>
                 </View>
             ) : (
-                <View style={{ height: 120, marginHorizontal: -16 }}>
+                <View style={{ height: 150, marginHorizontal: -16 }}>
                     <FlashList
                         data={productsList}
                         renderItem={renderProductItem}

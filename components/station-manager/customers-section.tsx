@@ -1,8 +1,8 @@
 import React, { memo, useCallback } from 'react';
+import { Users } from 'lucide-react-native';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { SymbolView } from 'expo-symbols';
 
 import { useCustomersIndex } from '@/features/api/customer/customer';
 import type { CustomersIndex200, AuthenticationExceptionResponse, CustomerResource } from '@/features/api/model';
@@ -40,12 +40,12 @@ export const CustomersSection = memo(function CustomersSection() {
     return (
         <Animated.View entering={FadeInDown.duration(400).delay(400)} className="mb-6">
             <View className="flex-row items-center gap-2 mb-3">
-                <SymbolView name="person.2.fill" size={18} tintColor="#34d399" />
-                <Text className="text-white font-bold text-lg">Customers</Text>
+                <Users size={18} color="#34d399" />
+                <Text className="text-ink font-bold text-lg">Customers</Text>
                 {isLoading && <ActivityIndicator size="small" color="#34d399" />}
                 {!isLoading && (
-                    <View className="bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                        <Text className="text-emerald-400 text-xs font-bold">
+                    <View className="bg-emerald-50 px-2 py-0.5 rounded-full">
+                        <Text className="text-emerald-700 text-xs font-bold">
                             {customersList.length}
                         </Text>
                     </View>
@@ -53,7 +53,7 @@ export const CustomersSection = memo(function CustomersSection() {
             </View>
 
             {isLoading ? (
-                <View style={{ height: 140, marginHorizontal: -16 }}>
+                <View style={{ height: 190, marginHorizontal: -16 }}>
                     <View style={{ flexDirection: 'row', paddingHorizontal: 16, gap: 12 }}>
                         <SkeletonCard variant="customer" />
                         <SkeletonCard variant="customer" />
@@ -61,11 +61,11 @@ export const CustomersSection = memo(function CustomersSection() {
                     </View>
                 </View>
             ) : customersList.length === 0 ? (
-                <View className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-                    <Text className="text-slate-500 text-center">No customers found</Text>
+                <View className="bg-surface-sunken rounded-xl p-4 border border-surface-border">
+                    <Text className="text-ink-muted text-center">No customers found</Text>
                 </View>
             ) : (
-                <View style={{ height: 140, marginHorizontal: -16 }}>
+                <View style={{ height: 190, marginHorizontal: -16 }}>
                     <FlashList
                         data={customersList}
                         renderItem={renderCustomerItem}
