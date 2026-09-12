@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\ApprovalController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CreditorController;
 use App\Http\Controllers\Api\V1\CreditSaleController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShiftController;
 use App\Http\Controllers\Api\V1\StationController;
+use App\Http\Controllers\Api\V1\SupplierSettlementController;
 use App\Http\Controllers\Api\V1\TankController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Resources\UserResource;
@@ -74,6 +76,15 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
         ->only(['index', 'store', 'show']);
     Route::post('/credit-settlements/{creditSettlement}/approve', [CreditSettlementController::class, 'approve']);
     Route::post('/credit-settlements/{creditSettlement}/reject', [CreditSettlementController::class, 'reject']);
+
+    // Paying suppliers down: recorded by whoever pays, approved by an admin.
+    Route::apiResource('supplier-settlements', SupplierSettlementController::class)
+        ->only(['index', 'store', 'show']);
+    Route::post('/supplier-settlements/{supplierSettlement}/approve', [SupplierSettlementController::class, 'approve']);
+    Route::post('/supplier-settlements/{supplierSettlement}/reject', [SupplierSettlementController::class, 'reject']);
+
+    // What is waiting for this user to approve, for the in-app badge.
+    Route::get('/approvals/summary', [ApprovalController::class, 'summary']);
 
     // Creditors (Suppliers)
     Route::apiResource('creditors', CreditorController::class);
