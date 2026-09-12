@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
-import { useReportVarianceTrend } from '../../../features/api/report/report';
+import { useVarianceTrend, formatPeriod, type ReportFilters } from '@/features/reports';
 import { ChartCard } from './chart-card';
 
 const CHART_WIDTH = Dimensions.get('window').width - 104;
@@ -62,8 +62,8 @@ function niceStep(span: number, sections: number): number {
 }
 
 // ─── Variance Trend Chart ─────────────────────────────────────────
-function VarianceTrendChart() {
-    const { data: varianceResponse, isLoading, isError } = useReportVarianceTrend();
+function VarianceTrendChart({ filters }: { filters: ReportFilters }) {
+    const { data: varianceResponse, isLoading, isError } = useVarianceTrend(filters);
 
     const dataPoints = (varianceResponse as unknown as { data: VarianceDataPoint[] } | undefined)?.data;
 
@@ -243,16 +243,16 @@ function VarianceTrendChart() {
 }
 
 // ─── Main Export ──────────────────────────────────────────────────
-export function InventoryReports() {
+export function InventoryReports({ filters }: { filters: ReportFilters }) {
     return (
         <View>
             {/* Section header */}
             <View className="mb-3 mt-2">
                 <Text className="text-ink font-bold text-lg">Inventory Reports</Text>
-                <Text className="text-ink-muted text-xs">Stock &amp; cash variance trends</Text>
+                <Text className="text-ink-muted text-xs">Stock &amp; cash variance &middot; {formatPeriod(filters)}</Text>
             </View>
 
-            <VarianceTrendChart />
+            <VarianceTrendChart filters={filters} />
         </View>
     );
 }

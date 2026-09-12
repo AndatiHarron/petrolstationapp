@@ -1,7 +1,14 @@
 import React, { useMemo } from 'react';
-import { View, Text, ScrollView, Dimensions } from 'react-native';
+import { View, Text, ScrollView, Dimensions, Pressable } from 'react-native';
 import { BarChart, PieChart } from 'react-native-gifted-charts';
-import { useReportPl, useReportTaxSummary, useReportDebtAging } from '../../../features/api/report/report';
+import { ChevronRight } from 'lucide-react-native';
+import {
+    useProfitAndLoss,
+    useTaxSummary,
+    useDebtAging,
+    formatPeriod,
+    type ReportFilters,
+} from '@/features/reports';
 import type {
     ReportPl200,
     ReportTaxSummary200,
@@ -35,8 +42,8 @@ function formatCurrency(value: number): string {
 }
 
 // ─── P&L Chart ────────────────────────────────────────────────────
-function PLChart() {
-    const { data: plResponse, isLoading, isError } = useReportPl();
+function PLChart({ filters }: { filters: ReportFilters }) {
+    const { data: plResponse, isLoading, isError } = useProfitAndLoss(filters);
 
     const plData = (plResponse as unknown as ReportPl200 | undefined)?.data;
 
@@ -88,9 +95,9 @@ function PLChart() {
         >
             {/* Summary row */}
             <View className="flex-row flex-wrap gap-2 mb-4">
-                <SummaryBadge label="Sales" value={formatCurrency(plData?.sales ?? 0)} color="text-brand" bgColor="bg-emerald-500/10" />
-                <SummaryBadge label="Costs" value={formatCurrency(plData?.costs ?? 0)} color="text-amber-400" bgColor="bg-amber-500/10" />
-                <SummaryBadge label="Net Profit" value={formatCurrency(plData?.net_profit ?? 0)} color="text-blue-400" bgColor="bg-blue-500/10" />
+                <SummaryBadge label="Sales" value={formatCurrency(plData?.sales ?? 0)} color="text-brand" bgColor="bg-brand-subtle" />
+                <SummaryBadge label="Costs" value={formatCurrency(plData?.costs ?? 0)} color="text-amber-700" bgColor="bg-amber-50" />
+                <SummaryBadge label="Net Profit" value={formatCurrency(plData?.net_profit ?? 0)} color="text-brand" bgColor="bg-brand-subtle" />
             </View>
 
             <View style={{ alignItems: 'center' }}>
@@ -115,8 +122,8 @@ function PLChart() {
 }
 
 // ─── Tax Summary Chart ────────────────────────────────────────────
-function TaxSummaryChart() {
-    const { data: taxResponse, isLoading, isError } = useReportTaxSummary();
+function TaxSummaryChart({ filters }: { filters: ReportFilters }) {
+    const { data: taxResponse, isLoading, isError } = useTaxSummary(filters);
 
     const taxData = (taxResponse as unknown as ReportTaxSummary200 | undefined)?.data;
 
@@ -138,9 +145,9 @@ function TaxSummaryChart() {
         >
             {/* KPI row */}
             <View className="flex-row gap-2 mb-4">
-                <SummaryBadge label="Collected" value={formatCurrency(taxData?.tax_collected ?? 0)} color="text-brand" bgColor="bg-emerald-500/10" />
+                <SummaryBadge label="Collected" value={formatCurrency(taxData?.tax_collected ?? 0)} color="text-brand" bgColor="bg-brand-subtle" />
                 <SummaryBadge label="Paid" value={formatCurrency(taxData?.tax_paid ?? 0)} color="text-accent" bgColor="bg-accent-subtle" />
-                <SummaryBadge label="Net" value={formatCurrency(taxData?.net_tax ?? 0)} color="text-blue-400" bgColor="bg-blue-500/10" />
+                <SummaryBadge label="Net" value={formatCurrency(taxData?.net_tax ?? 0)} color="text-brand" bgColor="bg-brand-subtle" />
             </View>
 
             {pieData.length > 0 ? (
@@ -170,8 +177,8 @@ function TaxSummaryChart() {
 }
 
 // ─── Debt Aging Chart ─────────────────────────────────────────────
-function DebtAgingChart() {
-    const { data: debtResponse, isLoading, isError } = useReportDebtAging();
+function DebtAgingChart({ filters, onSelectCustomer }: { filters: ReportFilters; onSelectCustomer?: (id: string, name: string) => void }) {
+    const { data: debtResponse, isLoading, isError } = useDebtAging(filters);
 
     const debtData = (debtResponse as unknown as ReportDebtAging200 | undefined)?.data;
 
@@ -232,6 +239,43 @@ function DebtAgingChart() {
                     isAnimated
                 />
             </ScrollView>
+
+            {/* The chart shows the shape; this list is how you reach one
+                customer's statement, which is what someone chasing a debt
+                actually needs. */}
+            {debtData && debtData.length > 0 ? (
+                <View className="mt-4 border-t border-surface-border pt-2">
+                    {[...debtData]
+                        .sort((a, b) => b.total_debt - a.total_debt)
+                        .map((item: ReportDebtAging200DataItem) => (
+                            <Pressable
+                                key={item.customer_id}
+                                onPress={() => onSelectCustomer?.(item.customer_id, item.customer_name)}
+                                disabled={!onSelectCustomer}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Statement for ${item.customer_name}`}
+                                className="flex-row items-center justify-between gap-3 border-b border-surface-border py-3 active:bg-surface-sunken"
+                            >
+                                <View className="min-w-0 flex-1">
+                                    <Text className="text-ink text-sm font-semibold" numberOfLines={1}>
+                                        {item.customer_name}
+                                    </Text>
+                                    <Text className="text-ink-faint text-[10px]">
+                                        {Number(item.buckets['90+']) > 0
+                                            ? `${formatCurrency(Number(item.buckets['90+']))} over 90 days`
+                                            : 'Nothing over 90 days'}
+                                    </Text>
+                                </View>
+                                <View className="shrink-0 flex-row items-center gap-2">
+                                    <Text className="text-accent font-mono text-sm font-bold">
+                                        {formatCurrency(item.total_debt)}
+                                    </Text>
+                                    {onSelectCustomer ? <ChevronRight size={14} color="#8b8b99" /> : null}
+                                </View>
+                            </Pressable>
+                        ))}
+                </View>
+            ) : null}
         </ChartCard>
     );
 }
@@ -261,18 +305,26 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 }
 
 // ─── Main Export ──────────────────────────────────────────────────
-export function FinancialReports() {
+interface FinancialReportsProps {
+    filters: ReportFilters;
+    onSelectCustomer?: (customerId: string, customerName: string) => void;
+}
+
+export function FinancialReports({ filters, onSelectCustomer }: FinancialReportsProps) {
     return (
         <View>
-            {/* Section header */}
+            {/* Section header. The period is stated here so a screenshot of the
+                report is never ambiguous about what it covers. */}
             <View className="mb-3 mt-2">
                 <Text className="text-ink font-bold text-lg">Financial Reports</Text>
-                <Text className="text-ink-muted text-xs">Revenue, taxes & receivables</Text>
+                <Text className="text-ink-muted text-xs">
+                    Revenue, taxes &amp; receivables &middot; {formatPeriod(filters)}
+                </Text>
             </View>
 
-            <PLChart />
-            <TaxSummaryChart />
-            <DebtAgingChart />
+            <PLChart filters={filters} />
+            <TaxSummaryChart filters={filters} />
+            <DebtAgingChart filters={filters} onSelectCustomer={onSelectCustomer} />
         </View>
     );
 }
