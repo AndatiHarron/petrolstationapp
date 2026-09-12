@@ -25,11 +25,23 @@ export const InputField = forwardRef<TextInput, InputFieldProps>(
         <View className="relative">
           <TextInput
             ref={ref}
-            className={`text-ink h-12 w-full rounded-xl border bg-surface px-3.5 text-[15px] ${error
+            className={`text-ink w-full rounded-xl border bg-surface px-3.5 text-[15px] ${
+              // A multiline field grows; a single-line one is a fixed control.
+              props.multiline ? 'min-h-[96px]' : 'h-12'
+            } ${error
                 ? 'border-accent bg-accent-subtle'
                 : 'border-surface-border focus:border-brand'
               } ${inputClassName ?? ''}`}
             placeholderTextColor="#8b8b99"
+            // Without these the glyphs sit off centre in a fixed-height field
+            // and appear to jump as the placeholder gives way to typed text.
+            style={{
+              // A single-line field is centred with no padding of its own; a
+              // multiline one needs real padding or the text hugs the edge.
+              paddingVertical: props.multiline ? 10 : 0,
+              textAlignVertical: props.multiline ? 'top' : 'center',
+              includeFontPadding: false,
+            }}
             {...props}
           />
           {rightAccessory ? (

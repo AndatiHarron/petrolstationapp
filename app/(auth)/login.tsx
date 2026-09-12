@@ -47,7 +47,7 @@ export default function LoginScreen() {
                   accessibilityLabel="Petrol Integrity"
                 />
 
-                <Text className="text-ink-muted max-w-[300px] text-center text-[13px] leading-5">
+                <Text className="text-ink-faint max-w-[260px] text-center text-[11px] leading-4">
                   Shift integrity, inventory and station operations in one place.
                 </Text>
               </Animated.View>
