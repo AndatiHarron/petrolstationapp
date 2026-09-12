@@ -19,7 +19,7 @@ class CreditSaleController extends Controller
         Gate::authorize('viewAny', CreditSale::class);
 
         $user = $request->user();
-        $query = CreditSale::with(['customer'])->latest();
+        $query = CreditSale::with(['customer', 'shift.station', 'shift.startedBy'])->latest();
 
         if ($user->hasRole('manager') && $user->station_id) {
             $query->whereHas('shift', function ($q) use ($user) {
