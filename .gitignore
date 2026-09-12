@@ -1,0 +1,3 @@
+# Tooling noise at the monorepo root. Each project keeps its own .gitignore.
+.DS_Store
+Thumbs.db
