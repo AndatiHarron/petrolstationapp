@@ -141,12 +141,12 @@ export default function InventoryTab() {
     // ─── Render ───────────────────────────────────────────────
     if (error) {
         return (
-            <View className="flex-1 bg-slate-900 items-center justify-center px-8">
-                <Ionicons name="alert-circle-outline" size={48} color="#ef4444" />
-                <Text className="text-white text-lg font-bold mt-4 text-center">
+            <View className="flex-1 bg-surface-sunken items-center justify-center px-8">
+                <Ionicons name="alert-circle-outline" size={48} color="#bf0a30" />
+                <Text className="text-ink text-lg font-bold mt-4 text-center">
                     Error loading liftings
                 </Text>
-                <Text className="text-slate-500 text-sm mt-2 text-center">
+                <Text className="text-ink-muted text-sm mt-2 text-center">
                     {(error as Error).message}
                 </Text>
             </View>
@@ -154,11 +154,11 @@ export default function InventoryTab() {
     }
 
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-surface-sunken">
+            <StatusBar style="light" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
-                <View className="px-4 py-4 flex-row justify-between items-center border-b border-slate-800">
+                <View className="px-4 py-4 flex-row justify-between items-center border-b border-surface-border">
                     <View className="flex-row items-center gap-2">
                         <Text className="text-2xl font-bold text-black">Inventory</Text>
                         {meta && (
@@ -212,7 +212,7 @@ export default function InventoryTab() {
                     onRequestClose={() => setSelectedLifting(null)}
                 >
                     <View className="flex-1 justify-end">
-                        <View className="bg-slate-900 border-t border-slate-700 h-[70%] rounded-t-3xl shadow-2xl p-6">
+                        <View className="bg-surface-sunken border-t border-surface-border h-[70%] rounded-t-3xl shadow-2xl p-6">
                             <View className="flex-row justify-between items-start mb-6">
                                 <View className="flex-1 mr-4">
                                     <Text className="text-2xl font-bold text-black">{selectedLifting?.tank_name}</Text>
@@ -221,12 +221,12 @@ export default function InventoryTab() {
                                     </Text>
                                 </View>
                                 <TouchableOpacity onPress={() => setSelectedLifting(null)}>
-                                    <Ionicons name="close-circle" size={32} color="#64748b" />
+                                    <Ionicons name="close-circle" size={32} color="#5c5c6b" />
                                 </TouchableOpacity>
                             </View>
 
                             {/* Delivery Details */}
-                            <View className="bg-slate-800 p-4 rounded-xl mb-4">
+                            <View className="bg-surface p-4 rounded-xl mb-4">
                                 <Text className="text-gray-600 text-xs uppercase mb-3 font-bold tracking-wider">Delivery Details</Text>
                                 <DetailRow label="Date" value={selectedLifting?.lifting_date ? new Date(selectedLifting.lifting_date).toLocaleDateString() : 'N/A'} />
                                 <DetailRow label="Invoice #" value={selectedLifting?.invoice_number || 'N/A'} mono />
@@ -234,7 +234,7 @@ export default function InventoryTab() {
                             </View>
 
                             {/* Financial Details */}
-                            <View className="bg-slate-800 p-4 rounded-xl">
+                            <View className="bg-surface p-4 rounded-xl">
                                 <Text className="text-gray-600 text-xs uppercase mb-3 font-bold tracking-wider">Financial</Text>
                                 <DetailRow label="Price/Liter" value={`KES ${selectedLifting?.buying_price_per_liter.toLocaleString()}`} mono />
                                 <DetailRow label="Total Cost" value={`KES ${selectedLifting?.total_cost.toLocaleString()}`} highlight mono />
@@ -250,9 +250,9 @@ export default function InventoryTab() {
                                     variant="outline"
                                     onPress={handleDeletePress}
                                     loading={deleteMutation.isPending}
-                                    style={{ borderColor: '#ef4444' }}
+                                    style={{ borderColor: '#bf0a30' }}
                                 />
-                                <Text className="text-red-500 text-center mt-2 text-xs">
+                                <Text className="text-accent text-center mt-2 text-xs">
                                     Note: This will reverse the inventory effect.
                                 </Text>
                             </View>
@@ -273,9 +273,9 @@ function DetailRow({ label, value, mono, highlight, last }: {
     last?: boolean;
 }) {
     return (
-        <View className={`flex-row justify-between items-center py-2 ${last ? '' : 'border-b border-slate-700'}`}>
-            <Text className="text-slate-300 text-sm">{label}</Text>
-            <Text className={`text-sm font-semibold ${mono ? 'font-mono' : ''} ${highlight ? 'text-emerald-400' : 'text-white'}`}>
+        <View className={`flex-row justify-between items-center py-2 ${last ? '' : 'border-b border-surface-border'}`}>
+            <Text className="text-ink text-sm">{label}</Text>
+            <Text className={`text-sm font-semibold ${mono ? 'font-mono' : ''} ${highlight ? 'text-emerald-400' : 'text-ink'}`}>
                 {value}
             </Text>
         </View>

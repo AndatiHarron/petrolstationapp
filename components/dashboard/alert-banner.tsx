@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { AppIcon } from '../app-icon';
+import { X } from 'lucide-react-native';
 import { View, Text, TouchableOpacity } from 'react-native';
 import Animated, { FadeInDown, FadeOutUp } from 'react-native-reanimated';
-import { SymbolView } from 'expo-symbols';
 import { Alert } from '../../utils/mock-data';
 
 interface AlertBannerProps {
@@ -26,10 +27,10 @@ export const AlertBanner = ({ alert, onDismiss }: AlertBannerProps) => {
     switch (alert.severity) {
       case 'critical':
         return {
-          bg: 'bg-red-900/20',
+          bg: 'bg-accent-subtle',
           border: 'border-red-500',
           icon: 'exclamationmark.triangle.fill',
-          iconColor: '#ef4444',
+          iconColor: '#bf0a30',
           text: 'text-red-200',
           title: 'text-red-100'
         };
@@ -63,11 +64,7 @@ export const AlertBanner = ({ alert, onDismiss }: AlertBannerProps) => {
       className={`mb-4 w-full flex-row items-start rounded-lg border-l-4 p-4 ${styles.bg} ${styles.border}`}
     >
       <View className="mr-3 mt-0.5">
-        <SymbolView 
-          name={styles.icon} 
-          size={20} 
-          tintColor={styles.iconColor}
-        />
+        <AppIcon name={styles.icon} size={20} color={styles.iconColor} />
       </View>
       
       <View className="flex-1">
@@ -75,7 +72,7 @@ export const AlertBanner = ({ alert, onDismiss }: AlertBannerProps) => {
           <Text className={`font-bold ${styles.title}`}>
             {alert.title}
           </Text>
-          <Text className="text-xs text-slate-400">
+          <Text className="text-xs text-ink-muted">
             {alert.timestamp}
           </Text>
         </View>
@@ -89,11 +86,7 @@ export const AlertBanner = ({ alert, onDismiss }: AlertBannerProps) => {
         className="ml-2 p-1"
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <SymbolView 
-          name="xmark" 
-          size={14} 
-          tintColor="#94a3b8"
-        />
+        <X size={14} color="#8b8b99" />
       </TouchableOpacity>
     </Animated.View>
   );

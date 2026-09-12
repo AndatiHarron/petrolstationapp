@@ -7,13 +7,13 @@ import type { OrganizationResource, OrganizationsIndex200 } from '@/features/api
 
 function OrganizationCardSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-center justify-between">
                 <View className="flex-1">
-                    <View className="h-5 w-40 bg-slate-700 rounded mb-2" />
-                    <View className="h-3 w-24 bg-slate-700 rounded" />
+                    <View className="h-5 w-40 bg-surface-border rounded mb-2" />
+                    <View className="h-3 w-24 bg-surface-border rounded" />
                 </View>
-                <View className="h-6 w-20 bg-slate-700 rounded-full" />
+                <View className="h-6 w-20 bg-surface-border rounded-full" />
             </View>
         </View>
     );
@@ -24,20 +24,20 @@ const OrganizationCard = memo(function OrganizationCard({
 }: {
     organization: OrganizationResource;
 }) {
-    const statusColor = organization.status === 'active' ? 'bg-emerald-500/20' : 'bg-slate-700/50';
-    const statusTextColor = organization.status === 'active' ? 'text-emerald-400' : 'text-slate-400';
+    const statusColor = organization.status === 'active' ? 'bg-emerald-500/20' : 'bg-surface-border';
+    const statusTextColor = organization.status === 'active' ? 'text-emerald-400' : 'text-ink-muted';
 
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-start justify-between">
                 <View className="flex-1">
                     <View className="flex-row items-center mb-2">
-                        <Building2 size={18} color="#94a3b8" />
-                        <Text className="text-white font-semibold text-base ml-2">{organization.name}</Text>
+                        <Building2 size={18} color="#8b8b99" />
+                        <Text className="text-ink font-semibold text-base ml-2">{organization.name}</Text>
                     </View>
-                    <Text className="text-slate-500 text-xs ml-6">{organization.slug}</Text>
+                    <Text className="text-ink-muted text-xs ml-6">{organization.slug}</Text>
                     {organization.created_at ? (
-                        <Text className="text-slate-500 text-xs ml-6 mt-1">
+                        <Text className="text-ink-muted text-xs ml-6 mt-1">
                             Created {new Date(organization.created_at).toLocaleDateString()}
                         </Text>
                     ) : null}
@@ -71,8 +71,8 @@ export function TenantTable({ onAddOrganization }: TenantTableProps) {
             <View className="flex-1">
                 <View className="flex-row items-center justify-between mb-4">
                     <View>
-                        <Text className="text-lg font-bold text-white">Organizations</Text>
-                        <Text className="text-slate-500 text-sm">Manage tenant organizations</Text>
+                        <Text className="text-lg font-bold text-ink">Organizations</Text>
+                        <Text className="text-ink-muted text-sm">Manage tenant organizations</Text>
                     </View>
                 </View>
                 <OrganizationCardSkeleton />
@@ -86,15 +86,15 @@ export function TenantTable({ onAddOrganization }: TenantTableProps) {
         <View className="flex-1">
             <View className="flex-row items-center justify-between mb-4">
                 <View>
-                    <Text className="text-lg font-bold text-white">Organizations</Text>
-                    <Text className="text-slate-500 text-sm">Manage tenant organizations</Text>
+                    <Text className="text-lg font-bold text-ink">Organizations</Text>
+                    <Text className="text-ink-muted text-sm">Manage tenant organizations</Text>
                 </View>
                 <Pressable
                     onPress={onAddOrganization}
                     className="flex-row items-center gap-2 bg-orange-500 px-4 py-2.5 rounded-xl active:bg-orange-600"
                 >
                     <Plus size={18} color="#ffffff" />
-                    <Text className="text-white font-semibold text-sm">Add Organization</Text>
+                    <Text className="text-ink font-semibold text-sm">Add Organization</Text>
                 </Pressable>
             </View>
 
@@ -106,21 +106,21 @@ export function TenantTable({ onAddOrganization }: TenantTableProps) {
                     <RefreshControl
                         refreshing={isRefetching && !isLoading}
                         onRefresh={() => refetch()}
-                        tintColor="#94a3b8"
+                        tintColor="#8b8b99"
                     />
                 }
                 ListEmptyComponent={
                     <View className="py-12 items-center">
-                        <View className="w-16 h-16 rounded-full bg-slate-800 items-center justify-center mb-4">
-                            <Building2 size={32} color="#64748b" />
+                        <View className="w-16 h-16 rounded-full bg-surface items-center justify-center mb-4">
+                            <Building2 size={32} color="#5c5c6b" />
                         </View>
-                        <Text className="text-slate-400 text-base font-medium">No organizations yet</Text>
-                        <Text className="text-slate-500 text-sm mt-1">Add your first organization to get started</Text>
+                        <Text className="text-ink-muted text-base font-medium">No organizations yet</Text>
+                        <Text className="text-ink-muted text-sm mt-1">Add your first organization to get started</Text>
                         <Pressable
                             onPress={onAddOrganization}
                             className="mt-4 bg-orange-500 px-6 py-3 rounded-xl active:bg-orange-600"
                         >
-                            <Text className="text-white font-semibold">Add Organization</Text>
+                            <Text className="text-ink font-semibold">Add Organization</Text>
                         </Pressable>
                     </View>
                 }

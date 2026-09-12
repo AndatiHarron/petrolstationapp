@@ -13,12 +13,12 @@ export const ChartCard = () => {
   };
 
   return (
-    <View className="mb-6 rounded-lg bg-slate-800 p-4 shadow-sm">
+    <View className="mb-6 rounded-lg bg-surface p-4 shadow-sm">
       <View className="mb-4 flex-row items-center justify-between">
-        <Text className="text-sm font-bold uppercase tracking-wider text-slate-400">
+        <Text className="text-sm font-bold uppercase tracking-wider text-ink-muted">
           Sales Trend
         </Text>
-        <View className="flex-row rounded-md bg-slate-700 p-1">
+        <View className="flex-row rounded-md bg-surface-border p-1">
           {(['day', 'week', 'month'] as const).map((p) => (
             <TouchableOpacity
               key={p}
@@ -28,7 +28,7 @@ export const ChartCard = () => {
               }`}
             >
               <Text className={`text-xs font-medium capitalize ${
-                period === p ? 'text-white' : 'text-slate-400'
+                period === p ? 'text-ink' : 'text-ink-muted'
               }`}>
                 {p}
               </Text>
@@ -51,12 +51,12 @@ export const ChartCard = () => {
         ))}
       </View>
       
-      <View className="mt-2 flex-row justify-between border-t border-slate-700 pt-2">
-        <Text className="text-xs text-slate-500">00:00</Text>
-        <Text className="text-xs text-slate-500">06:00</Text>
-        <Text className="text-xs text-slate-500">12:00</Text>
-        <Text className="text-xs text-slate-500">18:00</Text>
-        <Text className="text-xs text-slate-500">23:59</Text>
+      <View className="mt-2 flex-row justify-between border-t border-surface-border pt-2">
+        <Text className="text-xs text-ink-muted">00:00</Text>
+        <Text className="text-xs text-ink-muted">06:00</Text>
+        <Text className="text-xs text-ink-muted">12:00</Text>
+        <Text className="text-xs text-ink-muted">18:00</Text>
+        <Text className="text-xs text-ink-muted">23:59</Text>
       </View>
     </View>
   );

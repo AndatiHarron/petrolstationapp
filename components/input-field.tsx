@@ -25,9 +25,9 @@ export const InputField = forwardRef<TextInput, InputFieldProps>(
         <View className="relative">
           <TextInput
             ref={ref}
-            className={`h-14 w-full rounded-xl bg-gray-100 px-4 text-base text-black border ${error
-                ? 'border-red-500 bg-red-500/10'
-                : 'border-gray-300 focus:border-gray-400'
+            className={`h-14 w-full rounded-xl bg-surface px-4 text-base text-black border ${error
+                ? 'border-red-500 bg-accent-subtle'
+                : 'border-surface-border focus:border-gray-400'
               } ${inputClassName ?? ''}`}
             placeholderTextColor="#9CA3AF" // Gray placeholder
             {...props}
@@ -41,7 +41,7 @@ export const InputField = forwardRef<TextInput, InputFieldProps>(
         {error && (
           <Animated.Text
             entering={FadeIn}
-            className="mt-1.5 text-xs font-semibold text-red-500"
+            className="mt-1.5 text-xs font-semibold text-accent"
           >
             {error}
           </Animated.Text>

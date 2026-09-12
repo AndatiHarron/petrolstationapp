@@ -30,7 +30,7 @@ export default function FinanceTab() {
 
     return (
         <View className="flex-1 bg-white">
-            <StatusBar style="dark" backgroundColor="#0f172a" />
+            <StatusBar style="dark" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1">
                 <ScrollView
                     className="flex-1 px-4"
@@ -38,8 +38,8 @@ export default function FinanceTab() {
                     showsVerticalScrollIndicator={false}
                 >
                     <View className="mb-6 mt-4">
-                        <Text className="text-2xl font-bold text-white">Finance</Text>
-                        <Text className="text-slate-500 text-sm mt-1">Financial reporting and analysis</Text>
+                        <Text className="text-2xl font-bold text-ink">Finance</Text>
+                        <Text className="text-ink-muted text-sm mt-1">Financial reporting and analysis</Text>
                     </View>
 
                     <CreditorsList />

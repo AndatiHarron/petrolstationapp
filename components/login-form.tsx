@@ -96,7 +96,7 @@ export const LoginForm = () => {
                 <Ionicons
                   name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color="#94a3b8"
+                  color="#8b8b99"
                 />
               </Pressable>
             }
@@ -122,8 +122,8 @@ export const LoginForm = () => {
         entering={FadeInDown.delay(400).duration(400).springify()}
         className="items-center"
       >
-        <Text className="text-sm font-medium text-slate-500">
-          Forgot your password? <Text className="font-semibold text-slate-400">Get help</Text>
+        <Text className="text-sm font-medium text-ink-muted">
+          Forgot your password? <Text className="font-semibold text-ink-muted">Get help</Text>
         </Text>
       </Animated.View>
     </View>

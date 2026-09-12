@@ -7,11 +7,11 @@ import type { UserResource, UsersIndex200 } from '@/features/api/model';
 
 function AdminCardSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-center justify-between">
                 <View className="flex-1">
-                    <View className="h-5 w-32 bg-slate-700 rounded mb-2" />
-                    <View className="h-3 w-40 bg-slate-700 rounded" />
+                    <View className="h-5 w-32 bg-surface-border rounded mb-2" />
+                    <View className="h-3 w-40 bg-surface-border rounded" />
                 </View>
             </View>
         </View>
@@ -28,16 +28,16 @@ function isAdmin(user: UserResource): boolean {
 
 const AdminCard = memo(function AdminCard({ user }: { user: UserResource }) {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-start justify-between">
                 <View className="flex-1">
                     <View className="flex-row items-center mb-2">
-                        <Users size={18} color="#94a3b8" />
-                        <Text className="text-white font-semibold text-base ml-2">{user.name}</Text>
+                        <Users size={18} color="#8b8b99" />
+                        <Text className="text-ink font-semibold text-base ml-2">{user.name}</Text>
                     </View>
-                    <Text className="text-slate-500 text-sm ml-6">{user.email}</Text>
+                    <Text className="text-ink-muted text-sm ml-6">{user.email}</Text>
                     {user.organization_name ? (
-                        <Text className="text-slate-400 text-xs ml-6 mt-1">
+                        <Text className="text-ink-muted text-xs ml-6 mt-1">
                             {user.organization_name}
                         </Text>
                     ) : null}
@@ -70,8 +70,8 @@ export function AdminsList({ onAddAdmin }: AdminsListProps) {
             <View className="flex-1 mt-8">
                 <View className="flex-row items-center justify-between mb-4">
                     <View>
-                        <Text className="text-lg font-bold text-white">Admins</Text>
-                        <Text className="text-slate-500 text-sm">Organization administrators</Text>
+                        <Text className="text-lg font-bold text-ink">Admins</Text>
+                        <Text className="text-ink-muted text-sm">Organization administrators</Text>
                     </View>
                 </View>
                 <AdminCardSkeleton />
@@ -84,15 +84,15 @@ export function AdminsList({ onAddAdmin }: AdminsListProps) {
         <View className="flex-1 mt-8">
             <View className="flex-row items-center justify-between mb-4">
                 <View>
-                    <Text className="text-lg font-bold text-white">Admins</Text>
-                    <Text className="text-slate-500 text-sm">Organization administrators</Text>
+                    <Text className="text-lg font-bold text-ink">Admins</Text>
+                    <Text className="text-ink-muted text-sm">Organization administrators</Text>
                 </View>
                 <Pressable
                     onPress={onAddAdmin}
                     className="flex-row items-center gap-2 bg-orange-500 px-4 py-2.5 rounded-xl active:bg-orange-600"
                 >
                     <UserPlus size={18} color="#ffffff" />
-                    <Text className="text-white font-semibold text-sm">Add Admin</Text>
+                    <Text className="text-ink font-semibold text-sm">Add Admin</Text>
                 </Pressable>
             </View>
 
@@ -104,23 +104,23 @@ export function AdminsList({ onAddAdmin }: AdminsListProps) {
                     <RefreshControl
                         refreshing={isRefetching && !isLoading}
                         onRefresh={() => refetch()}
-                        tintColor="#94a3b8"
+                        tintColor="#8b8b99"
                     />
                 }
                 ListEmptyComponent={
                     <View className="py-12 items-center">
-                        <View className="w-16 h-16 rounded-full bg-slate-800 items-center justify-center mb-4">
-                            <UserPlus size={32} color="#64748b" />
+                        <View className="w-16 h-16 rounded-full bg-surface items-center justify-center mb-4">
+                            <UserPlus size={32} color="#5c5c6b" />
                         </View>
-                        <Text className="text-slate-400 text-base font-medium">No admins yet</Text>
-                        <Text className="text-slate-500 text-sm mt-1">
+                        <Text className="text-ink-muted text-base font-medium">No admins yet</Text>
+                        <Text className="text-ink-muted text-sm mt-1">
                             Create admins and assign them to organizations
                         </Text>
                         <Pressable
                             onPress={onAddAdmin}
                             className="mt-4 bg-orange-500 px-6 py-3 rounded-xl active:bg-orange-600"
                         >
-                            <Text className="text-white font-semibold">Add Admin</Text>
+                            <Text className="text-ink font-semibold">Add Admin</Text>
                         </Pressable>
                     </View>
                 }

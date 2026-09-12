@@ -11,12 +11,12 @@ import type { AuditLogIndex200, AuditLogResource } from '@/features/api/model';
 // Skeleton loader for a single audit log row
 function AuditLogSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
-            <View className="h-4 w-3/4 bg-slate-700 rounded mb-2 animate-pulse" />
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
+            <View className="h-4 w-3/4 bg-surface-border rounded mb-2 animate-pulse" />
             <View className="flex-row items-center gap-2 mt-2">
-                <View className="h-3 w-20 bg-slate-700 rounded animate-pulse" />
+                <View className="h-3 w-20 bg-surface-border rounded animate-pulse" />
                 <View className="w-1 h-1 rounded-full bg-slate-600" />
-                <View className="h-3 w-32 bg-slate-700 rounded animate-pulse" />
+                <View className="h-3 w-32 bg-surface-border rounded animate-pulse" />
             </View>
         </View>
     );
@@ -57,27 +57,27 @@ const AuditLogItem = React.memo(({
     return (
         <TouchableOpacity
             onPress={handlePress}
-            className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3 active:bg-slate-700/50"
+            className="bg-surface border border-surface-border rounded-xl p-4 mb-3 active:bg-surface-border"
         >
             <View className="flex-row items-start gap-3">
                 <View className="bg-blue-500/20 p-2 rounded-lg">
                     <Ionicons name={getActivityIcon() as any} size={20} color="#60a5fa" />
                 </View>
                 <View className="flex-1">
-                    <Text className="text-slate-200 text-sm leading-5 mb-2" numberOfLines={2}>
+                    <Text className="text-ink text-sm leading-5 mb-2" numberOfLines={2}>
                         {description}
                     </Text>
                     <View className="flex-row items-center gap-2">
-                        <Text className="text-slate-500 text-xs">
+                        <Text className="text-ink-muted text-xs">
                             {causerName}
                         </Text>
                         <View className="w-1 h-1 rounded-full bg-slate-600" />
-                        <Text className="text-slate-500 text-xs">
+                        <Text className="text-ink-muted text-xs">
                             {timeAgo}
                         </Text>
                     </View>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color="#64748b" />
+                <Ionicons name="chevron-forward" size={16} color="#5c5c6b" />
             </View>
         </TouchableOpacity>
     );
@@ -150,7 +150,7 @@ export default function SystemTab() {
                     <View className="mb-2">
                         <Text className={`${color} text-xs font-bold mb-1`}>{label}</Text>
                         {value.map((item, idx) => (
-                            <Text key={idx} className="text-slate-300 text-sm ml-2">
+                            <Text key={idx} className="text-ink text-sm ml-2">
                                 • {typeof item === 'object' ? JSON.stringify(item, null, 2) : String(item)}
                             </Text>
                         ))}
@@ -161,7 +161,7 @@ export default function SystemTab() {
             return (
                 <View className="mb-2">
                     <Text className={`${color} text-xs font-bold mb-1`}>{label}</Text>
-                    <Text className="text-slate-300 text-sm ml-2">
+                    <Text className="text-ink text-sm ml-2">
                         {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
                     </Text>
                 </View>
@@ -169,19 +169,19 @@ export default function SystemTab() {
         };
 
         return (
-            <View className="bg-slate-900/50 border border-slate-700 rounded-xl p-4">
-                {renderValue(oldValue, 'Previous Value', 'text-red-400')}
+            <View className="bg-surface-sunken border border-surface-border rounded-xl p-4">
+                {renderValue(oldValue, 'Previous Value', 'text-accent')}
                 {renderValue(newValue, 'New Value', 'text-emerald-400')}
             </View>
         );
     };
 
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-surface-sunken">
+            <StatusBar style="light" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
-                <View className="px-4 py-4 border-b border-slate-800">
+                <View className="px-4 py-4 border-b border-surface-border">
                     <View>
                         <Text className="text-2xl font-bold text-black">System</Text>
                         <Text className="text-gray-600 text-sm mt-1">Audit trail and activity log</Text>
@@ -219,9 +219,9 @@ export default function SystemTab() {
                             }
                             ListEmptyComponent={() => (
                                 <View className="items-center justify-center p-10">
-                                    <Ionicons name="document-text-outline" size={48} color="#475569" />
+                                    <Ionicons name="document-text-outline" size={48} color="#5c5c6b" />
                                     <Text className="text-gray-600 text-center mt-4">No audit logs found</Text>
-                                    <Text className="text-slate-600 text-center text-sm mt-2">
+                                    <Text className="text-ink-faint text-center text-sm mt-2">
                                         Activity will appear here as it happens
                                     </Text>
                                 </View>
@@ -238,12 +238,12 @@ export default function SystemTab() {
                     onRequestClose={handleCloseModal}
                 >
                     <View className="flex-1 justify-end bg-black/50">
-                        <View className="bg-slate-900 border-t border-slate-700 rounded-t-3xl shadow-2xl" style={{ maxHeight: '85%' }}>
+                        <View className="bg-surface-sunken border-t border-surface-border rounded-t-3xl shadow-2xl" style={{ maxHeight: '85%' }}>
                             {/* Modal Header */}
-                            <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
+                            <View className="p-6 border-b border-surface-border flex-row justify-between items-center bg-surface-sunken rounded-t-3xl">
                                 <Text className="text-xl font-bold text-black">Activity Details</Text>
                                 <TouchableOpacity onPress={handleCloseModal}>
-                                    <Ionicons name="close-circle" size={28} color="#64748b" />
+                                    <Ionicons name="close-circle" size={28} color="#5c5c6b" />
                                 </TouchableOpacity>
                             </View>
                             {/* Modal Content */}
@@ -256,38 +256,38 @@ export default function SystemTab() {
                                 ) : !selectedLog ? (
                                     <View className="items-center py-10">
                                         <Text className="text-gray-600">No details available</Text>
-                                        <Text className="text-slate-600 text-xs mt-2">ID: {selectedLogId}</Text>
+                                        <Text className="text-ink-faint text-xs mt-2">ID: {selectedLogId}</Text>
                                     </View>
                                 ) : (
                                     <View>
                                         {/* Description */}
                                         <View className="mb-6">
-                                            <Text className="text-slate-400 text-xs uppercase mb-2 font-bold">
+                                            <Text className="text-ink-muted text-xs uppercase mb-2 font-bold">
                                                 Action
                                             </Text>
-                                            <Text className="text-white text-base leading-6">
+                                            <Text className="text-ink text-base leading-6">
                                                 {selectedLog.description}
                                             </Text>
                                         </View>
 
                                         {/* Metadata Grid */}
-                                        <View className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6">
-                                            <Text className="text-slate-400 text-xs uppercase mb-3 font-bold">
+                                        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-6">
+                                            <Text className="text-ink-muted text-xs uppercase mb-3 font-bold">
                                                 Metadata
                                             </Text>
 
                                             {/* User */}
-                                            <View className="flex-row justify-between py-2 border-b border-slate-700">
-                                                <Text className="text-slate-300">User</Text>
-                                                <Text className="text-white font-medium">
+                                            <View className="flex-row justify-between py-2 border-b border-surface-border">
+                                                <Text className="text-ink">User</Text>
+                                                <Text className="text-ink font-medium">
                                                     {selectedLog.causer?.name ?? 'System'}
                                                 </Text>
                                             </View>
 
                                             {/* Role */}
                                             {selectedLog.causer?.role ? (
-                                                <View className="flex-row justify-between py-2 border-b border-slate-700">
-                                                    <Text className="text-slate-300">Role</Text>
+                                                <View className="flex-row justify-between py-2 border-b border-surface-border">
+                                                    <Text className="text-ink">Role</Text>
                                                     <Text className="text-blue-400 text-sm px-2 py-1 bg-blue-500/20 rounded">
                                                         {selectedLog.causer.role}
                                                     </Text>
@@ -295,24 +295,24 @@ export default function SystemTab() {
                                             ) : null}
 
                                             {/* Timestamp */}
-                                            <View className="flex-row justify-between py-2 border-b border-slate-700">
-                                                <Text className="text-slate-300">When</Text>
-                                                <Text className="text-white">
+                                            <View className="flex-row justify-between py-2 border-b border-surface-border">
+                                                <Text className="text-ink">When</Text>
+                                                <Text className="text-ink">
                                                     {selectedLog.time_ago}
                                                 </Text>
                                             </View>
 
                                             {/* Exact Time */}
-                                            <View className="flex-row justify-between py-2 border-b border-slate-700">
-                                                <Text className="text-slate-300">Date & Time</Text>
-                                                <Text className="text-slate-400 text-sm font-mono">
+                                            <View className="flex-row justify-between py-2 border-b border-surface-border">
+                                                <Text className="text-ink">Date & Time</Text>
+                                                <Text className="text-ink-muted text-sm font-mono">
                                                     {new Date(selectedLog.timestamp).toLocaleString()}
                                                 </Text>
                                             </View>
 
                                             {/* Subject Type */}
-                                            <View className="flex-row justify-between py-2 border-b border-slate-700">
-                                                <Text className="text-slate-300">Resource Type</Text>
+                                            <View className="flex-row justify-between py-2 border-b border-surface-border">
+                                                <Text className="text-ink">Resource Type</Text>
                                                 <Text className="text-purple-400 text-sm px-2 py-1 bg-purple-500/20 rounded">
                                                     {selectedLog.subject?.type ?? 'N/A'}
                                                 </Text>
@@ -320,8 +320,8 @@ export default function SystemTab() {
 
                                             {/* Subject ID */}
                                             <View className="flex-row justify-between py-2">
-                                                <Text className="text-slate-300">Resource ID</Text>
-                                                <Text className="text-slate-400 font-mono text-sm">
+                                                <Text className="text-ink">Resource ID</Text>
+                                                <Text className="text-ink-muted font-mono text-sm">
                                                     {selectedLog.subject?.id ?? 'N/A'}
                                                 </Text>
                                             </View>
@@ -329,7 +329,7 @@ export default function SystemTab() {
 
                                         {/* Changes Section */}
                                         <View className="mb-6">
-                                            <Text className="text-slate-400 text-xs uppercase mb-3 font-bold">
+                                            <Text className="text-ink-muted text-xs uppercase mb-3 font-bold">
                                                 Changes
                                             </Text>
                                             {renderChanges(selectedLog.changes)}

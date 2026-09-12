@@ -9,7 +9,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
     return (
-        <View className="flex-1 flex-row bg-slate-900">
+        <View className="flex-1 flex-row bg-surface-sunken">
             <Sidebar />
             <View className="flex-1 flex-col h-full">
                 <Header />

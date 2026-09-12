@@ -54,20 +54,20 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
     switch (variant) {
       case 'primary':
       case 'secondary':
-        return '#020473';
+        return '#040273';
       case 'outline':
         return 'transparent';
       case 'ghost':
         return 'transparent';
       default:
-        return '#020473';
+        return '#040273';
     }
   };
 
   const getBorderColor = () => {
     switch (variant) {
       case 'outline':
-        return '#020473';
+        return '#040273';
       default:
         return 'transparent';
     }
@@ -82,7 +82,7 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       case 'outline':
         return 'text-black';
       case 'ghost':
-        return 'text-slate-400';
+        return 'text-ink-muted';
       default:
         return 'text-white';
     }

@@ -49,21 +49,21 @@ export class ErrorBoundary extends Component<Props, State> {
     render() {
         if (this.state.hasError) {
             return (
-                <View style={{ flex: 1, backgroundColor: '#0f172a', padding: 24, justifyContent: 'center' }}>
-                    <Text style={{ color: '#ef4444', fontSize: 22, fontWeight: 'bold', marginBottom: 8 }}>
+                <View style={{ flex: 1, backgroundColor: '#ffffff', padding: 24, justifyContent: 'center' }}>
+                    <Text style={{ color: '#bf0a30', fontSize: 22, fontWeight: 'bold', marginBottom: 8 }}>
                         💥 Crash Caught {this.props.label ? `(${this.props.label})` : ''}
                     </Text>
                     <Text style={{ color: '#fbbf24', fontSize: 14, fontWeight: '600', marginBottom: 16 }}>
                         {this.state.error?.message}
                     </Text>
                     <ScrollView
-                        style={{ backgroundColor: '#1e293b', borderRadius: 12, padding: 12, maxHeight: 400 }}
+                        style={{ backgroundColor: '#f7f7fa', borderRadius: 12, padding: 12, maxHeight: 400 }}
                     >
-                        <Text style={{ color: '#94a3b8', fontSize: 11, fontFamily: 'monospace' }}>
+                        <Text style={{ color: '#8b8b99', fontSize: 11, fontFamily: 'monospace' }}>
                             {this.state.error?.stack}
                         </Text>
                         {this.state.errorInfo && (
-                            <Text style={{ color: '#64748b', fontSize: 10, fontFamily: 'monospace', marginTop: 12 }}>
+                            <Text style={{ color: '#5c5c6b', fontSize: 10, fontFamily: 'monospace', marginTop: 12 }}>
                                 Component Stack:{'\n'}{this.state.errorInfo.componentStack}
                             </Text>
                         )}
@@ -73,7 +73,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             onPress={this.handleCopy}
                             style={{
                                 flex: 1,
-                                backgroundColor: '#334155',
+                                backgroundColor: '#e6e6ee',
                                 paddingVertical: 14,
                                 borderRadius: 12,
                                 alignItems: 'center',

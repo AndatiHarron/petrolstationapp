@@ -29,10 +29,10 @@ export const PaginationControls = memo(function PaginationControls({
             <TouchableOpacity
                 onPress={() => onPageChange(currentPage - 1)}
                 disabled={!canGoPrev || loading}
-                className={`flex-row items-center px-4 py-2 rounded-lg ${canGoPrev && !loading ? 'bg-slate-700' : 'bg-slate-800 opacity-50'}`}
+                className={`flex-row items-center px-4 py-2 rounded-lg ${canGoPrev && !loading ? 'bg-surface-border' : 'bg-surface opacity-50'}`}
             >
-                <Ionicons name="chevron-back" size={18} color={canGoPrev && !loading ? '#fff' : '#64748b'} />
-                <Text className={`ml-1 font-medium ${canGoPrev && !loading ? 'text-white' : 'text-slate-500'}`}>
+                <Ionicons name="chevron-back" size={18} color={canGoPrev && !loading ? '#fff' : '#5c5c6b'} />
+                <Text className={`ml-1 font-medium ${canGoPrev && !loading ? 'text-ink' : 'text-ink-muted'}`}>
                     Previous
                 </Text>
             </TouchableOpacity>
@@ -41,8 +41,8 @@ export const PaginationControls = memo(function PaginationControls({
                 {loading ? (
                     <ActivityIndicator size="small" color="#60a5fa" />
                 ) : (
-                    <Text className="text-slate-400 text-sm">
-                        Page <Text className="text-white font-bold">{currentPage}</Text> of <Text className="text-white font-bold">{lastPage}</Text>
+                    <Text className="text-ink-muted text-sm">
+                        Page <Text className="text-ink font-bold">{currentPage}</Text> of <Text className="text-ink font-bold">{lastPage}</Text>
                     </Text>
                 )}
             </View>
@@ -50,12 +50,12 @@ export const PaginationControls = memo(function PaginationControls({
             <TouchableOpacity
                 onPress={() => onPageChange(currentPage + 1)}
                 disabled={!canGoNext || loading}
-                className={`flex-row items-center px-4 py-2 rounded-lg ${canGoNext && !loading ? 'bg-slate-700' : 'bg-slate-800 opacity-50'}`}
+                className={`flex-row items-center px-4 py-2 rounded-lg ${canGoNext && !loading ? 'bg-surface-border' : 'bg-surface opacity-50'}`}
             >
-                <Text className={`mr-1 font-medium ${canGoNext && !loading ? 'text-white' : 'text-slate-500'}`}>
+                <Text className={`mr-1 font-medium ${canGoNext && !loading ? 'text-ink' : 'text-ink-muted'}`}>
                     Next
                 </Text>
-                <Ionicons name="chevron-forward" size={18} color={canGoNext && !loading ? '#fff' : '#64748b'} />
+                <Ionicons name="chevron-forward" size={18} color={canGoNext && !loading ? '#fff' : '#5c5c6b'} />
             </TouchableOpacity>
         </View>
     );

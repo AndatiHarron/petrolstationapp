@@ -53,20 +53,20 @@ function SectionDropdown({
         <View className="mx-4 mb-4">
             <Pressable
                 onPress={onToggle}
-                className="bg-slate-800 p-4 rounded-xl border border-slate-700 flex-row items-center justify-between"
+                className="bg-surface p-4 rounded-xl border border-surface-border flex-row items-center justify-between"
             >
                 <View className="flex-row items-center">
-                    <Icon size={20} color="#94a3b8" />
-                    <Text className="text-white font-medium text-base ml-2">{activeTabConfig.label}</Text>
+                    <Icon size={20} color="#8b8b99" />
+                    <Text className="text-ink font-medium text-base ml-2">{activeTabConfig.label}</Text>
                 </View>
                 {isOpen ? (
-                    <ChevronUp size={20} color="#64748b" />
+                    <ChevronUp size={20} color="#5c5c6b" />
                 ) : (
-                    <ChevronDown size={20} color="#64748b" />
+                    <ChevronDown size={20} color="#5c5c6b" />
                 )}
             </Pressable>
             {isOpen ? (
-                <View className="bg-slate-800 rounded-xl border border-slate-700 mt-1 max-h-56 overflow-hidden">
+                <View className="bg-surface rounded-xl border border-surface-border mt-1 max-h-56 overflow-hidden">
                     <ScrollView nestedScrollEnabled>
                         {TABS.map((tab) => {
                             const TabIcon = tab.icon;
@@ -78,10 +78,10 @@ function SectionDropdown({
                                         onSelect(tab.id);
                                         onToggle();
                                     }}
-                                    className={`p-4 flex-row items-center border-b border-slate-700 last:border-b-0 ${isSelected ? 'bg-blue-600/20' : ''}`}
+                                    className={`p-4 flex-row items-center border-b border-surface-border last:border-b-0 ${isSelected ? 'bg-blue-600/20' : ''}`}
                                 >
-                                    <TabIcon size={18} color={isSelected ? '#3b82f6' : '#94a3b8'} />
-                                    <Text className={`ml-3 font-medium ${isSelected ? 'text-blue-400' : 'text-white'}`}>
+                                    <TabIcon size={18} color={isSelected ? '#3b82f6' : '#8b8b99'} />
+                                    <Text className={`ml-3 font-medium ${isSelected ? 'text-blue-400' : 'text-ink'}`}>
                                         {tab.label}
                                     </Text>
                                 </Pressable>
@@ -390,13 +390,13 @@ export default function InfrastructureTab() {
     };
 
     return (
-        <View className="flex-1 bg-slate-900">
-            <StatusBar style="light" backgroundColor="#0f172a" />
+        <View className="flex-1 bg-surface-sunken">
+            <StatusBar style="light" backgroundColor="#ffffff" />
             <SafeAreaView className="flex-1">
                 {/* Header */}
                 <View className="px-4 mb-4 mt-4">
-                    <Text className="text-2xl font-bold text-white">Infrastructure</Text>
-                    <Text className="text-slate-500 text-sm mt-1">
+                    <Text className="text-2xl font-bold text-ink">Infrastructure</Text>
+                    <Text className="text-ink-muted text-sm mt-1">
                         Manage stations, products, tanks, nozzles, suppliers, and managers
                     </Text>
                 </View>

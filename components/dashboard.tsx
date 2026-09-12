@@ -75,7 +75,7 @@ export const Dashboard = () => {
         </View>
 
         {/* Quick Actions */}
-        <Text className="mb-3 mt-2 text-sm font-bold uppercase tracking-wider text-slate-400">
+        <Text className="mb-3 mt-2 text-sm font-bold uppercase tracking-wider text-ink-muted">
           Quick Actions
         </Text>
         <View className="mb-2 flex-row flex-wrap justify-between">
@@ -87,7 +87,7 @@ export const Dashboard = () => {
           <QuickActionButton
             label="Report Issue"
             icon="exclamationmark.triangle.fill"
-            color="#ef4444"
+            color="#bf0a30"
           />
           <QuickActionButton
             label="Inventory"
@@ -105,7 +105,7 @@ export const Dashboard = () => {
         <ChartCard />
 
         {/* Status Indicators */}
-        <Text className="mb-3 mt-2 text-sm font-bold uppercase tracking-wider text-slate-400">
+        <Text className="mb-3 mt-2 text-sm font-bold uppercase tracking-wider text-ink-muted">
           System Status
         </Text>
         <View className="mb-6">
