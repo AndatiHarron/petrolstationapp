@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { customInstance } from '@/lib/axios';
 import { getCustomersIndexQueryKey } from '@/features/api/customer/customer';
+import { APPROVALS_KEY } from '@/features/approvals';
 
 /**
  * Clearing a customer's credit balance: a manager records the payment, an admin
@@ -78,6 +79,7 @@ export function useRecordSettlement() {
             } as never),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: KEY });
+            queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
         },
     });
 }
@@ -96,6 +98,7 @@ export function useApproveSettlement() {
             queryClient.invalidateQueries({ queryKey: KEY });
             queryClient.invalidateQueries({ queryKey: getCustomersIndexQueryKey() });
             queryClient.invalidateQueries({ queryKey: ['report'] });
+            queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
         },
     });
 }
@@ -111,6 +114,102 @@ export function useRejectSettlement() {
             } as never),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: KEY });
+            queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
+        },
+    });
+}
+
+// ─── Supplier payments ────────────────────────────────────────────
+// What the station owes a supplier, paid down under the same approval rule.
+
+export interface SupplierSettlement {
+    id: string;
+    supplier_id: string;
+    supplier_name: string | null;
+    supplier_balance: number;
+    station_name: string | null;
+    amount: number;
+    method: SettlementMethod;
+    reference: string | null;
+    notes: string | null;
+    status: SettlementStatus;
+    recorded_by: string | null;
+    approved_by: string | null;
+    balance_before: number | null;
+    balance_after: number | null;
+    rejection_reason: string | null;
+    recorded_at: string | null;
+    approved_at: string | null;
+    rejected_at: string | null;
+}
+
+const SUPPLIER_KEY = ['supplier-settlements'] as const;
+
+export function useSupplierSettlements(status?: Lowercase<SettlementStatus>) {
+    return useQuery({
+        queryKey: [...SUPPLIER_KEY, status ?? 'all'],
+        queryFn: () =>
+            customInstance<{ data: SupplierSettlement[] }>(
+                `/v1/supplier-settlements${status ? `?status=${status}` : ''}`,
+                { method: 'GET' }
+            ),
+    });
+}
+
+export interface RecordSupplierPaymentInput {
+    supplier_id: string;
+    amount: number;
+    method: SettlementMethod;
+    reference?: string;
+    notes?: string;
+}
+
+export function useRecordSupplierPayment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (input: RecordSupplierPaymentInput) =>
+            customInstance<{ data: SupplierSettlement }>('/v1/supplier-settlements', {
+                method: 'POST',
+                data: input,
+            } as never),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: SUPPLIER_KEY });
+            queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
+        },
+    });
+}
+
+export function useApproveSupplierPayment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) =>
+            customInstance<{ data: SupplierSettlement }>(`/v1/supplier-settlements/${id}/approve`, {
+                method: 'POST',
+            }),
+        onSuccess: () => {
+            // Approval is when the balance moves, so the creditor list is stale.
+            queryClient.invalidateQueries({ queryKey: SUPPLIER_KEY });
+            queryClient.invalidateQueries({ queryKey: ['creditors'] });
+            queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
+            queryClient.invalidateQueries({ queryKey: ['report'] });
+        },
+    });
+}
+
+export function useRejectSupplierPayment() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+            customInstance<{ data: SupplierSettlement }>(`/v1/supplier-settlements/${id}/reject`, {
+                method: 'POST',
+                data: { reason },
+            } as never),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: SUPPLIER_KEY });
+            queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
         },
     });
 }

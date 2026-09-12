@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppMenuButton } from '@/components/app-menu';
+import { ApprovalsBell } from '@/components/approvals-bell';
 import { LogoutButton } from '@/components/logout-button';
 
 interface TopBarProps {
@@ -33,6 +34,7 @@ export function TopBar({ title, trailing }: TopBarProps) {
                 </Text>
 
                 {trailing}
+                <ApprovalsBell />
                 <LogoutButton compact />
             </View>
         </View>
