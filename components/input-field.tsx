@@ -19,21 +19,21 @@ export const InputField = forwardRef<TextInput, InputFieldProps>(
         className={`mb-5 w-full ${className}`}
         style={style}
       >
-        <Text className="mb-2 text-xs font-bold text-gray-600 uppercase tracking-widest">
+        <Text className="text-ink-muted mb-1.5 text-[11px] font-semibold">
           {label}
         </Text>
         <View className="relative">
           <TextInput
             ref={ref}
-            className={`h-14 w-full rounded-xl bg-surface px-4 text-base text-black border ${error
-                ? 'border-red-500 bg-accent-subtle'
-                : 'border-surface-border focus:border-gray-400'
+            className={`text-ink h-12 w-full rounded-xl border bg-surface px-3.5 text-[15px] ${error
+                ? 'border-accent bg-accent-subtle'
+                : 'border-surface-border focus:border-brand'
               } ${inputClassName ?? ''}`}
-            placeholderTextColor="#9CA3AF" // Gray placeholder
+            placeholderTextColor="#8b8b99"
             {...props}
           />
           {rightAccessory ? (
-            <View className="absolute right-4 top-0 bottom-0 justify-center">
+            <View className="absolute bottom-0 right-3.5 top-0 justify-center">
               {rightAccessory}
             </View>
           ) : null}

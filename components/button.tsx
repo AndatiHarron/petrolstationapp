@@ -42,7 +42,7 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       case 'secondary':
         return 'border-transparent';
       case 'outline':
-        return 'bg-transparent border-2';
+        return 'bg-transparent border';
       case 'ghost':
         return 'bg-transparent border-transparent';
       default:
@@ -94,15 +94,15 @@ export const Button = ({ title, loading, variant = 'primary', style, onPress, cl
       onPressOut={handlePressOut}
       onPress={handlePress}
       disabled={loading || props.disabled}
-      className={`h-16 w-full items-center justify-center rounded-full ${getVariantStyle()} ${loading || props.disabled ? 'opacity-70' : ''} ${className}`}
-      style={[animatedStyle, { backgroundColor: getBackgroundColor(), borderColor: getBorderColor(), borderWidth: variant === 'outline' ? 2 : 0 }, style as any]}
+      className={`h-12 w-full items-center justify-center rounded-xl ${getVariantStyle()} ${loading || props.disabled ? 'opacity-70' : ''} ${className}`}
+      style={[animatedStyle, { backgroundColor: getBackgroundColor(), borderColor: getBorderColor(), borderWidth: variant === 'outline' ? 1 : 0 }, style as any]}
       {...props}
     >
       {loading ? (
         <ActivityIndicator color={variant === 'outline' ? '#000' : '#fff'} />
       ) : (
         <Text
-          className={`text-lg font-black uppercase tracking-wider ${getTextStyle()}`}
+          className={`text-sm font-bold ${getTextStyle()}`}
           style={{ paddingHorizontal: 2, textAlign: 'center' }}
           numberOfLines={1}
         >
