@@ -2,69 +2,65 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { useAuditLogIndex } from '../../../features/api/audit-log/audit-log';
 import type { AuditLogIndex200, AuditLogResource } from '@/features/api/model';
+import { Section, SectionEmpty } from './section';
 
-// Skeleton loader for a single activity row
 function ActivityRowSkeleton() {
     return (
-        <View className="p-3 bg-surface-sunken rounded-lg border border-surface-border">
-            <View className="h-4 w-48 bg-surface-border rounded mb-2 animate-pulse" />
-            <View className="flex-row items-center gap-2">
-                <View className="h-2 w-16 bg-surface-border rounded animate-pulse" />
-                <View className="w-1 h-1 rounded-full bg-ink-faint" />
-                <View className="h-2 w-24 bg-surface-border rounded animate-pulse" />
-            </View>
+        <View className="gap-2 py-3">
+            <View className="h-3 w-48 rounded bg-surface-border" />
+            <View className="h-2 w-28 rounded bg-surface-border" />
         </View>
     );
 }
 
-export function RecentActivity() {
+export function RecentActivity({ index = 0 }: { index?: number }) {
     const { data: auditLogsResponse, isLoading, isError } = useAuditLogIndex();
 
-    // Extract data safely - the hook returns { data: AuditLogIndex200 } structure
-    const auditLogs: AuditLogResource[] = (auditLogsResponse as unknown as AuditLogIndex200)?.data ?? [];
+    const auditLogs: AuditLogResource[] =
+        (auditLogsResponse as unknown as AuditLogIndex200)?.data ?? [];
     const recentActivities = auditLogs.slice(0, 5);
 
     return (
-        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-6">
-            <View className="mb-4">
-                <Text className="text-ink font-bold text-lg">Recent Activity</Text>
-                <Text className="text-ink-muted text-xs">Audit trail</Text>
-            </View>
-
+        <Section title="Recent activity" subtitle="Audit trail" index={index}>
             {isLoading ? (
-                <View className="gap-2">
-                    <ActivityRowSkeleton />
-                    <ActivityRowSkeleton />
-                    <ActivityRowSkeleton />
-                    <ActivityRowSkeleton />
-                    <ActivityRowSkeleton />
-                </View>
-            ) : isError ? (
-                <View className="items-center py-8">
-                    <Text className="text-ink-muted">Error loading recent activity</Text>
-                </View>
-            ) : recentActivities.length > 0 ? (
-                <View className="gap-2">
-                    {recentActivities.map((log) => (
-                        <View key={log.id} className="p-3 bg-surface-sunken rounded-lg border border-surface-border">
-                            <Text className="text-ink text-sm font-medium">{log.description}</Text>
-                            <View className="flex-row items-center mt-1 gap-2">
-                                <Text className="text-ink-muted text-xs">
-                                    {log.causer?.name ?? 'System'}
-                                </Text>
-                                <View className="w-1 h-1 rounded-full bg-ink-faint" />
-                                <Text className="text-ink-muted text-xs">
-                                    {log.time_ago}
-                                </Text>
-                            </View>
-                        </View>
+                <View>
+                    {[1, 2, 3].map((i) => (
+                        <ActivityRowSkeleton key={i} />
                     ))}
                 </View>
+            ) : isError ? (
+                <SectionEmpty message="Could not load activity" />
+            ) : recentActivities.length === 0 ? (
+                <SectionEmpty message="Nothing recorded yet" />
             ) : (
-                <View className="items-center py-8">
-                    <Text className="text-ink-muted">No recent activity</Text>
+                // A timeline rather than five stacked cards: these are one
+                // sequence of events, and boxing each of them fought that.
+                <View>
+                    {recentActivities.map((log, position) => {
+                        const isLast = position === recentActivities.length - 1;
+
+                        return (
+                            <View key={log.id} className="flex-row gap-3">
+                                <View className="items-center pt-1.5">
+                                    <View className="h-2 w-2 rounded-full bg-brand" />
+                                    {!isLast ? (
+                                        <View className="w-px flex-1 bg-surface-border" />
+                                    ) : null}
+                                </View>
+
+                                <View className={`min-w-0 flex-1 ${isLast ? 'pb-0' : 'pb-3.5'}`}>
+                                    <Text className="text-ink text-[13px] font-medium" numberOfLines={2}>
+                                        {log.description}
+                                    </Text>
+                                    <Text className="text-ink-faint mt-0.5 text-[11px]" numberOfLines={1}>
+                                        {log.causer?.name ?? 'System'} &middot; {log.time_ago}
+                                    </Text>
+                                </View>
+                            </View>
+                        );
+                    })}
                 </View>
             )}
-        </View>
+        </Section>
     );
 }

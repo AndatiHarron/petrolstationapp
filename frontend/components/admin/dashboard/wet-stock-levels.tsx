@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from 'react-native';
 import { MapPin } from 'lucide-react-native';
 import { useTanksIndex } from '../../../features/api/tank/tank';
 import type { TanksIndex200, TankResource } from '@/features/api/model';
+import { Section, SectionEmpty } from './section';
 
 // ─── Skeleton Loader ───────────────────────────────────────────────
 function TankCardSkeleton() {
@@ -107,8 +108,8 @@ function StockSummary({ tanks }: { tanks: TankResource[] }) {
     const lowTanks = tanks.filter(t => t.capacity_liters > 0 && (t.current_volume / t.capacity_liters) <= 0.3);
 
     return (
-        <View className="flex-row gap-3 mb-4">
-            <View className="flex-1 bg-surface-sunken rounded-xl p-3 border border-surface-border">
+        <View className="mb-3 flex-row gap-2 px-4">
+            <View className="flex-1 rounded-xl bg-surface-sunken p-3">
                 <Text className="text-ink-faint text-[10px] uppercase tracking-wider font-bold">Total Stock</Text>
                 <Text className="text-brand font-mono font-bold text-sm mt-1">
                     {totalVolume.toLocaleString()} L
@@ -117,7 +118,7 @@ function StockSummary({ tanks }: { tanks: TankResource[] }) {
                     {Math.round(overallLevel * 100)}% capacity
                 </Text>
             </View>
-            <View className={`flex-1 rounded-xl p-3 border ${lowTanks.length > 0 ? 'bg-accent-subtle border-accent/20' : 'bg-surface-sunken border-surface-border'}`}>
+            <View className={`flex-1 rounded-xl p-3 ${lowTanks.length > 0 ? 'bg-accent-subtle' : 'bg-surface-sunken'}`}>
                 <Text className="text-ink-faint text-[10px] uppercase tracking-wider font-bold">Low Stock</Text>
                 <Text className={`font-mono font-bold text-sm mt-1 ${lowTanks.length > 0 ? 'text-accent' : 'text-brand'}`}>
                     {lowTanks.length} tank{lowTanks.length !== 1 ? 's' : ''}
@@ -131,35 +132,35 @@ function StockSummary({ tanks }: { tanks: TankResource[] }) {
 }
 
 // ─── Main Component ─────────────────────────────────────────────────
-export function WetStockLevels() {
+export function WetStockLevels({ index = 0 }: { index?: number }) {
     const { data: tanksResponse, isLoading, isError } = useTanksIndex();
 
     const tanks: TankResource[] = (tanksResponse as unknown as TanksIndex200)?.data ?? [];
 
     return (
-        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-6">
-            <View className="mb-4">
-                <Text className="text-ink font-bold text-lg">Wet Stock Levels</Text>
-                <Text className="text-ink-muted text-xs">Current Tank Readings</Text>
-            </View>
+        <Section title="Wet stock" subtitle="Current tank readings" index={index} bleed>
 
             {isLoading ? (
                 <>
                     {/* Summary skeleton */}
-                    <View className="flex-row gap-3 mb-4">
-                        <View className="flex-1 bg-surface-sunken rounded-xl p-3 border border-surface-border">
+                    <View className="mb-3 flex-row gap-2 px-4">
+                        <View className="flex-1 rounded-xl bg-surface-sunken p-3">
                             <View className="h-2 w-14 bg-surface-border rounded animate-pulse mb-2" />
                             <View className="h-4 w-20 bg-surface-border rounded animate-pulse mb-1" />
                             <View className="h-2 w-16 bg-surface-border rounded animate-pulse" />
                         </View>
-                        <View className="flex-1 bg-surface-sunken rounded-xl p-3 border border-surface-border">
+                        <View className="flex-1 rounded-xl bg-surface-sunken p-3">
                             <View className="h-2 w-14 bg-surface-border rounded animate-pulse mb-2" />
                             <View className="h-4 w-12 bg-surface-border rounded animate-pulse mb-1" />
                             <View className="h-2 w-16 bg-surface-border rounded animate-pulse" />
                         </View>
                     </View>
                     {/* Tank cards skeleton */}
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingHorizontal: 16 }}
+                    >
                         <View className="flex-row">
                             <TankCardSkeleton />
                             <TankCardSkeleton />
@@ -168,13 +169,17 @@ export function WetStockLevels() {
                     </ScrollView>
                 </>
             ) : isError ? (
-                <View className="items-center py-8">
-                    <Text className="text-ink-muted">Error loading tank data</Text>
+                <View className="px-4">
+                    <SectionEmpty message="Could not load tanks" />
                 </View>
             ) : tanks.length > 0 ? (
                 <>
                     <StockSummary tanks={tanks} />
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ paddingHorizontal: 16 }}
+                    >
                         <View className="flex-row">
                             {tanks.map((tank) => (
                                 <TankCard key={tank.id} tank={tank} />
@@ -183,10 +188,10 @@ export function WetStockLevels() {
                     </ScrollView>
                 </>
             ) : (
-                <View className="items-center py-8">
-                    <Text className="text-ink-muted">No tank data available</Text>
+                <View className="px-4">
+                    <SectionEmpty message="No tanks set up yet" />
                 </View>
             )}
-        </View>
+        </Section>
     );
 }

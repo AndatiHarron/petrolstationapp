@@ -68,12 +68,21 @@ export function ChartCard({
     children,
 }: ChartCardProps) {
     return (
-        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-4">
+        <View
+            className="rounded-2xl border border-surface-border bg-surface p-4"
+            style={{
+                shadowColor: '#12121a',
+                shadowOpacity: 0.04,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 4 },
+                elevation: 1,
+            }}
+        >
             {/* Header */}
             <View className="mb-4">
-                <Text className="text-ink font-bold text-base">{title}</Text>
+                <Text className="text-ink text-[15px] font-bold">{title}</Text>
                 {subtitle ? (
-                    <Text className="text-ink-muted text-xs mt-0.5">{subtitle}</Text>
+                    <Text className="text-ink-faint mt-0.5 text-[11px]">{subtitle}</Text>
                 ) : null}
             </View>
 
