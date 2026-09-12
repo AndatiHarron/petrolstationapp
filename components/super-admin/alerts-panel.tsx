@@ -18,8 +18,8 @@ export function AlertsPanel({ alerts }: AlertsPanelProps) {
             <ScrollView className="flex-1 p-4">
                 {alerts.map((alert) => {
                     let Icon = Info;
-                    let iconColor = '#60a5fa';
-                    let bg = 'bg-blue-500/10';
+                    let iconColor = '#040273';
+                    let bg = 'bg-brand-subtle';
 
                     if (alert.type === 'critical') {
                         Icon = XCircle;

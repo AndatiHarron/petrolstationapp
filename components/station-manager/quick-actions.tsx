@@ -43,7 +43,7 @@ export function QuickActionsHero() {
             <ActionButton
                 label="Log Meter Readings"
                 icon="speedometer"
-                color="#3b82f6"
+                color="#040273"
                 onPress={() => console.log('Log Readings')}
             />
             <ActionButton

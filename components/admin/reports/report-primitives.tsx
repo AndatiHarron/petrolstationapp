@@ -11,14 +11,25 @@ export function litres(value: number): string {
     return value.toLocaleString(undefined, { maximumFractionDigits: 2 });
 }
 
-/** A row of headline figures. Signed values colour themselves. */
+/**
+ * Headline figures on a single scrollable line.
+ *
+ * These were a wrapping two-column grid, which squeezed each figure into half a
+ * phone's width and broke the row across two lines. One line that slides keeps
+ * every tile wide enough to read its number, however many there are.
+ */
 export function TileRow({
     tiles,
 }: {
     tiles: { label: string; value: string; tone?: 'neutral' | 'signed'; amount?: number }[];
 }) {
     return (
-        <View className="mb-3 flex-row flex-wrap gap-2">
+        <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="mb-3"
+            contentContainerStyle={{ gap: 8, paddingRight: 4 }}
+        >
             {tiles.map((tile) => {
                 const signed = tile.tone === 'signed' && typeof tile.amount === 'number';
                 const negative = signed && (tile.amount as number) < 0;
@@ -26,22 +37,24 @@ export function TileRow({
                 return (
                     <View
                         key={tile.label}
-                        className="min-w-[46%] flex-1 rounded-xl bg-surface-sunken px-3 py-2.5"
+                        style={{ minWidth: 118 }}
+                        className="rounded-xl border border-surface-border bg-surface-sunken px-3.5 py-3"
                     >
                         <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
                             {tile.label}
                         </Text>
                         <Text
-                            className={`mt-0.5 font-mono text-sm font-bold ${
+                            className={`mt-1 font-mono text-base font-bold ${
                                 signed ? (negative ? 'text-accent' : 'text-emerald-700') : 'text-ink'
                             }`}
+                            numberOfLines={1}
                         >
                             {tile.value}
                         </Text>
                     </View>
                 );
             })}
-        </View>
+        </ScrollView>
     );
 }
 

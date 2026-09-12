@@ -46,7 +46,7 @@ export function ReconciliationWidget() {
                     value={mpesa}
                     onChangeText={setMpesa}
                     icon="iphone"
-                    color="#3b82f6"
+                    color="#040273"
                 />
                 <InputRow
                     label="Credit Sales"
@@ -68,7 +68,7 @@ const InputRow = ({ label, value, onChangeText, icon, color }: any) => (
                 <AppIcon name={icon as any} size={20} color={color} />
             </View>
             <TextInput
-                className="bg-surface-sunken text-ink font-bold text-lg p-4 pl-12 rounded-xl border border-surface-border focus:border-blue-500 focus:bg-surface-sunken/80"
+                className="bg-surface-sunken text-ink font-bold text-lg p-4 pl-12 rounded-xl border border-surface-border focus:border-brand focus:bg-surface-sunken/80"
                 placeholder="0.00"
                 placeholderTextColor="#5c5c6b"
                 keyboardType="numeric"

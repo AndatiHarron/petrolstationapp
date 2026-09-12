@@ -162,14 +162,14 @@ export default function InventoryTab() {
                     <View className="flex-row items-center gap-2">
                         <Text className="text-2xl font-bold text-black">Inventory</Text>
                         {meta && (
-                            <View className="bg-blue-500/20 px-2.5 py-1 rounded-full">
-                                <Text className="text-blue-400 text-xs font-bold">{meta.total}</Text>
+                            <View className="bg-brand-subtle px-2.5 py-1 rounded-full">
+                                <Text className="text-brand text-xs font-bold">{meta.total}</Text>
                             </View>
                         )}
                     </View>
                     <TouchableOpacity
                         onPress={() => setIsCreateModalOpen(true)}
-                        className="flex-row items-center gap-1.5 bg-blue-600 px-4 py-2.5 rounded-full"
+                        className="flex-row items-center gap-1.5 bg-brand px-4 py-2.5 rounded-full"
                         activeOpacity={0.8}
                     >
                         <Ionicons name="add" size={18} color="#fff" />

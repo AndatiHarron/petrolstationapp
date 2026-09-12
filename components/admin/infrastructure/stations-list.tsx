@@ -63,9 +63,9 @@ const StationCard = memo(function StationCard({
                     </View>
                     <Pressable
                         onPress={handleEdit}
-                        className="p-2 bg-blue-500/20 rounded-lg active:opacity-70"
+                        className="p-2 bg-brand-subtle rounded-lg active:opacity-70"
                     >
-                        <Edit2 size={16} color="#3b82f6" />
+                        <Edit2 size={16} color="#040273" />
                     </Pressable>
                     <Pressable
                         onPress={handleDelete}

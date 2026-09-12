@@ -50,7 +50,7 @@ export function ActionSection() {
                                 <Text className="text-ink font-medium text-sm truncate">{item.request}</Text>
                                 <View className="flex-row items-center mt-1 gap-2">
                                     <Text className="text-ink-muted text-xs">{item.user}</Text>
-                                    <View className="w-1 h-1 rounded-full bg-slate-600" />
+                                    <View className="w-1 h-1 rounded-full bg-ink-faint" />
                                     <Text className="text-ink-muted text-xs">{item.time}</Text>
                                 </View>
                             </View>

@@ -73,17 +73,17 @@ const NozzleCard = memo(function NozzleCard({
                     ) : null}
                     {nozzle.product_name ? (
                         <View className="flex-row items-center mt-1">
-                            <Droplet size={12} color="#3b82f6" />
-                            <Text className="text-blue-400 text-sm ml-1">{nozzle.product_name}</Text>
+                            <Droplet size={12} color="#040273" />
+                            <Text className="text-brand text-sm ml-1">{nozzle.product_name}</Text>
                         </View>
                     ) : null}
                 </View>
                 <View className="flex-row items-center gap-2">
                     <Pressable
                         onPress={handleEdit}
-                        className="p-2 bg-blue-500/20 rounded-lg active:opacity-70"
+                        className="p-2 bg-brand-subtle rounded-lg active:opacity-70"
                     >
-                        <Edit2 size={16} color="#3b82f6" />
+                        <Edit2 size={16} color="#040273" />
                     </Pressable>
                     <Pressable
                         onPress={handleDelete}

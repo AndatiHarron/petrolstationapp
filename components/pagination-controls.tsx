@@ -39,7 +39,7 @@ export const PaginationControls = memo(function PaginationControls({
 
             <View className="flex-row items-center">
                 {loading ? (
-                    <ActivityIndicator size="small" color="#60a5fa" />
+                    <ActivityIndicator size="small" color="#040273" />
                 ) : (
                     <Text className="text-ink-muted text-sm">
                         Page <Text className="text-ink font-bold">{currentPage}</Text> of <Text className="text-ink font-bold">{lastPage}</Text>

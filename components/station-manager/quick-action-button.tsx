@@ -10,7 +10,7 @@ interface QuickActionButtonProps {
   onPress?: () => void;
 }
 
-export const QuickActionButton = ({ label, icon, color = '#3b82f6', onPress }: QuickActionButtonProps) => {
+export const QuickActionButton = ({ label, icon, color = '#040273', onPress }: QuickActionButtonProps) => {
   const handlePress = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress?.();

@@ -229,7 +229,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
         return (
             <Modal transparent visible={visible} animationType="fade">
                 <View className="flex-1 bg-black/60 justify-center items-center">
-                    <ActivityIndicator size="large" color="#3b82f6" />
+                    <ActivityIndicator size="large" color="#040273" />
                 </View>
             </Modal>
         );
@@ -291,7 +291,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
 
                     {/* Progress Bar */}
                     <View className="flex-row h-1 w-full bg-surface">
-                        <View className={`h-full bg-blue-500 transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`} />
+                        <View className={`h-full bg-brand transition-all duration-300 ${step === 1 ? 'w-1/3' : step === 2 ? 'w-2/3' : 'w-full'}`} />
                     </View>
 
                     <ScrollView
@@ -350,9 +350,9 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                             ) : (
                                                 <Pressable
                                                     onPress={() => takeMeterPhoto(nozzle.nozzle_id)}
-                                                    className="flex-row items-center gap-2 px-4 py-3 rounded-lg bg-blue-600/20 border border-blue-500/30"
+                                                    className="flex-row items-center gap-2 px-4 py-3 rounded-lg bg-brand/20 border border-brand/20"
                                                 >
-                                                    <Camera size={18} color="#60a5fa" />
+                                                    <Camera size={18} color="#040273" />
                                                     <Text className="text-brand text-sm font-bold">Take Photo</Text>
                                                 </Pressable>
                                             )}
@@ -442,9 +442,9 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                         <TouchableOpacity
                                             onPress={addCreditSale}
                                             disabled={!hasCustomers}
-                                            className={`px-3 py-1.5 rounded-full border flex-row items-center gap-1 ${hasCustomers ? 'bg-blue-600/20 border-blue-500/30' : 'bg-surface border-surface-border opacity-50'}`}
+                                            className={`px-3 py-1.5 rounded-full border flex-row items-center gap-1 ${hasCustomers ? 'bg-brand/20 border-brand/20' : 'bg-surface border-surface-border opacity-50'}`}
                                         >
-                                            <Plus size={12} color={hasCustomers ? "#60a5fa" : "#8b8b99"} />
+                                            <Plus size={12} color={hasCustomers ? "#040273" : "#8b8b99"} />
                                             <Text className={hasCustomers ? "text-brand text-xs font-bold" : "text-ink-muted text-xs font-bold"}>
                                                 {isLoadingCustomers ? 'Loading...' : hasCustomers ? 'Add Entry' : 'No Customers'}
                                             </Text>
@@ -477,14 +477,14 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                 <View className="mb-3">
                                                     <Text className="text-ink-muted text-xs mb-1">Customer</Text>
                                                     {isLoadingCustomers ? (
-                                                        <ActivityIndicator size="small" color="#3b82f6" />
+                                                        <ActivityIndicator size="small" color="#040273" />
                                                     ) : (
                                                         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row gap-2">
                                                             {customersList.map(cust => (
                                                                 <TouchableOpacity
                                                                     key={cust.id}
                                                                     onPress={() => updateCreditSale(sale.id, 'customerId', cust.id)}
-                                                                    className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-blue-600 border-blue-500' : 'bg-surface-sunken border-surface-border'}`}
+                                                                    className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-brand border-brand' : 'bg-surface-sunken border-surface-border'}`}
                                                                 >
                                                                     <Text className={sale.customerId === cust.id ? 'text-ink font-medium text-xs' : 'text-ink-muted text-xs'}>{cust.name}</Text>
                                                                 </TouchableOpacity>
@@ -546,7 +546,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                             <TouchableOpacity
                                 onPress={handleNext}
                                 disabled={step === 1 && !canProceedFromStep1}
-                                className={`flex-[2] py-4 rounded-xl items-center ${step === 1 && !canProceedFromStep1 ? 'bg-surface-border opacity-60' : 'bg-blue-600'}`}
+                                className={`flex-[2] py-4 rounded-xl items-center ${step === 1 && !canProceedFromStep1 ? 'bg-surface-border opacity-60' : 'bg-brand'}`}
                                 style={step === 1 && !canProceedFromStep1 ? undefined : {
                                     shadowColor: '#1e3a8a',
                                     shadowOffset: { width: 0, height: 4 },

@@ -15,7 +15,7 @@ function AuditLogSkeleton() {
             <View className="h-4 w-3/4 bg-surface-border rounded mb-2 animate-pulse" />
             <View className="flex-row items-center gap-2 mt-2">
                 <View className="h-3 w-20 bg-surface-border rounded animate-pulse" />
-                <View className="w-1 h-1 rounded-full bg-slate-600" />
+                <View className="w-1 h-1 rounded-full bg-ink-faint" />
                 <View className="h-3 w-32 bg-surface-border rounded animate-pulse" />
             </View>
         </View>
@@ -60,8 +60,8 @@ const AuditLogItem = React.memo(({
             className="bg-surface border border-surface-border rounded-xl p-4 mb-3 active:bg-surface-border"
         >
             <View className="flex-row items-start gap-3">
-                <View className="bg-blue-500/20 p-2 rounded-lg">
-                    <Ionicons name={getActivityIcon() as any} size={20} color="#60a5fa" />
+                <View className="bg-brand-subtle p-2 rounded-lg">
+                    <Ionicons name={getActivityIcon() as any} size={20} color="#040273" />
                 </View>
                 <View className="flex-1">
                     <Text className="text-ink text-sm leading-5 mb-2" numberOfLines={2}>
@@ -71,7 +71,7 @@ const AuditLogItem = React.memo(({
                         <Text className="text-ink-muted text-xs">
                             {causerName}
                         </Text>
-                        <View className="w-1 h-1 rounded-full bg-slate-600" />
+                        <View className="w-1 h-1 rounded-full bg-ink-faint" />
                         <Text className="text-ink-muted text-xs">
                             {timeAgo}
                         </Text>
@@ -214,7 +214,7 @@ export default function SystemTab() {
                                 <RefreshControl
                                     refreshing={refreshing}
                                     onRefresh={onRefresh}
-                                    tintColor="#60a5fa"
+                                    tintColor="#040273"
                                 />
                             }
                             ListEmptyComponent={() => (
@@ -288,7 +288,7 @@ export default function SystemTab() {
                                             {selectedLog.causer?.role ? (
                                                 <View className="flex-row justify-between py-2 border-b border-surface-border">
                                                     <Text className="text-ink">Role</Text>
-                                                    <Text className="text-blue-400 text-sm px-2 py-1 bg-blue-500/20 rounded">
+                                                    <Text className="text-brand text-sm px-2 py-1 bg-brand-subtle rounded">
                                                         {selectedLog.causer.role}
                                                     </Text>
                                                 </View>

@@ -138,7 +138,7 @@ export function StationModal({ visible, onClose, station }: StationModalProps) {
                                 Station Name *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="e.g. Main Street Station"
                                 placeholderTextColor="#5c5c6b"
                                 value={name}
@@ -151,7 +151,7 @@ export function StationModal({ visible, onClose, station }: StationModalProps) {
                                 Location (Optional)
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="e.g. 123 Main Street, City"
                                 placeholderTextColor="#5c5c6b"
                                 value={location}
@@ -173,7 +173,7 @@ export function StationModal({ visible, onClose, station }: StationModalProps) {
                         {/* Footer */}
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-blue-600/50' : 'bg-blue-600'
+                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
                                     }`}
                                 onPress={handleSubmit}
                                 disabled={isPending}

@@ -61,9 +61,9 @@ const ProductCard = memo(function ProductCard({
                 <View className="flex-row items-center gap-2">
                     <Pressable
                         onPress={handleEdit}
-                        className="p-2 bg-blue-500/20 rounded-lg active:opacity-70"
+                        className="p-2 bg-brand-subtle rounded-lg active:opacity-70"
                     >
-                        <Edit2 size={16} color="#3b82f6" />
+                        <Edit2 size={16} color="#040273" />
                     </Pressable>
                     <Pressable
                         onPress={handleDelete}

@@ -78,10 +78,10 @@ function SectionDropdown({
                                         onSelect(tab.id);
                                         onToggle();
                                     }}
-                                    className={`p-4 flex-row items-center border-b border-surface-border last:border-b-0 ${isSelected ? 'bg-blue-600/20' : ''}`}
+                                    className={`p-4 flex-row items-center border-b border-surface-border last:border-b-0 ${isSelected ? 'bg-brand/20' : ''}`}
                                 >
-                                    <TabIcon size={18} color={isSelected ? '#3b82f6' : '#8b8b99'} />
-                                    <Text className={`ml-3 font-medium ${isSelected ? 'text-blue-400' : 'text-ink'}`}>
+                                    <TabIcon size={18} color={isSelected ? '#040273' : '#8b8b99'} />
+                                    <Text className={`ml-3 font-medium ${isSelected ? 'text-brand' : 'text-ink'}`}>
                                         {tab.label}
                                     </Text>
                                 </Pressable>

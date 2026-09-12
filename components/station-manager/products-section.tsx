@@ -40,9 +40,9 @@ export const ProductsSection = memo(function ProductsSection() {
     return (
         <Animated.View entering={FadeInDown.duration(400).delay(200)} className="mb-6">
             <View className="flex-row items-center gap-2 mb-3">
-                <Fuel size={18} color="#60a5fa" />
+                <Fuel size={18} color="#040273" />
                 <Text className="text-ink font-bold text-lg">Products</Text>
-                {isLoading && <ActivityIndicator size="small" color="#60a5fa" />}
+                {isLoading && <ActivityIndicator size="small" color="#040273" />}
             </View>
 
             {isLoading ? (
