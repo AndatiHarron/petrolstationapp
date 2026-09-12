@@ -96,14 +96,14 @@ export function ReportFilterBar({
                                 key={preset.id}
                                 onPress={() => applyPreset(preset.id)}
                                 accessibilityRole="button"
-                                className={`rounded-full border px-3 py-1.5 ${
+                                className={`rounded-full border px-2.5 py-1 ${
                                     active
                                         ? 'border-brand bg-brand'
                                         : 'border-surface-border bg-surface active:bg-surface-sunken'
                                 }`}
                             >
                                 <Text
-                                    className={`text-[10px] font-bold uppercase tracking-wider ${
+                                    className={`text-[10px] font-semibold ${
                                         active ? 'text-white' : 'text-ink-muted'
                                     }`}
                                 >

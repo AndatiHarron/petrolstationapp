@@ -27,12 +27,12 @@ import {
 import { downloadReportPdf, type ReportSlug } from '@/lib/report-download';
 import { getApiErrorMessage } from '@/lib/api-error';
 
-const REPORTS: { slug: ReportSlug; label: string; blurb: string }[] = [
-    { slug: 'end-of-day', label: 'End of day', blurb: 'All shifts on one day, combined' },
-    { slug: 'monthly', label: 'Monthly', blurb: 'A month rolled up, day by day' },
-    { slug: 'credit', label: 'Credit', blurb: 'What customers owe, and their limits' },
-    { slug: 'users', label: 'Attendants', blurb: 'Per-person variance, worst first' },
-    { slug: 'vat', label: 'VAT', blurb: 'Output against input tax' },
+const REPORTS: { slug: ReportSlug; label: string; chip: string; blurb: string }[] = [
+    { slug: 'end-of-day', label: 'End of day', chip: 'Day', blurb: 'All shifts on one day, combined' },
+    { slug: 'monthly', label: 'Monthly', chip: 'Month', blurb: 'A month rolled up, day by day' },
+    { slug: 'credit', label: 'Credit', chip: 'Credit', blurb: 'What customers owe, and their limits' },
+    { slug: 'users', label: 'Attendants', chip: 'Staff', blurb: 'Per-person variance, worst first' },
+    { slug: 'vat', label: 'VAT', chip: 'VAT', blurb: 'Output against input tax' },
 ];
 
 export default function AdminReports() {
@@ -122,18 +122,18 @@ export default function AdminReports() {
                                         key={report.slug}
                                         onPress={() => setActive(report.slug)}
                                         accessibilityRole="button"
-                                        className={`rounded-full border px-3.5 py-2 ${
+                                        className={`rounded-full border px-3 py-1.5 ${
                                             selected
                                                 ? 'border-brand bg-brand'
                                                 : 'border-surface-border bg-surface active:bg-surface-sunken'
                                         }`}
                                     >
                                         <Text
-                                            className={`text-[11px] font-bold uppercase tracking-wider ${
+                                            className={`text-[11px] font-semibold ${
                                                 selected ? 'text-white' : 'text-ink-muted'
                                             }`}
                                         >
-                                            {report.label}
+                                            {report.chip}
                                         </Text>
                                     </Pressable>
                                 );
@@ -148,7 +148,7 @@ export default function AdminReports() {
                         disabled={downloading || current.isLoading}
                         accessibilityRole="button"
                         accessibilityLabel="Download this report as a PDF"
-                        className={`mb-4 flex-row items-center justify-center gap-2 rounded-xl bg-brand py-3 ${
+                        className={`mb-4 flex-row items-center justify-center gap-2 self-start rounded-full bg-brand px-4 py-2 ${
                             downloading || current.isLoading ? 'opacity-60' : 'active:opacity-80'
                         }`}
                     >
@@ -157,8 +157,8 @@ export default function AdminReports() {
                         ) : (
                             <Download size={15} color="#ffffff" />
                         )}
-                        <Text className="text-white text-xs font-bold uppercase tracking-wider">
-                            {downloading ? 'Preparing PDF' : 'Download PDF'}
+                        <Text className="text-white text-[11px] font-semibold">
+                            {downloading ? 'Preparing PDF...' : 'Download PDF'}
                         </Text>
                     </Pressable>
 
