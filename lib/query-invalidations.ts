@@ -63,3 +63,48 @@ export function invalidateOnShiftLock(queryClient: QueryClient, shiftId?: string
   }
 }
 
+
+/**
+ * Invalidate everything that carries a party balance.
+ *
+ * A supplier or customer balance is embedded in more responses than the list it
+ * belongs to: every lifting response carries its supplier, including
+ * `current_balance`, so a tapped lifting holds its own stale copy. Matching on
+ * the request path rather than an exact key catches the detail endpoints and
+ * every paginated variant, which naming keys individually would miss.
+ */
+function invalidateByPath(queryClient: QueryClient, prefixes: string[]): void {
+  queryClient.invalidateQueries({
+    predicate: (query) => {
+      const first = query.queryKey[0];
+
+      return typeof first === 'string' && prefixes.some((prefix) => first.startsWith(prefix));
+    },
+  });
+}
+
+/** After a supplier payment is approved and what is owed comes down. */
+export function invalidateOnSupplierBalanceChange(queryClient: QueryClient): void {
+  invalidateByPath(queryClient, [
+    '/v1/creditors',
+    '/v1/suppliers',
+    '/v1/liftings',
+    '/v1/supplier-settlements',
+  ]);
+
+  // The reports layer keys everything under 'report'.
+  queryClient.invalidateQueries({ queryKey: ['report'] });
+  queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+}
+
+/** After a customer credit payment is approved and their balance comes down. */
+export function invalidateOnCustomerBalanceChange(queryClient: QueryClient): void {
+  invalidateByPath(queryClient, [
+    '/v1/customers',
+    '/v1/credit-sales',
+    '/v1/credit-settlements',
+  ]);
+
+  queryClient.invalidateQueries({ queryKey: ['report'] });
+  queryClient.invalidateQueries({ queryKey: getAuditLogIndexQueryKey() });
+}

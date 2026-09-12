@@ -155,6 +155,13 @@ export const CreditorsList = memo(function CreditorsList() {
                 maxToRenderPerBatch={10}
                 windowSize={5}
             />
+
+            <RecordSupplierPaymentSheet
+                supplierId={paying?.id ?? null}
+                supplierName={paying?.name}
+                outstanding={Number(paying?.current_balance ?? 0)}
+                onClose={() => setPaying(null)}
+            />
         </View>
     );
 });

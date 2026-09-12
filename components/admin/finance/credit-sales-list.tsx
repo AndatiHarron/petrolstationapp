@@ -1,16 +1,37 @@
 import React, { memo, useCallback, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { CreditCard, ChevronRight } from 'lucide-react-native';
+import { Car, CreditCard, ChevronRight, User } from 'lucide-react-native';
 import type { CreditSaleResource, CreditSalesIndex200, AuthenticationExceptionResponse } from '@/features/api/model';
 import { useCreditSalesIndex } from '@/features/api/credit-sale/credit-sale';
 import { SkeletonCard } from '@/components/station-manager/skeleton-card';
+
+/**
+ * The generated CreditSaleResource predates the shift, attendant and credit
+ * fields the API now returns, and features/api is Orval output marked "do not
+ * edit manually" - so the extra fields are declared here instead. Regenerating
+ * the client will supersede this.
+ */
+type EnrichedCreditSale = CreditSaleResource & {
+    shift_number?: string | null;
+    station_name?: string | null;
+    recorded_by?: string | null;
+    customer_credit_limit?: number;
+    customer_balance?: number;
+    customer_available_credit?: number;
+    customer_over_limit?: boolean;
+};
+
+
+function money(value: number): string {
+    return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 interface CreditSalesListProps {
     onItemPress: (creditSaleId: string) => void;
 }
 
 interface CreditSaleItemProps {
-    item: CreditSaleResource;
+    item: EnrichedCreditSale;
     onPress: (id: string) => void;
 }
 
@@ -33,35 +54,116 @@ const CreditSaleItem = memo(function CreditSaleItem({ item, onPress }: CreditSal
     return (
         <TouchableOpacity
             onPress={handlePress}
-            className="bg-surface/70 border border-surface-border rounded-2xl p-4 mb-3"
+            className="bg-surface border border-surface-border rounded-2xl p-4 mb-3"
             activeOpacity={0.7}
         >
-            <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center flex-1">
-                    <View className="bg-emerald-500/10 p-3 rounded-xl mr-3">
-                        <CreditCard size={20} color="#10b981" />
+            {/* Who and how much, on the top line. */}
+            <View className="flex-row items-start justify-between gap-3">
+                <View className="min-w-0 flex-1 flex-row items-center gap-3">
+                    <View className="bg-brand-subtle shrink-0 rounded-xl p-2.5">
+                        <CreditCard size={18} color="#040273" />
                     </View>
-                    <View className="flex-1">
-                        <Text className="text-ink font-semibold text-base mb-1" numberOfLines={1}>
-                            {item.customer_name || 'Unknown Customer'}
+                    <View className="min-w-0 flex-1">
+                        <Text className="text-ink text-base font-bold" numberOfLines={1}>
+                            {item.customer_name || 'Unknown customer'}
                         </Text>
-                        <View className="flex-row items-center">
-                            <Text className="text-ink-muted text-sm mr-3">{formattedDate}</Text>
-                            {item.vehicle_reg && (
-                                <Text className="text-ink-muted text-sm" numberOfLines={1}>
-                                    {item.vehicle_reg}
-                                </Text>
-                            )}
-                        </View>
+                        <Text className="text-ink-faint text-[11px]" numberOfLines={1}>
+                            {formattedDate}
+                            {item.station_name ? ` · ${item.station_name}` : ''}
+                        </Text>
                     </View>
                 </View>
-                <View className="flex-row items-center ml-2">
-                    <Text className="text-emerald-400 font-bold text-base mr-2">
+
+                <View className="shrink-0 flex-row items-center gap-1.5" style={{ maxWidth: '40%' }}>
+                    <Text
+                        className="text-ink font-mono text-base font-bold"
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
+                        minimumFontScale={0.7}
+                    >
                         {formattedAmount}
                     </Text>
-                    <ChevronRight size={18} color="#5c5c6b" />
+                    <ChevronRight size={16} color="#8b8b99" />
                 </View>
             </View>
+
+            {/* The attendant and the vehicle: what makes a credit sale
+                traceable back to a person and a truck. */}
+            <View className="mt-3 flex-row flex-wrap items-center gap-1.5">
+                {item.recorded_by ? (
+                    <View className="flex-row items-center gap-1 rounded-full bg-surface-sunken px-2 py-1">
+                        <User size={11} color="#5c5c6b" />
+                        <Text className="text-ink-muted text-[10px] font-semibold" numberOfLines={1}>
+                            {item.recorded_by}
+                        </Text>
+                    </View>
+                ) : null}
+
+                {item.vehicle_reg ? (
+                    <View className="flex-row items-center gap-1 rounded-full bg-surface-sunken px-2 py-1">
+                        <Car size={11} color="#5c5c6b" />
+                        <Text className="text-ink font-mono text-[10px] font-bold" numberOfLines={1}>
+                            {item.vehicle_reg}
+                        </Text>
+                    </View>
+                ) : null}
+
+                {item.shift_number ? (
+                    <View className="rounded-full bg-surface-sunken px-2 py-1">
+                        <Text className="text-ink-faint font-mono text-[10px]" numberOfLines={1}>
+                            {item.shift_number}
+                        </Text>
+                    </View>
+                ) : null}
+            </View>
+
+            {/* Where this sale leaves their credit standing. */}
+            {typeof item.customer_balance === 'number' ? (
+                <View className="mt-2.5 rounded-lg bg-surface-sunken px-3 py-2">
+                    <View className="flex-row items-baseline justify-between gap-2">
+                        <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-wider">
+                            Owes now
+                        </Text>
+                        <Text
+                            className={`shrink font-mono text-[11px] font-bold ${
+                                item.customer_over_limit ? 'text-accent' : 'text-ink'
+                            }`}
+                            numberOfLines={1}
+                        >
+                            {money(item.customer_balance)}
+                            {item.customer_credit_limit
+                                ? ` of ${money(item.customer_credit_limit)}`
+                                : ''}
+                        </Text>
+                    </View>
+
+                    {item.customer_credit_limit ? (
+                        <>
+                            <View className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-border">
+                                <View
+                                    className={item.customer_over_limit ? 'bg-accent' : 'bg-brand'}
+                                    style={{
+                                        width: `${Math.min(
+                                            (item.customer_balance / item.customer_credit_limit) * 100,
+                                            100
+                                        )}%`,
+                                        height: '100%',
+                                    }}
+                                />
+                            </View>
+                            <Text
+                                className={`mt-1 text-[10px] ${
+                                    item.customer_over_limit ? 'text-accent font-bold' : 'text-ink-faint'
+                                }`}
+                            >
+                                {item.customer_over_limit
+                                    ? 'Over their credit limit'
+                                    : `${money(item.customer_available_credit ?? 0)} of credit left`}
+                            </Text>
+                        </>
+                    ) : null}
+                </View>
+            ) : null}
         </TouchableOpacity>
     );
 });
@@ -88,13 +190,13 @@ export const CreditSalesList = memo(function CreditSalesList({ onItemPress }: Cr
     const hasNextPage = meta ? meta.current_page < meta.last_page : false;
 
     const renderItem = useCallback(
-        ({ item }: { item: CreditSaleResource }) => (
+        ({ item }: { item: EnrichedCreditSale }) => (
             <CreditSaleItem item={item} onPress={onItemPress} />
         ),
         [onItemPress]
     );
 
-    const keyExtractor = useCallback((item: CreditSaleResource) => item.id, []);
+    const keyExtractor = useCallback((item: EnrichedCreditSale) => item.id, []);
 
     const handleLoadMore = useCallback(() => {
         if (hasNextPage && !isFetching) {
@@ -119,7 +221,7 @@ export const CreditSalesList = memo(function CreditSalesList({ onItemPress }: Cr
                 className="bg-surface-sunken border border-surface-border rounded-xl py-3 mx-1 mb-2"
                 activeOpacity={0.7}
             >
-                <Text className="text-emerald-400 text-center font-semibold">Load More</Text>
+                <Text className="text-brand text-center font-semibold">Load More</Text>
             </TouchableOpacity>
         );
     }, [hasNextPage, isFetching, handleLoadMore]);

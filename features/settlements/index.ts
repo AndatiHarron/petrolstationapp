@@ -1,6 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { customInstance } from '@/lib/axios';
-import { getCustomersIndexQueryKey } from '@/features/api/customer/customer';
+import {
+    invalidateOnCustomerBalanceChange,
+    invalidateOnSupplierBalanceChange,
+} from '@/lib/query-invalidations';
 import { APPROVALS_KEY } from '@/features/approvals';
 
 /**
@@ -93,12 +96,11 @@ export function useApproveSettlement() {
                 method: 'POST',
             }),
         onSuccess: () => {
-            // Approval is the point at which the balance moves, so the customer
-            // lists and any debt report are stale from here.
+            // Approval is the point at which the balance moves, so everything
+            // carrying that balance is stale from here, not just this list.
             queryClient.invalidateQueries({ queryKey: KEY });
-            queryClient.invalidateQueries({ queryKey: getCustomersIndexQueryKey() });
-            queryClient.invalidateQueries({ queryKey: ['report'] });
             queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
+            invalidateOnCustomerBalanceChange(queryClient);
         },
     });
 }
@@ -189,11 +191,12 @@ export function useApproveSupplierPayment() {
                 method: 'POST',
             }),
         onSuccess: () => {
-            // Approval is when the balance moves, so the creditor list is stale.
+            // Approval is when what is owed comes down. That figure is embedded
+            // in the creditors list, the supplier record and every lifting
+            // response, so all of them have to be refetched, not just this list.
             queryClient.invalidateQueries({ queryKey: SUPPLIER_KEY });
-            queryClient.invalidateQueries({ queryKey: ['creditors'] });
             queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
-            queryClient.invalidateQueries({ queryKey: ['report'] });
+            invalidateOnSupplierBalanceChange(queryClient);
         },
     });
 }
