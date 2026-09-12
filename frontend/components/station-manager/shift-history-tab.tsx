@@ -566,29 +566,29 @@ export function ShiftHistoryTab() {
                             {editStep > 1 && (
                                 <TouchableOpacity
                                     onPress={() => setEditStep(prev => (prev - 1) as any)}
-                                    className="flex-1 py-4 bg-surface rounded-xl items-center"
+                                    className="h-12 flex-1 items-center justify-center rounded-xl border border-surface-border bg-surface"
                                 >
-                                    <Text className="text-ink font-bold uppercase tracking-wider">Back</Text>
+                                    <Text className="text-ink text-sm font-bold uppercase tracking-wider">Back</Text>
                                 </TouchableOpacity>
                             )}
 
                             {editStep < 3 ? (
                                 <TouchableOpacity
                                     onPress={() => setEditStep(prev => (prev + 1) as any)}
-                                    className="flex-[2] py-4 bg-brand rounded-xl items-center shadow-lg "
+                                    className="h-12 flex-[2] items-center justify-center rounded-xl bg-brand"
                                 >
-                                    <Text className="text-ink font-bold uppercase tracking-wider">Next Step</Text>
+                                    <Text className="text-sm font-bold uppercase tracking-wider text-white">Next Step</Text>
                                 </TouchableOpacity>
                             ) : (
                                 <TouchableOpacity
                                     onPress={handleEditSubmit}
                                     disabled={editRequestMutation.isPending}
-                                    className={`flex-[2] py-4 bg-amber-500 rounded-xl items-center shadow-lg shadow-amber-900/40 ${editRequestMutation.isPending ? 'opacity-70' : ''}`}
+                                    className={`h-12 flex-[2] items-center justify-center rounded-xl bg-brand ${editRequestMutation.isPending ? 'opacity-70' : ''}`}
                                 >
                                     {editRequestMutation.isPending ? (
                                         <ActivityIndicator color="#fff" />
                                     ) : (
-                                        <Text className="text-ink font-bold uppercase tracking-wider">Submit Edit Request</Text>
+                                        <Text className="text-sm font-bold uppercase tracking-wider text-white">Submit Edit Request</Text>
                                     )}
                                 </TouchableOpacity>
                             )}

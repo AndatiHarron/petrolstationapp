@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Modal, Pressable, TextInput, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View, Text, Pressable, TextInput, Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { X, ChevronDown, Plus, Trash2, ChevronUp } from 'lucide-react-native';
+import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react-native';
+import { FormSheet, Field, TextField, ChoiceField } from '@/components/form-sheet';
 import {
     useTanksStore,
     useTanksUpdate,
@@ -39,8 +39,6 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
     const [productId, setProductId] = useState('');
     const [capacityLiters, setCapacityLiters] = useState('');
     const [currentVolume, setCurrentVolume] = useState('');
-    const [showStationPicker, setShowStationPicker] = useState(false);
-    const [showProductPicker, setShowProductPicker] = useState(false);
     const [showCalibrationChart, setShowCalibrationChart] = useState(false);
     const [calibrationEntries, setCalibrationEntries] = useState<CalibrationEntry[]>([]);
 
@@ -50,9 +48,6 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
 
     const stations = (stationsResponse as StationsIndex200 | undefined)?.data ?? [];
     const products = (productsResponse as ProductsIndex200 | undefined)?.data ?? [];
-
-    const selectedStation = stations.find((s) => s.id === stationId);
-    const selectedProduct = products.find((p) => p.id === productId);
 
     // Reset form when modal opens/closes or tank changes
     useEffect(() => {
@@ -193,255 +188,143 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
     const isPending = storeMutation.isPending || updateMutation.isPending;
 
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
+        <FormSheet
             visible={visible}
-            onRequestClose={onClose}
+            title={isEditing ? 'Edit tank' : 'New tank'}
+            subtitle={isEditing ? tank?.name : 'Storage a nozzle draws from'}
+            onClose={onClose}
+            onSubmit={handleSubmit}
+            submitLabel={isEditing ? 'Save tank' : 'Create tank'}
+            isPending={isPending}
         >
-            <BlurView intensity={20} className="flex-1">
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    enabled={Platform.OS === 'ios'}
-                    className="flex-1 justify-end"
-                    keyboardVerticalOffset={0}
+            <TextField
+                label="Tank name"
+                required
+                value={name}
+                onChangeText={setName}
+                placeholder="Tank 1"
+                autoFocus
+            />
+
+            {/* Chips rather than the two collapsing dropdowns this form used to
+                open over its own fields. */}
+            <ChoiceField
+                label="Station"
+                required
+                options={stations.map((s) => ({ value: s.id, label: s.name }))}
+                value={stationId || null}
+                onSelect={setStationId}
+                emptyMessage="Add a station first"
+            />
+
+            <ChoiceField
+                label="Product"
+                required
+                options={products.map((p) => ({ value: p.id, label: p.name }))}
+                value={productId || null}
+                onSelect={setProductId}
+                emptyMessage="Add a product first"
+            />
+
+            <TextField
+                label="Capacity"
+                required
+                value={capacityLiters}
+                onChangeText={setCapacityLiters}
+                placeholder="10000"
+                keyboardType="numeric"
+                suffix="L"
+            />
+
+            <TextField
+                label="Current volume"
+                value={currentVolume}
+                onChangeText={setCurrentVolume}
+                placeholder="0"
+                keyboardType="numeric"
+                suffix="L"
+            />
+
+            <Field label="Calibration chart">
+                <Pressable
+                    onPress={() => setShowCalibrationChart((open) => !open)}
+                    accessibilityRole="button"
+                    className="flex-row items-center justify-between gap-3 rounded-xl border border-surface-border bg-surface-sunken px-3.5 py-3"
                 >
-                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border max-h-[90%]">
-                        {/* Handle Bar */}
-                        <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-surface-border rounded-full" />
-                        </View>
-
-                        {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
-                            <View>
-                                <Text className="text-ink text-2xl font-bold">
-                                    {isEditing ? 'Edit Tank' : 'New Tank'}
-                                </Text>
-                                <Text className="text-ink-muted text-sm">
-                                    {isEditing ? 'Update tank details' : 'Add a new storage tank'}
-                                </Text>
-                            </View>
-                            <Pressable
-                                onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
-                            >
-                                <X size={16} color="#8b8b99" />
-                            </Pressable>
-                        </View>
-
-                        {/* Form */}
-                        <ScrollView
-                            className="px-6 pt-6"
-                            contentContainerStyle={{ paddingBottom: 20 }}
-                            keyboardShouldPersistTaps="handled"
-                            showsVerticalScrollIndicator={false}
-                        >
-                            {/* Name Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Tank Name *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="e.g. Tank 1"
-                                placeholderTextColor="#5c5c6b"
-                                value={name}
-                                onChangeText={setName}
-                                autoFocus
-                            />
-
-                            {/* Station Picker */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Station *
-                            </Text>
-                            <Pressable
-                                onPress={() => setShowStationPicker(!showStationPicker)}
-                                className="bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center"
-                            >
-                                <Text className={selectedStation ? 'text-ink' : 'text-ink-muted'}>
-                                    {selectedStation?.name ?? 'Select a station'}
-                                </Text>
-                                <ChevronDown size={20} color="#5c5c6b" />
-                            </Pressable>
-                            {showStationPicker ? (
-                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
-                                    <ScrollView nestedScrollEnabled>
-                                        {stations.map((s) => (
-                                            <Pressable
-                                                key={s.id}
-                                                onPress={() => {
-                                                    setStationId(s.id);
-                                                    setShowStationPicker(false);
-                                                }}
-                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-brand/20' : ''
-                                                    }`}
-                                            >
-                                                <Text className={stationId === s.id ? 'text-brand' : 'text-ink'}>
-                                                    {s.name}
-                                                </Text>
-                                            </Pressable>
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            ) : (
-                                <View className="mb-2" />
-                            )}
-
-                            {/* Product Picker */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Product *
-                            </Text>
-                            <Pressable
-                                onPress={() => setShowProductPicker(!showProductPicker)}
-                                className="bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center"
-                            >
-                                <Text className={selectedProduct ? 'text-ink' : 'text-ink-muted'}>
-                                    {selectedProduct?.name ?? 'Select a product'}
-                                </Text>
-                                <ChevronDown size={20} color="#5c5c6b" />
-                            </Pressable>
-                            {showProductPicker ? (
-                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
-                                    <ScrollView nestedScrollEnabled>
-                                        {products.map((p) => (
-                                            <Pressable
-                                                key={p.id}
-                                                onPress={() => {
-                                                    setProductId(p.id);
-                                                    setShowProductPicker(false);
-                                                }}
-                                                className={`p-3 border-b border-surface-border ${productId === p.id ? 'bg-brand/20' : ''
-                                                    }`}
-                                            >
-                                                <Text className={productId === p.id ? 'text-brand' : 'text-ink'}>
-                                                    {p.name}
-                                                </Text>
-                                            </Pressable>
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            ) : (
-                                <View className="mb-2" />
-                            )}
-
-                            {/* Capacity Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Capacity (Liters) *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="e.g. 10000"
-                                placeholderTextColor="#5c5c6b"
-                                keyboardType="numeric"
-                                value={capacityLiters}
-                                onChangeText={setCapacityLiters}
-                            />
-
-                            {/* Current Volume Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Current Volume (Liters)
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="0"
-                                placeholderTextColor="#5c5c6b"
-                                keyboardType="numeric"
-                                value={currentVolume}
-                                onChangeText={setCurrentVolume}
-                            />
-
-                            {/* Calibration Chart Section */}
-                            <Pressable
-                                onPress={() => setShowCalibrationChart(!showCalibrationChart)}
-                                className="flex-row items-center justify-between bg-surface p-4 rounded-xl border border-surface-border mb-4"
-                            >
-                                <View>
-                                    <Text className="text-ink font-medium">Calibration Chart</Text>
-                                    <Text className="text-ink-muted text-xs">
-                                        {calibrationEntries.length > 0
-                                            ? `${calibrationEntries.length} entries`
-                                            : 'Optional - Map mm to liters'}
-                                    </Text>
-                                </View>
-                                {showCalibrationChart ? (
-                                    <ChevronUp size={20} color="#5c5c6b" />
-                                ) : (
-                                    <ChevronDown size={20} color="#5c5c6b" />
-                                )}
-                            </Pressable>
-
-                            {showCalibrationChart ? (
-                                <View className="bg-surface-sunken rounded-xl border border-surface-border p-4 mb-4">
-                                    {/* Column Headers */}
-                                    <View className="flex-row mb-3">
-                                        <View className="flex-1 mr-2">
-                                            <Text className="text-ink-muted text-xs font-bold uppercase">
-                                                Depth (mm)
-                                            </Text>
-                                        </View>
-                                        <View className="flex-1 mr-8">
-                                            <Text className="text-ink-muted text-xs font-bold uppercase">
-                                                Volume (L)
-                                            </Text>
-                                        </View>
-                                    </View>
-
-                                    {/* Calibration Entries */}
-                                    {calibrationEntries.map((entry, index) => (
-                                        <View key={index} className="flex-row items-center mb-2">
-                                            <TextInput
-                                                className="flex-1 bg-surface-border text-ink p-3 rounded-lg border border-surface-border mr-2"
-                                                placeholder="0"
-                                                placeholderTextColor="#5c5c6b"
-                                                keyboardType="numeric"
-                                                value={entry.mm}
-                                                onChangeText={(value) => updateCalibrationEntry(index, 'mm', value)}
-                                            />
-                                            <TextInput
-                                                className="flex-1 bg-surface-border text-ink p-3 rounded-lg border border-surface-border mr-2"
-                                                placeholder="0"
-                                                placeholderTextColor="#5c5c6b"
-                                                keyboardType="numeric"
-                                                value={entry.liters}
-                                                onChangeText={(value) => updateCalibrationEntry(index, 'liters', value)}
-                                            />
-                                            <Pressable
-                                                onPress={() => removeCalibrationEntry(index)}
-                                                className="p-2 bg-accent-subtle rounded-lg"
-                                            >
-                                                <Trash2 size={16} color="#bf0a30" />
-                                            </Pressable>
-                                        </View>
-                                    ))}
-
-                                    {/* Add Entry Button */}
-                                    <Pressable
-                                        onPress={addCalibrationEntry}
-                                        className="flex-row items-center justify-center py-3 mt-2 bg-surface-border rounded-lg active:opacity-80"
-                                    >
-                                        <Plus size={16} color="#8b8b99" />
-                                        <Text className="text-ink-muted font-medium ml-2">Add Entry</Text>
-                                    </Pressable>
-                                </View>
-                            ) : null}
-                        </ScrollView>
-
-                        {/* Footer */}
-                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
-                            <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
-                                    }`}
-                                onPress={handleSubmit}
-                                disabled={isPending}
-                            >
-                                <Text className="text-ink font-bold text-lg">
-                                    {isPending ? 'Saving...' : isEditing ? 'Update Tank' : 'Create Tank'}
-                                </Text>
-                            </Pressable>
-                        </View>
+                    <View className="min-w-0 flex-1">
+                        <Text className="text-ink text-[13px] font-semibold">
+                            {calibrationEntries.length > 0
+                                ? `${calibrationEntries.length} depth reading${calibrationEntries.length === 1 ? '' : 's'}`
+                                : 'Not set'}
+                        </Text>
+                        <Text className="text-ink-faint text-[10.5px]">
+                            Maps a dip reading in mm to litres in the tank.
+                        </Text>
                     </View>
-                </KeyboardAvoidingView>
-            </BlurView>
-        </Modal>
+                    {showCalibrationChart ? (
+                        <ChevronUp size={16} color="#5c5c6b" />
+                    ) : (
+                        <ChevronDown size={16} color="#5c5c6b" />
+                    )}
+                </Pressable>
+
+                {showCalibrationChart ? (
+                    <View className="mt-2 gap-2 rounded-xl border border-surface-border p-3">
+                        <View className="flex-row gap-2">
+                            <Text className="text-ink-faint flex-1 text-[9px] font-bold uppercase tracking-widest">
+                                Depth (mm)
+                            </Text>
+                            <Text className="text-ink-faint flex-1 text-[9px] font-bold uppercase tracking-widest">
+                                Volume (L)
+                            </Text>
+                            <View style={{ width: 32 }} />
+                        </View>
+
+                        {calibrationEntries.map((entry, index) => (
+                            <View key={index} className="flex-row items-center gap-2">
+                                <TextInput
+                                    className="text-ink h-10 flex-1 rounded-lg border border-surface-border bg-surface-sunken px-3"
+                                    style={{ fontSize: 13, paddingVertical: 0 }}
+                                    placeholder="0"
+                                    placeholderTextColor="#a3a3b2"
+                                    keyboardType="numeric"
+                                    value={entry.mm}
+                                    onChangeText={(value) => updateCalibrationEntry(index, 'mm', value)}
+                                />
+                                <TextInput
+                                    className="text-ink h-10 flex-1 rounded-lg border border-surface-border bg-surface-sunken px-3"
+                                    style={{ fontSize: 13, paddingVertical: 0 }}
+                                    placeholder="0"
+                                    placeholderTextColor="#a3a3b2"
+                                    keyboardType="numeric"
+                                    value={entry.liters}
+                                    onChangeText={(value) => updateCalibrationEntry(index, 'liters', value)}
+                                />
+                                <Pressable
+                                    onPress={() => removeCalibrationEntry(index)}
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Remove reading ${index + 1}`}
+                                    style={{ width: 32, height: 32, borderRadius: 11 }}
+                                    className="items-center justify-center bg-accent-subtle active:opacity-60"
+                                >
+                                    <Trash2 size={14} color="#bf0a30" />
+                                </Pressable>
+                            </View>
+                        ))}
+
+                        <Pressable
+                            onPress={addCalibrationEntry}
+                            accessibilityRole="button"
+                            className="mt-1 h-10 flex-row items-center justify-center gap-1.5 rounded-lg bg-brand-subtle active:opacity-70"
+                        >
+                            <Plus size={14} color="#040273" />
+                            <Text className="text-brand text-[11px] font-bold uppercase tracking-wider">
+                                Add reading
+                            </Text>
+                        </Pressable>
+                    </View>
+                ) : null}
+            </Field>
+        </FormSheet>
     );
 }

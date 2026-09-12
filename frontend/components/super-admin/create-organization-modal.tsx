@@ -141,11 +141,11 @@ export function CreateOrganizationModal({ visible, onClose }: CreateOrganization
 
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-orange-600/50' : 'bg-orange-600'}`}
+                                className={`h-12 items-center justify-center rounded-xl ${isPending ? 'bg-brand-muted' : 'bg-brand active:opacity-85'}`}
                                 onPress={handleSubmit}
                                 disabled={isPending}
                             >
-                                <Text className="text-ink font-bold text-lg">
+                                <Text className="text-sm font-bold text-white">
                                     {isPending ? 'Creating...' : 'Create Organization'}
                                 </Text>
                             </Pressable>

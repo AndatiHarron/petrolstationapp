@@ -400,7 +400,7 @@ export default function LiftingsScreen() {
                                                 onPress={() => handleTankChange(tank.id)}
                                                 className={`px-4 py-3 rounded-xl border mr-2 ${selectedTankId === tank.id ? 'bg-brand border-brand' : 'bg-surface border-surface-border'}`}
                                             >
-                                                <Text className={selectedTankId === tank.id ? 'text-ink font-bold' : 'text-ink'}>{tank.name}</Text>
+                                                <Text className={selectedTankId === tank.id ? 'font-bold text-white' : 'text-ink'}>{tank.name}</Text>
                                             </TouchableOpacity>
                                         ))}
                                     </ScrollView>

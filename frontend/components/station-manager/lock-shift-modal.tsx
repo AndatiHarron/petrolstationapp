@@ -486,7 +486,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                                                     onPress={() => updateCreditSale(sale.id, 'customerId', cust.id)}
                                                                     className={`px-3 py-2 rounded-lg border ${sale.customerId === cust.id ? 'bg-brand border-brand' : 'bg-surface-sunken border-surface-border'}`}
                                                                 >
-                                                                    <Text className={sale.customerId === cust.id ? 'text-ink font-medium text-xs' : 'text-ink-muted text-xs'}>{cust.name}</Text>
+                                                                    <Text className={sale.customerId === cust.id ? 'text-xs font-medium text-white' : 'text-ink-muted text-xs'}>{cust.name}</Text>
                                                                 </TouchableOpacity>
                                                             ))}
                                                         </ScrollView>
@@ -536,9 +536,9 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         {step > 1 && (
                             <TouchableOpacity
                                 onPress={handleBack}
-                                className="flex-1 py-4 bg-surface rounded-xl items-center"
+                                className="h-12 flex-1 items-center justify-center rounded-xl border border-surface-border bg-surface"
                             >
-                                <Text className="text-ink font-bold uppercase tracking-wider">Back</Text>
+                                <Text className="text-ink text-sm font-bold uppercase tracking-wider">Back</Text>
                             </TouchableOpacity>
                         )}
 
@@ -546,7 +546,7 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                             <TouchableOpacity
                                 onPress={handleNext}
                                 disabled={step === 1 && !canProceedFromStep1}
-                                className={`flex-[2] py-4 rounded-xl items-center ${step === 1 && !canProceedFromStep1 ? 'bg-surface-border opacity-60' : 'bg-brand'}`}
+                                className={`h-12 flex-[2] items-center justify-center rounded-xl ${step === 1 && !canProceedFromStep1 ? 'bg-surface-border opacity-60' : 'bg-brand'}`}
                                 style={step === 1 && !canProceedFromStep1 ? undefined : {
                                     shadowColor: '#1e3a8a',
                                     shadowOffset: { width: 0, height: 4 },
@@ -555,13 +555,13 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                     elevation: 4,
                                 }}
                             >
-                                <Text className="text-ink font-bold uppercase tracking-wider">Next Step</Text>
+                                <Text className="text-sm font-bold uppercase tracking-wider text-white">Next Step</Text>
                             </TouchableOpacity>
                         ) : (
                             <TouchableOpacity
                                 onPress={handleSubmit}
                                 disabled={isSubmitting}
-                                className={`flex-[2] py-4 bg-emerald-600 rounded-xl items-center ${isSubmitting ? 'opacity-70' : ''}`}
+                                className={`h-12 flex-[2] items-center justify-center rounded-xl bg-emerald-600 ${isSubmitting ? 'opacity-70' : ''}`}
                                 style={{
                                     shadowColor: '#064e3b',
                                     shadowOffset: { width: 0, height: 4 },

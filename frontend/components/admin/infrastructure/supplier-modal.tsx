@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react-native';
+import { FormSheet, TextField } from '@/components/form-sheet';
 import {
     useCreditorsStore,
     useCreditorsUpdate,
@@ -87,106 +86,40 @@ export function SupplierModal({ visible, onClose, supplier }: SupplierModalProps
     const isPending = storeMutation.isPending || updateMutation.isPending;
 
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
+        <FormSheet
             visible={visible}
-            onRequestClose={onClose}
+            title={isEditing ? 'Edit supplier' : 'New supplier'}
+            subtitle={isEditing ? supplier?.name : 'Who fuel deliveries are bought from'}
+            onClose={onClose}
+            onSubmit={handleSubmit}
+            submitLabel={isEditing ? 'Save supplier' : 'Create supplier'}
+            isPending={isPending}
         >
-            <BlurView intensity={20} className="flex-1">
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    enabled={Platform.OS === 'ios'}
-                    className="flex-1 justify-end"
-                    keyboardVerticalOffset={0}
-                >
-                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border h-[85%] flex overflow-hidden">
-                        {/* Handle Bar */}
-                        <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-surface-border rounded-full" />
-                        </View>
+            <TextField
+                label="Supplier name"
+                required
+                value={name}
+                onChangeText={setName}
+                placeholder="TotalEnergies Kenya"
+                autoFocus
+            />
 
-                        {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
-                            <View>
-                                <Text className="text-ink text-2xl font-bold">
-                                    {isEditing ? 'Edit Supplier' : 'New Supplier'}
-                                </Text>
-                                <Text className="text-ink-muted text-sm">
-                                    {isEditing ? 'Update supplier details' : 'Add a new fuel supplier'}
-                                </Text>
-                            </View>
-                            <Pressable
-                                onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
-                            >
-                                <X size={16} color="#8b8b99" />
-                            </Pressable>
-                        </View>
+            <TextField
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="orders@supplier.co.ke"
+                keyboardType="email-address"
+                autoCapitalize="none"
+            />
 
-                        {/* Form */}
-                        <ScrollView
-                            className="flex-1 px-6 pt-6"
-                            keyboardShouldPersistTaps="handled"
-                            contentContainerStyle={{ paddingBottom: 24 }}
-                            showsVerticalScrollIndicator={false}
-                        >
-                            {/* Name Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Supplier Name *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-sky-500 mb-4"
-                                placeholder="e.g. Total Energies"
-                                placeholderTextColor="#5c5c6b"
-                                value={name}
-                                onChangeText={setName}
-                                autoFocus
-                            />
-
-                            {/* Email Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Email (Optional)
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-sky-500 mb-4"
-                                placeholder="e.g. supplier@example.com"
-                                placeholderTextColor="#5c5c6b"
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                            />
-
-                            {/* Phone Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Phone (Optional)
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-sky-500 mb-6"
-                                placeholder="e.g. +254 712 345 678"
-                                placeholderTextColor="#5c5c6b"
-                                value={phone}
-                                onChangeText={setPhone}
-                                keyboardType="phone-pad"
-                            />
-                        </ScrollView>
-
-                        {/* Footer */}
-                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
-                            <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-sky-600/50' : 'bg-sky-600'}`}
-                                onPress={handleSubmit}
-                                disabled={isPending}
-                            >
-                                <Text className="text-ink font-bold text-lg">
-                                    {isPending ? 'Saving...' : isEditing ? 'Update Supplier' : 'Create Supplier'}
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </BlurView>
-        </Modal>
+            <TextField
+                label="Phone"
+                value={phone}
+                onChangeText={setPhone}
+                placeholder="+254 712 345 678"
+                keyboardType="phone-pad"
+            />
+        </FormSheet>
     );
 }

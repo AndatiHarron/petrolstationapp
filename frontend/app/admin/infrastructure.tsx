@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, Pressable, Alert, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { Building2, Package, Cylinder, Truck, Gauge, Users, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { Building2, Package, Cylinder, Truck, Gauge, Users } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import { StationsList } from '@/components/admin/infrastructure/stations-list';
 import { ProductsList } from '@/components/admin/infrastructure/products-list';
@@ -35,62 +36,53 @@ const TABS: { id: TabType; label: string; icon: typeof Building2 }[] = [
     { id: 'managers', label: 'Managers', icon: Users },
 ];
 
-function SectionDropdown({
+/**
+ * The section switcher.
+ *
+ * It used to be a dropdown: two taps to change section, and a panel that covered
+ * the list underneath it. Six short labels fit on one scrolling row, so the whole
+ * set is visible and switching costs one tap.
+ */
+function SectionTabs({
     activeTab,
     onSelect,
-    isOpen,
-    onToggle
 }: {
     activeTab: TabType;
     onSelect: (tab: TabType) => void;
-    isOpen: boolean;
-    onToggle: () => void;
 }) {
-    const activeTabConfig = TABS.find((t) => t.id === activeTab) ?? TABS[0];
-    const Icon = activeTabConfig.icon;
-
     return (
-        <View className="mx-4 mb-4">
-            <Pressable
-                onPress={onToggle}
-                className="bg-surface p-4 rounded-xl border border-surface-border flex-row items-center justify-between"
-            >
-                <View className="flex-row items-center">
-                    <Icon size={20} color="#8b8b99" />
-                    <Text className="text-ink font-medium text-base ml-2">{activeTabConfig.label}</Text>
-                </View>
-                {isOpen ? (
-                    <ChevronUp size={20} color="#5c5c6b" />
-                ) : (
-                    <ChevronDown size={20} color="#5c5c6b" />
-                )}
-            </Pressable>
-            {isOpen ? (
-                <View className="bg-surface rounded-xl border border-surface-border mt-1 max-h-56 overflow-hidden">
-                    <ScrollView nestedScrollEnabled>
-                        {TABS.map((tab) => {
-                            const TabIcon = tab.icon;
-                            const isSelected = activeTab === tab.id;
-                            return (
-                                <Pressable
-                                    key={tab.id}
-                                    onPress={() => {
-                                        onSelect(tab.id);
-                                        onToggle();
-                                    }}
-                                    className={`p-4 flex-row items-center border-b border-surface-border last:border-b-0 ${isSelected ? 'bg-brand/20' : ''}`}
-                                >
-                                    <TabIcon size={18} color={isSelected ? '#040273' : '#8b8b99'} />
-                                    <Text className={`ml-3 font-medium ${isSelected ? 'text-brand' : 'text-ink'}`}>
-                                        {tab.label}
-                                    </Text>
-                                </Pressable>
-                            );
-                        })}
-                    </ScrollView>
-                </View>
-            ) : null}
-        </View>
+        <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+            className="mb-3 grow-0"
+        >
+            {TABS.map((tab) => {
+                const TabIcon = tab.icon;
+                const selected = activeTab === tab.id;
+
+                return (
+                    <Pressable
+                        key={tab.id}
+                        onPress={() => onSelect(tab.id)}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected }}
+                        className={`h-9 flex-row items-center gap-1.5 rounded-full px-3.5 ${
+                            selected
+                                ? 'bg-brand'
+                                : 'border border-surface-border bg-surface active:bg-surface-sunken'
+                        }`}
+                    >
+                        <TabIcon size={14} color={selected ? '#ffffff' : '#5c5c6b'} />
+                        <Text
+                            className={`text-[12px] font-bold ${selected ? 'text-white' : 'text-ink-muted'}`}
+                        >
+                            {tab.label}
+                        </Text>
+                    </Pressable>
+                );
+            })}
+        </ScrollView>
     );
 }
 
@@ -98,7 +90,6 @@ export default function InfrastructureTab() {
     const params = useLocalSearchParams<{ tab?: TabType }>();
     const queryClient = useQueryClient();
     const [activeTab, setActiveTab] = useState<TabType>(params.tab ?? 'stations');
-    const [showSectionPicker, setShowSectionPicker] = useState(false);
 
     // Modal states
     const [stationModalVisible, setStationModalVisible] = useState(false);
@@ -171,10 +162,6 @@ export default function InfrastructureTab() {
 
     const handleTabChange = useCallback((tab: TabType) => {
         setActiveTab(tab);
-    }, []);
-
-    const handleToggleSectionPicker = useCallback(() => {
-        setShowSectionPicker((prev) => !prev);
     }, []);
 
     // Station handlers
@@ -391,28 +378,28 @@ export default function InfrastructureTab() {
 
     return (
         <View className="flex-1 bg-surface-sunken">
-            <StatusBar style="light" backgroundColor="#ffffff" />
+            <StatusBar style="dark" backgroundColor="#f7f7fa" />
             <SafeAreaView className="flex-1" edges={['left', 'right']}>
-                {/* Header */}
-                <View className="px-4 mb-4 mt-4">
-                    <Text className="text-2xl font-bold text-ink">Infrastructure</Text>
-                    <Text className="text-ink-muted text-sm mt-1">
-                        Manage stations, products, tanks, nozzles, suppliers, and managers
+                <View className="mb-3 mt-4 px-4">
+                    <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-widest">
+                        Setup
+                    </Text>
+                    <Text className="text-ink text-[22px] font-bold">Infrastructure</Text>
+                    <Text className="text-ink-muted mt-0.5 text-[12px]">
+                        Stations, products, tanks, nozzles, suppliers and managers
                     </Text>
                 </View>
 
-                {/* Section Dropdown */}
-                <SectionDropdown
-                    activeTab={activeTab}
-                    onSelect={handleTabChange}
-                    isOpen={showSectionPicker}
-                    onToggle={handleToggleSectionPicker}
-                />
+                <SectionTabs activeTab={activeTab} onSelect={handleTabChange} />
 
-                {/* Content */}
-                <View className="flex-1 px-4">
+                {/* Keyed on the tab so each section fades in as it is chosen. */}
+                <Animated.View
+                    key={activeTab}
+                    entering={FadeIn.duration(220)}
+                    className="flex-1 px-4"
+                >
                     {renderContent()}
-                </View>
+                </Animated.View>
             </SafeAreaView>
 
             {/* Modals */}

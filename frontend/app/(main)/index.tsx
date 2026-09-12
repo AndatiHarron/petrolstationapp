@@ -18,13 +18,13 @@ export default function Home() {
           </Pressable>
         </Link>
         <Link href="/admin" asChild>
-          <Pressable className="bg-emerald-500 px-6 py-3 rounded-full shadow-lg">
-            <Text className="text-black font-bold">Role: Owner Admin</Text>
+          <Pressable className="h-12 justify-center rounded-full bg-brand px-6">
+            <Text className="text-sm font-bold text-white">Role: Owner Admin</Text>
           </Pressable>
         </Link>
         <Link href="/station-manager" asChild>
-          <Pressable className="bg-brand px-6 py-3 rounded-full shadow-lg">
-            <Text className="text-black font-bold">Role: Station Manager</Text>
+          <Pressable className="h-12 justify-center rounded-full bg-brand px-6">
+            <Text className="text-sm font-bold text-white">Role: Station Manager</Text>
           </Pressable>
         </Link>
       </View>

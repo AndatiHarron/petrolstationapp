@@ -179,7 +179,7 @@ export function AddLiftingModal({
                                                     : 'bg-surface border-surface-border'
                                                     }`}
                                             >
-                                                <Text className={selectedStationId === station.id ? 'text-ink font-bold' : 'text-ink'}>
+                                                <Text className={selectedStationId === station.id ? 'font-bold text-white' : 'text-ink'}>
                                                     {station.name}
                                                 </Text>
                                             </TouchableOpacity>
@@ -214,7 +214,7 @@ export function AddLiftingModal({
                                                     : 'bg-surface border-surface-border'
                                                     }`}
                                             >
-                                                <Text className={selectedTankId === tank.id ? 'text-ink font-bold' : 'text-ink'}>
+                                                <Text className={selectedTankId === tank.id ? 'font-bold text-white' : 'text-ink'}>
                                                     {tank.name}
                                                 </Text>
                                                 {tank.product_name ? (

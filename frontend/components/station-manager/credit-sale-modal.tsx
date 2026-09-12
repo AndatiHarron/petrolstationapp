@@ -97,7 +97,7 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                                                 : 'bg-surface border-surface-border'
                                             }`}
                                     >
-                                        <Text className={`font-bold ${selectedCustomer === customer ? 'text-ink' : 'text-ink-muted'
+                                        <Text className={`font-bold ${selectedCustomer === customer ? 'text-white' : 'text-ink-muted'
                                             }`}>
                                             {customer}
                                         </Text>
@@ -121,10 +121,10 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                         {/* Footer */}
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <TouchableOpacity
-                                className="bg-brand rounded-xl py-4 items-center shadow-lg "
+                                className="h-12 items-center justify-center rounded-xl bg-brand active:opacity-85"
                                 onPress={onClose} // Functionality would go here
                             >
-                                <Text className="text-ink font-bold text-lg">Confirm Credit Sale</Text>
+                                <Text className="text-sm font-bold text-white">Confirm Credit Sale</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

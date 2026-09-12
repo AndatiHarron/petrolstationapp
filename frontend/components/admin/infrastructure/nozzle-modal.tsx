@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Modal, Pressable, TextInput, ScrollView, KeyboardAvoidingView, Platform, Alert } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { X, ChevronDown, ChevronUp } from 'lucide-react-native';
+import { FormSheet, TextField, ChoiceField } from '@/components/form-sheet';
 import {
     useNozzlesStore,
     useNozzlesUpdate,
@@ -33,8 +32,6 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
     const [stationId, setStationId] = useState('');
     const [tankId, setTankId] = useState('');
     const [currentReading, setCurrentReading] = useState('0');
-    const [showStationPicker, setShowStationPicker] = useState(false);
-    const [showTankPicker, setShowTankPicker] = useState(false);
 
     // Fetch stations and tanks for selection
     const { data: stationsResponse } = useStationsIndex();
@@ -43,9 +40,6 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
     const stations = (stationsResponse as StationsIndex200 | undefined)?.data ?? [];
     const allTanks = (tanksResponse as TanksIndex200 | undefined)?.data ?? [];
     const tanksForStation = allTanks.filter((t) => t.station_id === stationId);
-
-    const selectedStation = stations.find((s) => s.id === stationId);
-    const selectedTank = tanksForStation.find((t) => t.id === tankId);
 
     // Reset form when modal opens/closes or nozzle changes
     useEffect(() => {
@@ -154,194 +148,60 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
     const isPending = storeMutation.isPending || updateMutation.isPending;
 
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
+        <FormSheet
             visible={visible}
-            onRequestClose={onClose}
+            title={isEditing ? 'Edit nozzle' : 'New nozzle'}
+            subtitle={isEditing ? nozzle?.name : 'A pump nozzle and its counter'}
+            onClose={onClose}
+            onSubmit={handleSubmit}
+            submitLabel={isEditing ? 'Save nozzle' : 'Create nozzle'}
+            isPending={isPending}
         >
-            <BlurView intensity={20} className="flex-1">
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    enabled={Platform.OS === 'ios'}
-                    className="flex-1 justify-end"
-                    keyboardVerticalOffset={0}
-                >
-                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border max-h-[90%]">
-                        {/* Handle Bar */}
-                        <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-surface-border rounded-full" />
-                        </View>
+            <TextField
+                label="Nozzle name"
+                required
+                value={name}
+                onChangeText={setName}
+                placeholder="Pump 1 — Nozzle A"
+                autoFocus
+            />
 
-                        {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
-                            <View>
-                                <Text className="text-ink text-2xl font-bold">
-                                    {isEditing ? 'Edit Nozzle' : 'New Nozzle'}
-                                </Text>
-                                <Text className="text-ink-muted text-sm">
-                                    {isEditing ? 'Update pump/nozzle details' : 'Add a new pump nozzle'}
-                                </Text>
-                            </View>
-                            <Pressable
-                                onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
-                            >
-                                <X size={16} color="#8b8b99" />
-                            </Pressable>
-                        </View>
+            <ChoiceField
+                label="Station"
+                required
+                options={stations.map((s) => ({ value: s.id, label: s.name }))}
+                value={stationId || null}
+                onSelect={setStationId}
+                emptyMessage="Add a station first"
+            />
 
-                        {/* Form */}
-                        <ScrollView
-                            className="px-6 pt-6"
-                            contentContainerStyle={{ paddingBottom: 20 }}
-                            keyboardShouldPersistTaps="handled"
-                            showsVerticalScrollIndicator={false}
-                        >
-                            {/* Name Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Nozzle Name *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="e.g. Pump 1 - Nozzle A"
-                                placeholderTextColor="#5c5c6b"
-                                value={name}
-                                onChangeText={setName}
-                                autoFocus
-                            />
+            <ChoiceField
+                label="Tank"
+                required
+                options={tanksForStation.map((t) => ({ value: t.id, label: t.name }))}
+                value={tankId || null}
+                onSelect={setTankId}
+                emptyMessage={stationId ? 'This station has no tanks yet' : 'Choose a station first'}
+                hint="Only tanks at the chosen station can be picked."
+            />
 
-                            {/* Digits Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Counter Digits (1-10) *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="7"
-                                placeholderTextColor="#5c5c6b"
-                                keyboardType="numeric"
-                                value={digits}
-                                onChangeText={setDigits}
-                            />
+            <TextField
+                label="Counter digits"
+                required
+                value={digits}
+                onChangeText={setDigits}
+                placeholder="7"
+                keyboardType="numeric"
+                hint="How many figures the mechanical counter shows before it rolls over."
+            />
 
-                            {/* Station Picker */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Station *
-                            </Text>
-                            <Pressable
-                                onPress={() => setShowStationPicker(!showStationPicker)}
-                                className="bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center"
-                            >
-                                <Text className={selectedStation ? 'text-ink' : 'text-ink-muted'}>
-                                    {selectedStation?.name ?? 'Select a station'}
-                                </Text>
-                                {showStationPicker ? (
-                                    <ChevronUp size={20} color="#5c5c6b" />
-                                ) : (
-                                    <ChevronDown size={20} color="#5c5c6b" />
-                                )}
-                            </Pressable>
-                            {showStationPicker ? (
-                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
-                                    <ScrollView nestedScrollEnabled>
-                                        {stations.map((s) => (
-                                            <Pressable
-                                                key={s.id}
-                                                onPress={() => {
-                                                    setStationId(s.id);
-                                                    setShowStationPicker(false);
-                                                }}
-                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-brand/20' : ''
-                                                    }`}
-                                            >
-                                                <Text className={stationId === s.id ? 'text-brand' : 'text-ink'}>
-                                                    {s.name}
-                                                </Text>
-                                            </Pressable>
-                                        ))}
-                                    </ScrollView>
-                                </View>
-                            ) : (
-                                <View className="mb-2" />
-                            )}
-
-                            {/* Tank Picker */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Tank *
-                            </Text>
-                            <Pressable
-                                onPress={() => stationId ? setShowTankPicker(!showTankPicker) : null}
-                                className={`bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center ${!stationId ? 'opacity-60' : ''}`}
-                            >
-                                <Text className={selectedTank ? 'text-ink' : 'text-ink-muted'}>
-                                    {selectedTank?.name ?? (stationId ? 'Select a tank' : 'Select a station first')}
-                                </Text>
-                                {showTankPicker ? (
-                                    <ChevronUp size={20} color="#5c5c6b" />
-                                ) : (
-                                    <ChevronDown size={20} color="#5c5c6b" />
-                                )}
-                            </Pressable>
-                            {showTankPicker && stationId ? (
-                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
-                                    <ScrollView nestedScrollEnabled>
-                                        {tanksForStation.map((t) => (
-                                            <Pressable
-                                                key={t.id}
-                                                onPress={() => {
-                                                    setTankId(t.id);
-                                                    setShowTankPicker(false);
-                                                }}
-                                                className={`p-3 border-b border-surface-border ${tankId === t.id ? 'bg-brand/20' : ''
-                                                    }`}
-                                            >
-                                                <Text className={tankId === t.id ? 'text-brand' : 'text-ink'}>
-                                                    {t.name}
-                                                    {t.product_name ? ` (${t.product_name})` : ''}
-                                                </Text>
-                                            </Pressable>
-                                        ))}
-                                        {tanksForStation.length === 0 ? (
-                                            <View className="p-3">
-                                                <Text className="text-ink-muted text-sm">No tanks at this station</Text>
-                                            </View>
-                                        ) : null}
-                                    </ScrollView>
-                                </View>
-                            ) : (
-                                <View className="mb-2" />
-                            )}
-
-                            {/* Current Reading Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Current Reading *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="0"
-                                placeholderTextColor="#5c5c6b"
-                                keyboardType="numeric"
-                                value={currentReading}
-                                onChangeText={setCurrentReading}
-                            />
-                        </ScrollView>
-
-                        {/* Footer */}
-                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
-                            <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
-                                    }`}
-                                onPress={handleSubmit}
-                                disabled={isPending}
-                            >
-                                <Text className="text-ink font-bold text-lg">
-                                    {isPending ? 'Saving...' : isEditing ? 'Update Nozzle' : 'Create Nozzle'}
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </BlurView>
-        </Modal>
+            <TextField
+                label="Current reading"
+                value={currentReading}
+                onChangeText={setCurrentReading}
+                placeholder="0"
+                keyboardType="numeric"
+            />
+        </FormSheet>
     );
 }

@@ -165,14 +165,14 @@ export function CurrentShiftTab() {
                             <TouchableOpacity
                                 onPress={handleLockShift}
                                 disabled={isLocking}
-                                className="bg-accent py-4 rounded-xl items-center flex-row justify-center gap-2 active:bg-accent"
+                                className="h-12 flex-row items-center justify-center gap-2 rounded-xl bg-accent active:opacity-85"
                             >
                                 {isLocking ? (
                                     <ActivityIndicator size="small" color="#fff" />
                                 ) : (
                                     <Lock size={18} color="#fff" />
                                 )}
-                                <Text className="text-white font-bold text-base uppercase tracking-wider">
+                                <Text className="text-sm font-bold uppercase tracking-wider text-white">
                                     {isLocking ? 'Locking...' : 'Stop & Lock Shift'}
                                 </Text>
                             </TouchableOpacity>
@@ -194,7 +194,7 @@ export function CurrentShiftTab() {
                             <TouchableOpacity
                                 onPress={handleStartShift}
                                 disabled={isStarting}
-                                className="bg-brand w-full py-4 rounded-xl items-center flex-row justify-center gap-2 active:bg-brand"
+                                className="h-12 w-full flex-row items-center justify-center gap-2 rounded-xl bg-brand active:opacity-85"
                             >
                                 {isStarting ? (
                                     <ActivityIndicator size="small" color="#fff" />

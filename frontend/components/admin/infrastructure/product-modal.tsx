@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, Modal, Pressable, TextInput, KeyboardAvoidingView, Platform, Alert, ScrollView } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { Alert } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
-import { X } from 'lucide-react-native';
+import { FormSheet, TextField } from '@/components/form-sheet';
 import {
     useProductsStore,
     useProductsUpdate,
@@ -101,116 +100,43 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
     const isPending = storeMutation.isPending || updateMutation.isPending;
 
     return (
-        <Modal
-            animationType="slide"
-            transparent={true}
+        <FormSheet
             visible={visible}
-            onRequestClose={onClose}
+            title={isEditing ? 'Edit product' : 'New product'}
+            subtitle={isEditing ? product?.name : 'A fuel grade, its price and its VAT rate'}
+            onClose={onClose}
+            onSubmit={handleSubmit}
+            submitLabel={isEditing ? 'Save product' : 'Create product'}
+            isPending={isPending}
         >
-            <BlurView intensity={20} className="flex-1">
-                <KeyboardAvoidingView
-                    behavior="padding"
-                    enabled={Platform.OS === 'ios'}
-                    className="flex-1 justify-end"
-                    keyboardVerticalOffset={0}
-                >
-                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border h-[85%] flex overflow-hidden">
-                        {/* Handle Bar */}
-                        <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-surface-border rounded-full" />
-                        </View>
+            <TextField
+                label="Product name"
+                required
+                value={name}
+                onChangeText={setName}
+                placeholder="Super Petrol"
+                autoFocus
+            />
 
-                        {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
-                            <View>
-                                <Text className="text-ink text-2xl font-bold">
-                                    {isEditing ? 'Edit Product' : 'New Product'}
-                                </Text>
-                                <Text className="text-ink-muted text-sm">
-                                    {isEditing ? 'Update product details' : 'Add a new fuel product'}
-                                </Text>
-                            </View>
-                            <Pressable
-                                onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
-                            >
-                                <X size={16} color="#8b8b99" />
-                            </Pressable>
-                        </View>
+            <TextField
+                label="Price per litre"
+                required
+                value={currentPrice}
+                onChangeText={setCurrentPrice}
+                placeholder="0.00"
+                keyboardType="numeric"
+                prefix="KES"
+            />
 
-                        {/* Form */}
-                        <ScrollView
-                            className="flex-1 px-6 pt-6"
-                            keyboardShouldPersistTaps="handled"
-                            contentContainerStyle={{ paddingBottom: 24 }}
-                            showsVerticalScrollIndicator={false}
-                        >
-                            {/* Name Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Product Name *
-                            </Text>
-                            <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
-                                placeholder="e.g. Super Petrol"
-                                placeholderTextColor="#5c5c6b"
-                                value={name}
-                                onChangeText={setName}
-                                autoFocus
-                            />
-
-                            {/* Price Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                Current Price (KES) *
-                            </Text>
-                            <View className="relative mb-4">
-                                <View className="absolute left-4 top-4 z-10">
-                                    <Text className="text-ink-muted font-bold">KES</Text>
-                                </View>
-                                <TextInput
-                                    className="bg-surface text-ink p-4 pl-14 rounded-xl border border-surface-border focus:border-brand"
-                                    placeholder="0.00"
-                                    placeholderTextColor="#5c5c6b"
-                                    keyboardType="numeric"
-                                    value={currentPrice}
-                                    onChangeText={setCurrentPrice}
-                                />
-                            </View>
-
-                            {/* VAT Rate Input */}
-                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
-                                VAT Rate (%)
-                            </Text>
-                            <View className="relative mb-6">
-                                <TextInput
-                                    className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand"
-                                    placeholder="16"
-                                    placeholderTextColor="#5c5c6b"
-                                    keyboardType="numeric"
-                                    value={vatRate}
-                                    onChangeText={setVatRate}
-                                />
-                                <View className="absolute right-4 top-4">
-                                    <Text className="text-ink-muted font-bold">%</Text>
-                                </View>
-                            </View>
-                        </ScrollView>
-
-                        {/* Footer */}
-                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
-                            <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
-                                    }`}
-                                onPress={handleSubmit}
-                                disabled={isPending}
-                            >
-                                <Text className="text-ink font-bold text-lg">
-                                    {isPending ? 'Saving...' : isEditing ? 'Update Product' : 'Create Product'}
-                                </Text>
-                            </Pressable>
-                        </View>
-                    </View>
-                </KeyboardAvoidingView>
-            </BlurView>
-        </Modal>
+            <TextField
+                label="VAT rate"
+                value={vatRate}
+                onChangeText={setVatRate}
+                placeholder="16"
+                keyboardType="numeric"
+                suffix="%"
+                hint="Applied to every sale of this product."
+            />
+        </FormSheet>
     );
 }

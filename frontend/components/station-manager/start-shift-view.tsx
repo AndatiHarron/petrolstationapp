@@ -110,7 +110,7 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                 <Pressable
                     onPress={() => setLockModalVisible(true)}
                     disabled={isLockShiftPending}
-                    className={`w-full bg-accent-subtle border border-accent/20 py-4 rounded-xl items-center flex-row justify-center active:bg-accent-subtle active:scale-95 transition-all ${isLockShiftPending ? 'opacity-70' : ''}`}
+                    className={`h-12 w-full flex-row items-center justify-center rounded-xl border border-accent/20 bg-accent-subtle active:bg-accent-subtle ${isLockShiftPending ? 'opacity-70' : ''}`}
                 >
                     {isLockShiftPending ? (
                         <>
@@ -162,7 +162,7 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
             <Pressable
                 onPress={handleStart}
                 disabled={isCreateShiftPending}
-                className={`w-full bg-brand py-4 rounded-xl items-center flex-row justify-center active:opacity-80 active:scale-95 transition-all ${isCreateShiftPending ? 'opacity-70' : ''}`}
+                className={`h-12 w-full flex-row items-center justify-center rounded-xl bg-brand active:opacity-80 ${isCreateShiftPending ? 'opacity-70' : ''}`}
             >
                 {isCreateShiftPending ? (
                     <Animated.View entering={FadeIn} className="flex-row items-center justify-center space-x-2 gap-2">

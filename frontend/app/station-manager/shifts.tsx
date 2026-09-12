@@ -30,7 +30,7 @@ export default function ShiftsScreen() {
                             onPress={() => setActiveTab('current')}
                             className={`flex-1 py-2.5 rounded-lg items-center ${activeTab === 'current' ? 'bg-brand' : ''}`}
                         >
-                            <Text className={`font-semibold text-sm ${activeTab === 'current' ? 'text-ink' : 'text-ink-muted'}`}>
+                            <Text className={`font-semibold text-sm ${activeTab === 'current' ? 'text-white' : 'text-ink-muted'}`}>
                                 Current Shift
                             </Text>
                         </TouchableOpacity>
@@ -38,7 +38,7 @@ export default function ShiftsScreen() {
                             onPress={() => setActiveTab('history')}
                             className={`flex-1 py-2.5 rounded-lg items-center ${activeTab === 'history' ? 'bg-brand' : ''}`}
                         >
-                            <Text className={`font-semibold text-sm ${activeTab === 'history' ? 'text-ink' : 'text-ink-muted'}`}>
+                            <Text className={`font-semibold text-sm ${activeTab === 'history' ? 'text-white' : 'text-ink-muted'}`}>
                                 Shift History
                             </Text>
                         </TouchableOpacity>

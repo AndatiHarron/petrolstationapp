@@ -1,114 +1,49 @@
 import React, { useCallback, memo } from 'react';
-import { View, Text, Pressable, RefreshControl } from 'react-native';
-import { FlashList, type ListRenderItemInfo } from '@shopify/flash-list';
-import { Truck, Trash2, Edit2, Plus, DollarSign, Mail, Phone } from 'lucide-react-native';
+import { Mail, Phone, Truck } from 'lucide-react-native';
 import { useCreditorsIndex } from '@/features/api/creditor/creditor';
 import type { SupplierResource, CreditorsIndex200 } from '@/features/api/model';
+import { EntityCard, EntityList, Meta, MetaRow, type Tone } from './shell';
 
-// Skeleton loader for a single supplier card
-function SupplierCardSkeleton() {
-    return (
-        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
-            <View className="flex-row items-center justify-between">
-                <View className="flex-1">
-                    <View className="h-5 w-36 bg-surface-border rounded mb-2 animate-pulse" />
-                    <View className="h-3 w-28 bg-surface-border/60 rounded animate-pulse" />
-                </View>
-                <View className="h-7 w-24 bg-surface-border rounded-full animate-pulse" />
-            </View>
-        </View>
-    );
+const AMOUNT = new Intl.NumberFormat('en-KE', { maximumFractionDigits: 0 });
+
+/** Owing money is the state worth flagging; settled is quiet. */
+function balanceTone(balance: number): Tone {
+    if (balance > 0) return 'warn';
+    if (balance < 0) return 'danger';
+    return 'success';
 }
 
-// Individual supplier card — memoized for FlashList performance
 const SupplierCard = memo(function SupplierCard({
     supplier,
     onDelete,
     onEdit,
-    isDeleting,
 }: {
     supplier: SupplierResource;
     onDelete: (id: string) => void;
     onEdit: (supplier: SupplierResource) => void;
-    isDeleting: boolean;
 }) {
-    const handleDelete = useCallback(() => {
-        onDelete(supplier.id);
-    }, [supplier.id, onDelete]);
-
-    const handleEdit = useCallback(() => {
-        onEdit(supplier);
-    }, [supplier, onEdit]);
-
-    const balanceColor =
-        supplier.current_balance > 0
-            ? 'text-amber-400'
-            : supplier.current_balance < 0
-                ? 'text-accent'
-                : 'text-emerald-400';
-
-    const balanceBgColor =
-        supplier.current_balance > 0
-            ? 'bg-amber-500/15'
-            : supplier.current_balance < 0
-                ? 'bg-accent/15'
-                : 'bg-emerald-500/15';
+    const handleDelete = useCallback(() => onDelete(supplier.id), [supplier.id, onDelete]);
+    const handleEdit = useCallback(() => onEdit(supplier), [supplier, onEdit]);
 
     return (
-        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
-            <View className="flex-row items-start justify-between">
-                <View className="flex-1 mr-3">
-                    <View className="flex-row items-center mb-1.5">
-                        <View className="w-8 h-8 rounded-lg bg-sky-500/15 items-center justify-center mr-2.5">
-                            <Truck size={16} color="#38bdf8" />
-                        </View>
-                        <Text className="text-ink font-semibold text-base">{supplier.name}</Text>
-                    </View>
-
-                    {/* Contact info row */}
-                    <View className="flex-row items-center flex-wrap ml-[42px] gap-3">
-                        {supplier.email ? (
-                            <View className="flex-row items-center">
-                                <Mail size={12} color="#5c5c6b" />
-                                <Text className="text-ink-muted text-xs ml-1">{supplier.email}</Text>
-                            </View>
-                        ) : null}
-                        {supplier.phone ? (
-                            <View className="flex-row items-center">
-                                <Phone size={12} color="#5c5c6b" />
-                                <Text className="text-ink-muted text-xs ml-1">{supplier.phone}</Text>
-                            </View>
-                        ) : null}
-                    </View>
-                </View>
-
-                <View className="items-end gap-2">
-                    {/* Balance badge */}
-                    <View className={`flex-row items-center px-2.5 py-1 rounded-full ${balanceBgColor}`}>
-                        <Text className={`text-xs font-bold ml-0.5 font-mono ${balanceColor}`}>
-                            KES {Math.abs(supplier.current_balance).toLocaleString()}
-                        </Text>
-                    </View>
-
-                    {/* Actions */}
-                    <View className="flex-row items-center gap-1.5">
-                        <Pressable
-                            onPress={handleEdit}
-                            className="p-2 bg-brand-subtle rounded-lg active:opacity-70"
-                        >
-                            <Edit2 size={14} color="#040273" />
-                        </Pressable>
-                        <Pressable
-                            onPress={handleDelete}
-                            disabled={isDeleting}
-                            className="p-2 bg-accent-subtle rounded-lg active:opacity-70"
-                        >
-                            <Trash2 size={14} color={isDeleting ? '#8b8b99' : '#bf0a30'} />
-                        </Pressable>
-                    </View>
-                </View>
-            </View>
-        </View>
+        <EntityCard
+            Icon={Truck}
+            title={supplier.name}
+            badge={{
+                label: `KES ${AMOUNT.format(Math.abs(supplier.current_balance))}`,
+                tone: balanceTone(supplier.current_balance),
+                mono: true,
+            }}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+        >
+            {supplier.email || supplier.phone ? (
+                <MetaRow>
+                    {supplier.email ? <Meta Icon={Mail} text={supplier.email} /> : null}
+                    {supplier.phone ? <Meta Icon={Phone} text={supplier.phone} /> : null}
+                </MetaRow>
+            ) : null}
+        </EntityCard>
     );
 });
 
@@ -121,76 +56,35 @@ interface SuppliersListProps {
 export function SuppliersList({ onAddSupplier, onEditSupplier, onDeleteSupplier }: SuppliersListProps) {
     const { data: creditorsResponse, isLoading, refetch, isRefetching } = useCreditorsIndex();
 
-    const handleDelete = useCallback((id: string) => {
-        onDeleteSupplier?.(id);
-    }, [onDeleteSupplier]);
+    const handleDelete = useCallback((id: string) => onDeleteSupplier?.(id), [onDeleteSupplier]);
+    const handleEdit = useCallback(
+        (supplier: SupplierResource) => onEditSupplier?.(supplier),
+        [onEditSupplier]
+    );
 
-    const handleEdit = useCallback((supplier: SupplierResource) => {
-        onEditSupplier?.(supplier);
-    }, [onEditSupplier]);
+    const renderItem = useCallback(
+        (item: SupplierResource) => (
+            <SupplierCard supplier={item} onDelete={handleDelete} onEdit={handleEdit} />
+        ),
+        [handleDelete, handleEdit]
+    );
 
-    const renderItem = useCallback(({ item }: ListRenderItemInfo<SupplierResource>) => (
-        <SupplierCard
-            supplier={item}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-            isDeleting={false}
-        />
-    ), [handleDelete, handleEdit]);
-
-    const keyExtractor = useCallback((item: SupplierResource) => item.id, []);
-
-    // Extract data safely
     const suppliers = (creditorsResponse as CreditorsIndex200 | undefined)?.data ?? [];
 
-    if (isLoading) {
-        return (
-            <View>
-                <SupplierCardSkeleton />
-                <SupplierCardSkeleton />
-                <SupplierCardSkeleton />
-            </View>
-        );
-    }
-
     return (
-        <View className="flex-1">
-            {/* Header with Add Button */}
-            <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-ink-muted text-sm">
-                    {suppliers.length} supplier{suppliers.length !== 1 ? 's' : ''}
-                </Text>
-                {onAddSupplier ? (
-                    <Pressable
-                        onPress={onAddSupplier}
-                        className="flex-row items-center px-3 py-2 bg-sky-500 rounded-lg active:opacity-80"
-                    >
-                        <Plus size={16} color="#ffffff" />
-                        <Text className="text-ink font-medium text-sm ml-1">Add Supplier</Text>
-                    </Pressable>
-                ) : null}
-            </View>
-
-            {suppliers.length === 0 ? (
-                <View className="bg-surface-sunken border border-surface-border rounded-xl p-8 items-center">
-                    <Truck size={48} color="#5c5c6b" />
-                    <Text className="text-ink-muted text-lg mt-4">No suppliers found</Text>
-                    <Text className="text-ink-muted text-sm mt-1">Add a supplier to get started</Text>
-                </View>
-            ) : (
-                <FlashList
-                    data={suppliers}
-                    renderItem={renderItem}
-                    keyExtractor={keyExtractor}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={isRefetching}
-                            onRefresh={refetch}
-                            tintColor="#8b8b99"
-                        />
-                    }
-                />
-            )}
-        </View>
+        <EntityList
+            items={suppliers}
+            isLoading={isLoading}
+            isRefetching={isRefetching}
+            onRefresh={refetch}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            noun="supplier"
+            addLabel="Add supplier"
+            onAdd={onAddSupplier}
+            Icon={Truck}
+            emptyTitle="No suppliers yet"
+            emptyHint="Suppliers are who deliveries are bought from, on credit or cash."
+        />
     );
 }
