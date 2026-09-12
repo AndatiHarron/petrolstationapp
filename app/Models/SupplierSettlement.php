@@ -13,15 +13,14 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 /**
- * A payment clearing part or all of a customer's credit balance.
+ * A payment reducing what the station owes a supplier.
  *
- * The manager who takes the money records it; an admin approves it. The
- * customer's balance moves only on approval, so the person handling cash cannot
- * also be the one who writes down that it arrived.
+ * Recorded by whoever pays, approved by an admin. See ApprovableSettlement for
+ * the approval mechanics, which are shared with customer credit.
  */
-class CreditSettlement extends Model
+class SupplierSettlement extends Model
 {
-    /** @use HasFactory<\Database\Factories\CreditSettlementFactory> */
+    /** @use HasFactory<\Database\Factories\SupplierSettlementFactory> */
     use ApprovableSettlement, BelongsToOrganization, HasFactory, HasUuids, LogsActivity, SoftDeletes;
 
     protected $guarded = [];
@@ -43,12 +42,17 @@ class CreditSettlement extends Model
             ->logOnly(['status', 'amount', 'method', 'approved_by_user_id', 'rejection_reason'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(fn (string $eventName) => "Credit settlement was {$eventName}");
+            ->setDescriptionForEvent(fn (string $eventName) => "Supplier payment was {$eventName}");
     }
 
-    public function customer(): BelongsTo
+    protected function balanceHolder(): Model
     {
-        return $this->belongsTo(Customer::class);
+        return $this->supplier;
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function station(): BelongsTo
@@ -64,10 +68,5 @@ class CreditSettlement extends Model
     public function approvedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by_user_id');
-    }
-
-    protected function balanceHolder(): Model
-    {
-        return $this->customer;
     }
 }
