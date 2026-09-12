@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { LogoutButton } from '@/components/logout-button';
 
 interface StationManagerHeaderProps {
     isShiftActive?: boolean;
@@ -46,8 +45,6 @@ export function StationManagerHeader({ isShiftActive = false }: StationManagerHe
                             {isShiftActive ? 'Open' : 'Off'}
                         </Text>
                     </View>
-
-                    <LogoutButton compact />
                 </View>
             </View>
         </View>

@@ -392,7 +392,7 @@ export default function InfrastructureTab() {
     return (
         <View className="flex-1 bg-surface-sunken">
             <StatusBar style="light" backgroundColor="#ffffff" />
-            <SafeAreaView className="flex-1">
+            <SafeAreaView className="flex-1" edges={['left', 'right']}>
                 {/* Header */}
                 <View className="px-4 mb-4 mt-4">
                     <Text className="text-2xl font-bold text-ink">Infrastructure</Text>

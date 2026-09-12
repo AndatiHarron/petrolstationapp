@@ -156,7 +156,7 @@ export default function InventoryTab() {
     return (
         <View className="flex-1 bg-surface-sunken">
             <StatusBar style="light" backgroundColor="#ffffff" />
-            <SafeAreaView className="flex-1">
+            <SafeAreaView className="flex-1" edges={['left', 'right']}>
                 {/* Header */}
                 <View className="px-4 py-4 flex-row justify-between items-center border-b border-surface-border">
                     <View className="flex-row items-center gap-2">

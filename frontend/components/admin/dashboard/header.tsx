@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { LogoutButton } from '@/components/logout-button';
 
 export function AdminHeader() {
     const currentDate = new Date().toLocaleDateString('en-GB', {
@@ -16,15 +15,11 @@ export function AdminHeader() {
                 {currentDate}
             </Text>
 
-            <View className="flex-row items-start justify-between gap-3">
-                <View className="flex-1">
-                    <Text className="text-ink text-2xl font-bold">Business Intelligence</Text>
-                    <Text className="text-ink-muted mt-1 text-sm">
-                        Financial oversight and operational integrity
-                    </Text>
-                </View>
-
-                <LogoutButton />
+            <View>
+                <Text className="text-ink text-2xl font-bold">Business Intelligence</Text>
+                <Text className="text-ink-muted mt-1 text-sm">
+                    Financial oversight and operational integrity
+                </Text>
             </View>
         </View>
     );

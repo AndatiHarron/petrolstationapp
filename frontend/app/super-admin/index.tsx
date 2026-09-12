@@ -34,7 +34,7 @@ export default function SuperAdminDashboard() {
     return (
         <View className="flex-1 bg-white">
             <StatusBar style="dark" backgroundColor="#ffffff" />
-            <SafeAreaView className="flex-1">
+            <SafeAreaView className="flex-1" edges={['left', 'right']}>
                 <Animated.ScrollView
                     className="flex-1 px-4"
                     contentContainerStyle={{ paddingBottom: 40 }}
