@@ -4,7 +4,12 @@ import { LineChart } from 'react-native-gifted-charts';
 import { useReportVarianceTrend } from '../../../features/api/report/report';
 import { ChartCard } from './chart-card';
 
-const CHART_WIDTH = Dimensions.get('window').width - 64;
+const CHART_WIDTH = Dimensions.get('window').width - 104;
+
+/** Plot box geometry. Section height and point spacing are kept equal so the
+ *  gridlines form squares — graph-paper ruling rather than wide flat bands. */
+const CELL = 34;
+const MAX_SECTIONS = 4;
 
 // ─── Types ────────────────────────────────────────────────────────
 interface VarianceDataPoint {
@@ -13,10 +18,16 @@ interface VarianceDataPoint {
 }
 
 // ─── Colors ───────────────────────────────────────────────────────
+// Variance is signed, so this is a diverging encoding: one hue each side of a
+// neutral zero line. Grid and axes stay recessive so the data reads first.
 const COLORS = {
-    variance: '#3b82f6',
-    positive: '#10b981',
-    negative: '#ef4444',
+    line: '#4a49a0',
+    positive: '#040273',
+    negative: '#bf0a30',
+    grid: '#e6e6ee',
+    zero: '#c9c9d8',
+    axisText: '#5c5c6b',
+    labelText: '#8b8b99',
 };
 
 // ─── Format helpers ───────────────────────────────────────────────
@@ -31,18 +42,36 @@ function formatCurrency(value: number): string {
     return `KES ${value.toFixed(0)}`;
 }
 
+function formatAxis(value: number): string {
+    if (value === 0) return '0';
+    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
+    if (Math.abs(value) >= 1_000) return `${Math.round(value / 1_000)}K`;
+    return String(Math.round(value));
+}
+
+/** Round a span up to a readable 1 / 2 / 5 × 10ⁿ step. The step used to be
+ *  hardcoded at 5000, which forced the library to add sections until the real
+ *  values fitted — that is what made the plot grow tall enough to scroll. */
+function niceStep(span: number, sections: number): number {
+    if (span <= 0 || !Number.isFinite(span)) return 1;
+    const rough = span / sections;
+    const magnitude = 10 ** Math.floor(Math.log10(rough));
+    const normalised = rough / magnitude;
+    const snapped = normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10;
+    return snapped * magnitude;
+}
+
 // ─── Variance Trend Chart ─────────────────────────────────────────
 function VarianceTrendChart() {
     const { data: varianceResponse, isLoading, isError } = useReportVarianceTrend();
 
     const dataPoints = (varianceResponse as unknown as { data: VarianceDataPoint[] } | undefined)?.data;
 
-    const { lineData, summaryStats } = useMemo(() => {
+    const { lineData, summaryStats, axis } = useMemo(() => {
         if (!dataPoints || dataPoints.length === 0) {
-            return { lineData: [], summaryStats: null };
+            return { lineData: [], summaryStats: null, axis: null };
         }
 
-        // Sort by date
         const sorted = [...dataPoints].sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
@@ -56,21 +85,36 @@ function VarianceTrendChart() {
             };
         });
 
-        // Calculate summary stats
-        const values = sorted.map((p) => parseFloat(p.total_variance));
+        const values = line.map((p) => p.value);
         const total = values.reduce((sum, v) => sum + v, 0);
-        const avg = total / values.length;
-        const min = Math.min(...values);
-        const max = Math.max(...values);
+        const highest = Math.max(0, ...values);
+        const lowest = Math.min(0, ...values);
+
+        // Split the available sections between the two sides of zero in
+        // proportion to how far the data actually reaches each way. Each side
+        // keeps a floor of one section: an all-negative series (the common case
+        // here) would otherwise ask for zero sections above the axis, leaving the
+        // plot with no height to draw into.
+        const span = highest - lowest || 1;
+        const step = niceStep(span, MAX_SECTIONS);
+        const above = highest > 0 ? Math.ceil(highest / step) : 1;
+        const below = lowest < 0 ? Math.ceil(Math.abs(lowest) / step) : 0;
 
         return {
             lineData: line,
             summaryStats: {
                 totalVariance: total,
-                avgVariance: avg,
-                minVariance: min,
-                maxVariance: max,
+                avgVariance: total / values.length,
+                minVariance: Math.min(...values),
+                maxVariance: Math.max(...values),
                 dataPointCount: values.length,
+            },
+            axis: {
+                stepValue: step,
+                sectionsAbove: above,
+                sectionsBelow: below,
+                maxValue: step * above,
+                mostNegativeValue: -step * below,
             },
         };
     }, [dataPoints]);
@@ -78,74 +122,122 @@ function VarianceTrendChart() {
     return (
         <ChartCard
             title="Variance Trend"
-            subtitle="Total variance over time"
+            subtitle="Total variance per day (KES)"
             isLoading={isLoading}
             isError={isError}
             isEmpty={!dataPoints || dataPoints.length === 0}
             emptyMessage="No variance data available"
         >
-            {/* Summary KPIs */}
+            {/* Summary figures. Ink tokens carry the text; the sign carries meaning. */}
             {summaryStats ? (
-                <View className="flex-row gap-2 mb-4">
-                    <View className="flex-1 bg-blue-500/10 rounded-lg px-3 py-2">
-                        <Text className="text-slate-500 text-[9px] uppercase tracking-wider font-bold">Avg Variance</Text>
-                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.avgVariance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                <View className="flex-row gap-2 mb-3">
+                    <View className="flex-1 bg-surface-sunken rounded-lg px-3 py-2">
+                        <Text className="text-ink-faint text-[9px] uppercase tracking-wider font-bold">Avg / day</Text>
+                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.avgVariance >= 0 ? 'text-brand' : 'text-accent'}`}>
                             {formatCurrency(summaryStats.avgVariance)}
                         </Text>
                     </View>
-                    <View className="flex-1 bg-slate-700/30 rounded-lg px-3 py-2">
-                        <Text className="text-slate-500 text-[9px] uppercase tracking-wider font-bold">Total</Text>
-                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.totalVariance >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <View className="flex-1 bg-surface-sunken rounded-lg px-3 py-2">
+                        <Text className="text-ink-faint text-[9px] uppercase tracking-wider font-bold">Total</Text>
+                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.totalVariance >= 0 ? 'text-brand' : 'text-accent'}`}>
                             {formatCurrency(summaryStats.totalVariance)}
                         </Text>
                     </View>
-                    <View className="flex-1 bg-slate-700/30 rounded-lg px-3 py-2">
-                        <Text className="text-slate-500 text-[9px] uppercase tracking-wider font-bold">Data Points</Text>
-                        <Text className="text-white text-xs font-bold font-mono mt-0.5">
-                            {summaryStats.dataPointCount}
+                    <View className="flex-1 bg-surface-sunken rounded-lg px-3 py-2">
+                        <Text className="text-ink-faint text-[9px] uppercase tracking-wider font-bold">Worst day</Text>
+                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.minVariance >= 0 ? 'text-brand' : 'text-accent'}`}>
+                            {formatCurrency(summaryStats.minVariance)}
                         </Text>
                     </View>
                 </View>
             ) : null}
 
-            {/* Legend */}
-            <View className="flex-row gap-4 mb-3">
-                <View className="flex-row items-center gap-1.5">
-                    <View style={{ width: 12, height: 3, borderRadius: 2, backgroundColor: COLORS.variance }} />
-                    <Text className="text-slate-400 text-[10px]">Total Variance (KES)</Text>
-                </View>
-            </View>
-
-            {/* Chart */}
-            <View style={{ alignItems: 'center' }}>
+            {/*
+              No legend: there is a single series and the card title names it.
+              The old legend row, the per-point value labels and an oversized plot
+              were together making this section long enough to need scrolling.
+              Long histories now scroll sideways within the chart instead.
+            */}
+            {axis ? (
                 <LineChart
                     data={lineData}
-                    width={CHART_WIDTH - 40}
-                    height={120}
-                    color={COLORS.variance}
-                    dataPointsColor={COLORS.variance}
-                    dataPointsRadius={4}
+                    width={CHART_WIDTH}
+                    height={CELL * (axis.sectionsAbove + axis.sectionsBelow)}
+                    spacing={CELL + 4}
+                    initialSpacing={16}
+                    endSpacing={16}
+
+                    color={COLORS.line}
                     thickness={2}
-                    curved
-                    noOfSections={4}
-                    stepValue={5000}
+                    dataPointsRadius={4}
+                    curved={false}
+
+                    /* graph-paper ruling: horizontal rules + vertical lines = boxes */
+                    rulesColor={COLORS.grid}
+                    rulesThickness={1}
+                    showVerticalLines
+                    verticalLinesColor={COLORS.grid}
+                    verticalLinesThickness={1}
+
+                    /* zero is the reference this whole chart is read against */
+                    showReferenceLine1
+                    referenceLine1Position={0}
+                    referenceLine1Config={{
+                        color: COLORS.zero,
+                        thickness: 1.5,
+                        dashWidth: 0,
+                        dashGap: 0,
+                    }}
+
+                    stepValue={axis.stepValue}
+                    noOfSections={axis.sectionsAbove}
+                    noOfSectionsBelowXAxis={axis.sectionsBelow}
+                    maxValue={axis.maxValue}
+                    mostNegativeValue={axis.mostNegativeValue}
+                    formatYLabel={(label: string) => formatAxis(Number(label))}
+
                     yAxisThickness={0}
                     xAxisThickness={1}
-                    xAxisColor="#334155"
-                    xAxisLabelTextStyle={{ color: '#94a3b8', fontSize: 8 }}
-                    yAxisTextStyle={{ color: '#64748b', fontSize: 9 }}
-                    hideRules
+                    xAxisColor={COLORS.grid}
+                    yAxisTextStyle={{ color: COLORS.axisText, fontSize: 9 }}
+                    xAxisLabelTextStyle={{ color: COLORS.labelText, fontSize: 8 }}
+                    yAxisLabelWidth={34}
                     backgroundColor="transparent"
-                    isAnimated
-                    animationDuration={800}
-                    showVerticalLines
-                    verticalLinesColor="#1e293b"
-                    textShiftY={-4}
-                    textShiftX={-4}
-                    textFontSize={7}
-                    textColor="#94a3b8"
+
+                    scrollToEnd
+                    disableScroll={false}
+
+                    /* Touch a point to read its value, instead of printing a
+                       number above every one of them. */
+                    pointerConfig={{
+                        pointerStripHeight: CELL * (axis.sectionsAbove + axis.sectionsBelow),
+                        pointerStripColor: COLORS.zero,
+                        pointerStripWidth: 1,
+                        pointerColor: COLORS.line,
+                        radius: 5,
+                        activatePointersOnLongPress: false,
+                        autoAdjustPointerLabelPosition: true,
+                        pointerLabelWidth: 108,
+                        pointerLabelHeight: 44,
+                        pointerLabelComponent: (items: { value: number; label: string }[]) => {
+                            const item = items?.[0];
+                            if (!item) return null;
+                            return (
+                                <View className="bg-surface border border-surface-border rounded-lg px-2.5 py-1.5">
+                                    <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
+                                        {item.label}
+                                    </Text>
+                                    <Text
+                                        className={`text-xs font-mono font-bold mt-0.5 ${item.value >= 0 ? 'text-brand' : 'text-accent'}`}
+                                    >
+                                        {formatCurrency(item.value)}
+                                    </Text>
+                                </View>
+                            );
+                        },
+                    }}
                 />
-            </View>
+            ) : null}
         </ChartCard>
     );
 }
@@ -156,8 +248,8 @@ export function InventoryReports() {
         <View>
             {/* Section header */}
             <View className="mb-3 mt-2">
-                <Text className="text-white font-bold text-lg">Inventory Reports</Text>
-                <Text className="text-slate-500 text-xs">Stock & cash variance trends</Text>
+                <Text className="text-ink font-bold text-lg">Inventory Reports</Text>
+                <Text className="text-ink-muted text-xs">Stock &amp; cash variance trends</Text>
             </View>
 
             <VarianceTrendChart />

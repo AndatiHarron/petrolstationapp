@@ -14,17 +14,17 @@ const CHART_WIDTH = Dimensions.get('window').width - 64;
 
 // ─── Color Palette ────────────────────────────────────────────────
 const COLORS = {
-    sales: '#10b981',
+    sales: '#040273',
     costs: '#f59e0b',
-    taxes: '#ef4444',
-    netProfit: '#3b82f6',
-    taxCollected: '#10b981',
-    taxPaid: '#ef4444',
-    netTax: '#3b82f6',
-    bucket030: '#10b981',
+    taxes: '#bf0a30',
+    netProfit: '#4a49a0',
+    taxCollected: '#040273',
+    taxPaid: '#bf0a30',
+    netTax: '#4a49a0',
+    bucket030: '#040273',
     bucket3160: '#f59e0b',
     bucket6190: '#f97316',
-    bucket90: '#ef4444',
+    bucket90: '#bf0a30',
 };
 
 // ─── Format helpers ───────────────────────────────────────────────
@@ -48,7 +48,7 @@ function PLChart() {
                 label: 'Sales',
                 frontColor: COLORS.sales,
                 topLabelComponent: () => (
-                    <Text className="text-[8px] text-slate-400 mb-0.5">{formatCurrency(plData.sales)}</Text>
+                    <Text className="text-[8px] text-ink-muted mb-0.5">{formatCurrency(plData.sales)}</Text>
                 ),
             },
             {
@@ -56,7 +56,7 @@ function PLChart() {
                 label: 'Costs',
                 frontColor: COLORS.costs,
                 topLabelComponent: () => (
-                    <Text className="text-[8px] text-slate-400 mb-0.5">{formatCurrency(plData.costs)}</Text>
+                    <Text className="text-[8px] text-ink-muted mb-0.5">{formatCurrency(plData.costs)}</Text>
                 ),
             },
             {
@@ -64,7 +64,7 @@ function PLChart() {
                 label: 'Taxes',
                 frontColor: COLORS.taxes,
                 topLabelComponent: () => (
-                    <Text className="text-[8px] text-slate-400 mb-0.5">{formatCurrency(plData.taxes)}</Text>
+                    <Text className="text-[8px] text-ink-muted mb-0.5">{formatCurrency(plData.taxes)}</Text>
                 ),
             },
             {
@@ -72,7 +72,7 @@ function PLChart() {
                 label: 'Profit',
                 frontColor: COLORS.netProfit,
                 topLabelComponent: () => (
-                    <Text className="text-[8px] text-slate-400 mb-0.5">{formatCurrency(plData.net_profit)}</Text>
+                    <Text className="text-[8px] text-ink-muted mb-0.5">{formatCurrency(plData.net_profit)}</Text>
                 ),
             },
         ];
@@ -88,7 +88,7 @@ function PLChart() {
         >
             {/* Summary row */}
             <View className="flex-row flex-wrap gap-2 mb-4">
-                <SummaryBadge label="Sales" value={formatCurrency(plData?.sales ?? 0)} color="text-emerald-400" bgColor="bg-emerald-500/10" />
+                <SummaryBadge label="Sales" value={formatCurrency(plData?.sales ?? 0)} color="text-brand" bgColor="bg-emerald-500/10" />
                 <SummaryBadge label="Costs" value={formatCurrency(plData?.costs ?? 0)} color="text-amber-400" bgColor="bg-amber-500/10" />
                 <SummaryBadge label="Net Profit" value={formatCurrency(plData?.net_profit ?? 0)} color="text-blue-400" bgColor="bg-blue-500/10" />
             </View>
@@ -99,13 +99,12 @@ function PLChart() {
                     width={CHART_WIDTH - 40}
                     barWidth={40}
                     spacing={20}
-                    roundedTop
                     noOfSections={4}
                     yAxisThickness={0}
                     xAxisThickness={1}
-                    xAxisColor="#334155"
-                    xAxisLabelTextStyle={{ color: '#94a3b8', fontSize: 10 }}
-                    yAxisTextStyle={{ color: '#64748b', fontSize: 9 }}
+                    xAxisColor="#e6e6ee"
+                    xAxisLabelTextStyle={{ color: '#8b8b99', fontSize: 10 }}
+                    yAxisTextStyle={{ color: '#5c5c6b', fontSize: 9 }}
                     hideRules
                     backgroundColor="transparent"
                     isAnimated
@@ -139,8 +138,8 @@ function TaxSummaryChart() {
         >
             {/* KPI row */}
             <View className="flex-row gap-2 mb-4">
-                <SummaryBadge label="Collected" value={formatCurrency(taxData?.tax_collected ?? 0)} color="text-emerald-400" bgColor="bg-emerald-500/10" />
-                <SummaryBadge label="Paid" value={formatCurrency(taxData?.tax_paid ?? 0)} color="text-red-400" bgColor="bg-red-500/10" />
+                <SummaryBadge label="Collected" value={formatCurrency(taxData?.tax_collected ?? 0)} color="text-brand" bgColor="bg-emerald-500/10" />
+                <SummaryBadge label="Paid" value={formatCurrency(taxData?.tax_paid ?? 0)} color="text-accent" bgColor="bg-accent-subtle" />
                 <SummaryBadge label="Net" value={formatCurrency(taxData?.net_tax ?? 0)} color="text-blue-400" bgColor="bg-blue-500/10" />
             </View>
 
@@ -151,11 +150,11 @@ function TaxSummaryChart() {
                         donut
                         innerRadius={50}
                         radius={70}
-                        innerCircleColor="#1e293b"
+                        innerCircleColor="#f7f7fa"
                         centerLabelComponent={() => (
                             <View style={{ alignItems: 'center' }}>
-                                <Text className="text-slate-400 text-[9px]">Net Tax</Text>
-                                <Text className="text-white text-xs font-bold">{formatCurrency(taxData?.net_tax ?? 0)}</Text>
+                                <Text className="text-ink-muted text-[9px]">Net Tax</Text>
+                                <Text className="text-ink text-xs font-bold">{formatCurrency(taxData?.net_tax ?? 0)}</Text>
                             </View>
                         )}
                     />
@@ -216,13 +215,12 @@ function DebtAgingChart() {
                     width={Math.max(CHART_WIDTH - 40, stackData.length * 60)}
                     barWidth={32}
                     spacing={16}
-                    roundedTop
                     noOfSections={4}
                     yAxisThickness={0}
                     xAxisThickness={1}
-                    xAxisColor="#334155"
-                    xAxisLabelTextStyle={{ color: '#94a3b8', fontSize: 9 }}
-                    yAxisTextStyle={{ color: '#64748b', fontSize: 9 }}
+                    xAxisColor="#e6e6ee"
+                    xAxisLabelTextStyle={{ color: '#8b8b99', fontSize: 9 }}
+                    yAxisTextStyle={{ color: '#5c5c6b', fontSize: 9 }}
                     formatYLabel={(val: string) => {
                         const num = parseFloat(val);
                         if (num >= 1000) return `${(num / 1000).toFixed(0)}K`;
@@ -247,7 +245,7 @@ function SummaryBadge({ label, value, color, bgColor }: {
 }) {
     return (
         <View className={`flex-1 ${bgColor} rounded-lg px-3 py-2`}>
-            <Text className="text-slate-500 text-[9px] uppercase tracking-wider font-bold">{label}</Text>
+            <Text className="text-ink-muted text-[9px] uppercase tracking-wider font-bold">{label}</Text>
             <Text className={`${color} text-xs font-bold font-mono mt-0.5`}>{value}</Text>
         </View>
     );
@@ -257,7 +255,7 @@ function LegendDot({ color, label }: { color: string; label: string }) {
     return (
         <View className="flex-row items-center gap-1.5">
             <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
-            <Text className="text-slate-400 text-[10px]">{label}</Text>
+            <Text className="text-ink-muted text-[10px]">{label}</Text>
         </View>
     );
 }
@@ -268,8 +266,8 @@ export function FinancialReports() {
         <View>
             {/* Section header */}
             <View className="mb-3 mt-2">
-                <Text className="text-white font-bold text-lg">Financial Reports</Text>
-                <Text className="text-slate-500 text-xs">Revenue, taxes & receivables</Text>
+                <Text className="text-ink font-bold text-lg">Financial Reports</Text>
+                <Text className="text-ink-muted text-xs">Revenue, taxes & receivables</Text>
             </View>
 
             <PLChart />
