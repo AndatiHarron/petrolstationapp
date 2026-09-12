@@ -76,7 +76,7 @@ const DESTINATIONS: Destination[] = [
     { href: '/super-admin', label: 'Organizations', hint: 'Tenants and admins', Icon: Users, roles: ['super-admin'] },
     { href: '/station-manager', label: 'My shift', hint: 'Open, run and close', Icon: LayoutDashboard, roles: ['manager'], bottomTabFor: ['manager'] },
     { href: '/station-manager/shifts', label: 'Shift history', hint: 'Past shifts', Icon: FileText, roles: ['manager'], bottomTabFor: ['manager'] },
-    { href: '/station-manager/liftings', label: 'Deliveries', hint: 'Record fuel received', Icon: Package, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/station-manager/liftings', label: 'Offloading', hint: 'Record fuel received', Icon: Package, roles: ['manager'], bottomTabFor: ['manager'] },
     { href: '/station-manager/customers', label: 'Customers', hint: 'Credit accounts', Icon: Users, roles: ['manager'], bottomTabFor: ['manager'] },
 ];
 

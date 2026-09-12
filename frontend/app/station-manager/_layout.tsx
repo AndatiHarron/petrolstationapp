@@ -51,7 +51,7 @@ export default function StationManagerLayout() {
                 <Tabs.Screen
                     name="liftings"
                     options={{
-                        title: 'Liftings',
+                        title: 'Offloading',
                         tabBarIcon: ({ color }) => <Droplets size={22} color={color} />,
                     }}
                 />

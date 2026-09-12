@@ -144,10 +144,10 @@ export default function LiftingsScreen() {
                 queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setIsCreateModalOpen(false);
                 resetForm();
-                Alert.alert("Success", "Lifting recorded successfully.");
+                Alert.alert("Success", "Offloading recorded successfully.");
             },
             onError: (error: any) => {
-                Alert.alert("Error", error?.response?.data?.message || "Failed to record lifting.");
+                Alert.alert("Error", error?.response?.data?.message || "Failed to record offloading.");
             }
         }
     });
@@ -163,10 +163,10 @@ export default function LiftingsScreen() {
                 queryClient.invalidateQueries({ queryKey: getReportDebtAgingQueryKey() });
                 queryClient.invalidateQueries({ queryKey: getReportVarianceTrendQueryKey() });
                 setSelectedLifting(null);
-                Alert.alert("Success", "Lifting deleted successfully.");
+                Alert.alert("Success", "Offloading deleted successfully.");
             },
             onError: (error: any) => {
-                Alert.alert("Error", error?.response?.data?.message || "Failed to delete lifting.");
+                Alert.alert("Error", error?.response?.data?.message || "Failed to delete offloading.");
             }
         }
     });
@@ -230,7 +230,7 @@ export default function LiftingsScreen() {
     if (error) {
         return (
             <View className="flex-1 items-center justify-center bg-white">
-                <Text className="text-ink text-lg font-bold">Error fetching liftings: {(error as Error).message}</Text>
+                <Text className="text-ink text-lg font-bold">Error fetching offloadings: {(error as Error).message}</Text>
             </View>
         );
     }
@@ -277,8 +277,8 @@ export default function LiftingsScreen() {
         if (!selectedLifting?.id) return;
 
         Alert.alert(
-            "Delete Lifting",
-            `Are you sure you want to delete this lifting record? This action cannot be undone.`,
+            "Delete offloading",
+            `Are you sure you want to delete this offloading record? This action cannot be undone.`,
             [
                 { text: "Cancel", style: "cancel" },
                 {
@@ -294,7 +294,7 @@ export default function LiftingsScreen() {
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
             <View className="px-4 py-4 flex-row justify-between items-center border-b border-gray-200 bg-white">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-2xl font-bold text-ink">Liftings</Text>
+                    <Text className="text-2xl font-bold text-ink">Offloading</Text>
                     {meta && (
                         <View className="bg-brand-subtle px-2 py-0.5 rounded-full">
                             <Text className="text-brand text-xs font-bold">{meta.total}</Text>
@@ -327,7 +327,7 @@ export default function LiftingsScreen() {
                         }
                         ListEmptyComponent={() => (
                             <View className="items-center justify-center p-10">
-                                <Text className="text-ink-muted text-center">No liftings found.</Text>
+                                <Text className="text-ink-muted text-center">No offloading recorded yet.</Text>
                                 <Text className="text-ink-faint text-center text-sm mt-2">Tap + to record a new fuel delivery.</Text>
                             </View>
                         )}
@@ -363,7 +363,7 @@ export default function LiftingsScreen() {
                 >
                     <View className="bg-surface-sunken border-t border-surface-border h-[90%] rounded-t-3xl shadow-2xl">
                         <View className="p-6 border-b border-surface-border flex-row justify-between items-center bg-surface-sunken rounded-t-3xl">
-                            <Text className="text-xl font-bold text-ink">New Lifting</Text>
+                            <Text className="text-xl font-bold text-ink">New offloading</Text>
                             <TouchableOpacity onPress={() => setIsCreateModalOpen(false)}>
                                 <Ionicons name="close-circle" size={28} color="#5c5c6b" />
                             </TouchableOpacity>
@@ -408,7 +408,7 @@ export default function LiftingsScreen() {
                             </View>
 
                             <InputField
-                                label="Lifting Date *"
+                                label="Offloading Date *"
                                 placeholder="YYYY-MM-DD"
                                 value={newItem.lifting_date || ''}
                                 onChangeText={(text) => setNewItem({ ...newItem, lifting_date: text })}
@@ -498,7 +498,7 @@ export default function LiftingsScreen() {
 
                             <View className="mt-6">
                                 <Button
-                                    title="Record Lifting"
+                                    title="Record Offloading"
                                     onPress={handleCreateSubmit}
                                     loading={createMutation.isPending}
                                 />
@@ -575,7 +575,7 @@ export default function LiftingsScreen() {
 
                         <View className="mt-auto pt-6 mb-10">
                             <Button
-                                title="Delete Lifting"
+                                title="Delete Offloading"
                                 variant="outline"
                                 onPress={handleDeletePress}
                                 loading={deleteMutation.isPending}
