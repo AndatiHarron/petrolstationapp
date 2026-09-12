@@ -143,36 +143,85 @@ function TaxSummaryChart({ filters }: { filters: ReportFilters }) {
             isError={isError}
             isEmpty={!taxData}
         >
-            {/* KPI row */}
-            <View className="flex-row gap-2 mb-4">
-                <SummaryBadge label="Collected" value={formatCurrency(taxData?.tax_collected ?? 0)} color="text-brand" bgColor="bg-brand-subtle" />
-                <SummaryBadge label="Paid" value={formatCurrency(taxData?.tax_paid ?? 0)} color="text-accent" bgColor="bg-accent-subtle" />
-                <SummaryBadge label="Net" value={formatCurrency(taxData?.net_tax ?? 0)} color="text-brand" bgColor="bg-brand-subtle" />
-            </View>
-
             {pieData.length > 0 ? (
-                <View style={{ alignItems: 'center' }}>
+                // Donut beside its figures rather than above them: the ring
+                // shows the split, the numbers give the amounts, and side by
+                // side they take one card instead of two screens.
+                <View className="flex-row items-center gap-4">
                     <PieChart
                         data={pieData}
                         donut
-                        innerRadius={50}
-                        radius={70}
-                        innerCircleColor="#f7f7fa"
+                        innerRadius={38}
+                        radius={56}
+                        innerCircleColor="#ffffff"
                         centerLabelComponent={() => (
                             <View style={{ alignItems: 'center' }}>
-                                <Text className="text-ink-muted text-[9px]">Net Tax</Text>
-                                <Text className="text-ink text-xs font-bold">{formatCurrency(taxData?.net_tax ?? 0)}</Text>
+                                <Text className="text-ink-faint text-[8px] font-bold uppercase">
+                                    Net
+                                </Text>
+                                <Text className="text-ink text-[11px] font-bold">
+                                    {formatCurrency(taxData?.net_tax ?? 0)}
+                                </Text>
                             </View>
                         )}
                     />
-                    {/* Legend */}
-                    <View className="flex-row gap-4 mt-3">
-                        <LegendDot color={COLORS.taxCollected} label="Collected" />
-                        <LegendDot color={COLORS.taxPaid} label="Paid" />
+
+                    <View className="min-w-0 flex-1 gap-2.5">
+                        <TaxLine
+                            colour={COLORS.taxCollected}
+                            label="Collected on sales"
+                            value={formatCurrency(taxData?.tax_collected ?? 0)}
+                        />
+                        <TaxLine
+                            colour={COLORS.taxPaid}
+                            label="Paid on purchases"
+                            value={formatCurrency(taxData?.tax_paid ?? 0)}
+                        />
+                        <View className="border-t border-surface-border pt-2">
+                            <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
+                                {(taxData?.net_tax ?? 0) >= 0 ? 'Net payable' : 'Net reclaimable'}
+                            </Text>
+                            <Text
+                                className="text-brand font-mono text-sm font-bold"
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
+                                {formatCurrency(Math.abs(taxData?.net_tax ?? 0))}
+                            </Text>
+                        </View>
                     </View>
                 </View>
-            ) : null}
+            ) : (
+                // It used to render nothing at all when both sides were zero,
+                // which reads as a broken card rather than a quiet period.
+                <View className="items-center rounded-xl bg-surface-sunken py-7">
+                    <Text className="text-ink-muted text-[13px]">No VAT in this period</Text>
+                </View>
+            )}
         </ChartCard>
+    );
+}
+
+
+function TaxLine({ colour, label, value }: { colour: string; label: string; value: string }) {
+    return (
+        <View className="flex-row items-center gap-2">
+            <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colour }} />
+            <View className="min-w-0 flex-1">
+                <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
+                    {label}
+                </Text>
+                <Text
+                    className="text-ink font-mono text-[13px] font-bold"
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.7}
+                >
+                    {value}
+                </Text>
+            </View>
+        </View>
     );
 }
 

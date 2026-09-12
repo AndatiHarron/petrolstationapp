@@ -1,113 +1,103 @@
 import React, { useMemo } from 'react';
 import { View, Text, Dimensions } from 'react-native';
-import { LineChart } from 'react-native-gifted-charts';
+import { BarChart } from 'react-native-gifted-charts';
 import { useVarianceTrend, formatPeriod, type ReportFilters } from '@/features/reports';
 import { ChartCard } from './chart-card';
 
-const CHART_WIDTH = Dimensions.get('window').width - 104;
+const CHART_WIDTH = Dimensions.get('window').width - 108;
 
-/** Plot box geometry. Section height and point spacing are kept equal so the
- *  gridlines form squares — graph-paper ruling rather than wide flat bands. */
-const CELL = 34;
+/**
+ * Plot geometry. Four sections of 26px is a 104px plot — tall enough to read a
+ * shape, short enough that the section does not dominate the page. The old
+ * square-celled grid grew with the data and pushed the card past a screen.
+ */
+const SECTION_HEIGHT = 26;
 const MAX_SECTIONS = 4;
+const BAR_WIDTH = 14;
+const BAR_GAP = 12;
 
-// ─── Types ────────────────────────────────────────────────────────
 interface VarianceDataPoint {
     date: string;
-    total_variance: string;
+    total_variance: string | number;
 }
 
-// ─── Colors ───────────────────────────────────────────────────────
-// Variance is signed, so this is a diverging encoding: one hue each side of a
-// neutral zero line. Grid and axes stay recessive so the data reads first.
+// Diverging: one hue each side of a neutral zero line, because the sign is the
+// whole message. Grid and axis stay recessive.
 const COLORS = {
-    line: '#4a49a0',
     positive: '#040273',
     negative: '#bf0a30',
-    grid: '#e6e6ee',
+    grid: '#eeeef4',
     zero: '#c9c9d8',
-    axisText: '#5c5c6b',
-    labelText: '#8b8b99',
+    axisText: '#8b8b99',
 };
 
-// ─── Format helpers ───────────────────────────────────────────────
-function formatDate(dateStr: string): string {
+function shortDate(dateStr: string): string {
     const date = new Date(dateStr);
     return `${date.getDate()}/${date.getMonth() + 1}`;
 }
 
-function formatCurrency(value: number): string {
-    if (Math.abs(value) >= 1_000_000) return `KES ${(value / 1_000_000).toFixed(1)}M`;
-    if (Math.abs(value) >= 1_000) return `KES ${(value / 1_000).toFixed(1)}K`;
-    return `KES ${value.toFixed(0)}`;
-}
-
-function formatAxis(value: number): string {
-    if (value === 0) return '0';
-    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-    if (Math.abs(value) >= 1_000) return `${Math.round(value / 1_000)}K`;
+function money(value: number): string {
+    const abs = Math.abs(value);
+    if (abs >= 1_000_000) return `${value < 0 ? '-' : ''}${(abs / 1_000_000).toFixed(1)}M`;
+    if (abs >= 1_000) return `${value < 0 ? '-' : ''}${(abs / 1_000).toFixed(1)}K`;
     return String(Math.round(value));
 }
 
-/** Round a span up to a readable 1 / 2 / 5 × 10ⁿ step. The step used to be
- *  hardcoded at 5000, which forced the library to add sections until the real
- *  values fitted — that is what made the plot grow tall enough to scroll. */
+/** Round a span up to a readable 1 / 2 / 5 × 10ⁿ step. */
 function niceStep(span: number, sections: number): number {
     if (span <= 0 || !Number.isFinite(span)) return 1;
     const rough = span / sections;
     const magnitude = 10 ** Math.floor(Math.log10(rough));
-    const normalised = rough / magnitude;
-    const snapped = normalised <= 1 ? 1 : normalised <= 2 ? 2 : normalised <= 5 ? 5 : 10;
-    return snapped * magnitude;
+    const n = rough / magnitude;
+    return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * magnitude;
 }
 
-// ─── Variance Trend Chart ─────────────────────────────────────────
+// ─── Variance trend ───────────────────────────────────────────────
 function VarianceTrendChart({ filters }: { filters: ReportFilters }) {
     const { data: varianceResponse, isLoading, isError } = useVarianceTrend(filters);
 
-    const dataPoints = (varianceResponse as unknown as { data: VarianceDataPoint[] } | undefined)?.data;
+    const points = (varianceResponse as unknown as { data: VarianceDataPoint[] } | undefined)?.data;
 
-    const { lineData, summaryStats, axis } = useMemo(() => {
-        if (!dataPoints || dataPoints.length === 0) {
-            return { lineData: [], summaryStats: null, axis: null };
+    const { bars, stats, axis } = useMemo(() => {
+        if (!points || points.length === 0) {
+            return { bars: [], stats: null, axis: null };
         }
 
-        const sorted = [...dataPoints].sort(
+        const sorted = [...points].sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
         );
 
-        const line = sorted.map((point) => {
-            const value = parseFloat(point.total_variance);
+        const values = sorted.map((point) => Number(point.total_variance) || 0);
+
+        // A day is a discrete bucket, not a point on a continuous line, so bars
+        // rather than a line: the sign reads instantly and short ranges do not
+        // pretend to be a trend.
+        const barData = sorted.map((point, i) => {
+            const value = values[i];
             return {
                 value,
-                label: formatDate(point.date),
-                dataPointColor: value >= 0 ? COLORS.positive : COLORS.negative,
+                label: shortDate(point.date),
+                frontColor: value < 0 ? COLORS.negative : COLORS.positive,
+                labelTextStyle: { color: COLORS.axisText, fontSize: 8 },
             };
         });
 
-        const values = line.map((p) => p.value);
         const total = values.reduce((sum, v) => sum + v, 0);
+        const worst = Math.min(...values);
         const highest = Math.max(0, ...values);
         const lowest = Math.min(0, ...values);
 
-        // Split the available sections between the two sides of zero in
-        // proportion to how far the data actually reaches each way. Each side
-        // keeps a floor of one section: an all-negative series (the common case
-        // here) would otherwise ask for zero sections above the axis, leaving the
-        // plot with no height to draw into.
-        const span = highest - lowest || 1;
-        const step = niceStep(span, MAX_SECTIONS);
+        const step = niceStep(highest - lowest || 1, MAX_SECTIONS);
         const above = highest > 0 ? Math.ceil(highest / step) : 1;
         const below = lowest < 0 ? Math.ceil(Math.abs(lowest) / step) : 0;
 
         return {
-            lineData: line,
-            summaryStats: {
-                totalVariance: total,
-                avgVariance: total / values.length,
-                minVariance: Math.min(...values),
-                maxVariance: Math.max(...values),
-                dataPointCount: values.length,
+            bars: barData,
+            stats: {
+                total,
+                worst,
+                days: values.length,
+                badDays: values.filter((v) => v < 0).length,
             },
             axis: {
                 stepValue: step,
@@ -115,141 +105,134 @@ function VarianceTrendChart({ filters }: { filters: ReportFilters }) {
                 sectionsBelow: below,
                 maxValue: step * above,
                 mostNegativeValue: -step * below,
+                height: SECTION_HEIGHT * (above + below),
             },
         };
-    }, [dataPoints]);
+    }, [points]);
 
     return (
         <ChartCard
-            title="Variance Trend"
-            subtitle="Total variance per day (KES)"
+            title="Variance trend"
+            subtitle={`Daily cash variance · ${formatPeriod(filters)}`}
             isLoading={isLoading}
             isError={isError}
-            isEmpty={!dataPoints || dataPoints.length === 0}
-            emptyMessage="No variance data available"
+            isEmpty={!points || points.length === 0}
+            emptyMessage="No shifts closed in this period"
         >
-            {/* Summary figures. Ink tokens carry the text; the sign carries meaning. */}
-            {summaryStats ? (
-                <View className="flex-row gap-2 mb-3">
-                    <View className="flex-1 bg-surface-sunken rounded-lg px-3 py-2">
-                        <Text className="text-ink-faint text-[9px] uppercase tracking-wider font-bold">Avg / day</Text>
-                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.avgVariance >= 0 ? 'text-brand' : 'text-accent'}`}>
-                            {formatCurrency(summaryStats.avgVariance)}
-                        </Text>
+            {stats ? (
+                <>
+                    {/* Three figures, one line. The old three-tile row took as
+                        much height as the plot it introduced. */}
+                    <View className="mb-3 flex-row items-baseline justify-between gap-2">
+                        <View className="min-w-0 flex-1">
+                            <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
+                                Total
+                            </Text>
+                            <Text
+                                className={`font-mono text-sm font-bold ${
+                                    stats.total < 0 ? 'text-accent' : 'text-brand'
+                                }`}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
+                                {money(stats.total)}
+                            </Text>
+                        </View>
+
+                        <View className="min-w-0 flex-1">
+                            <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
+                                Worst day
+                            </Text>
+                            <Text
+                                className={`font-mono text-sm font-bold ${
+                                    stats.worst < 0 ? 'text-accent' : 'text-brand'
+                                }`}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
+                                {money(stats.worst)}
+                            </Text>
+                        </View>
+
+                        <View className="min-w-0 flex-1">
+                            <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
+                                Short days
+                            </Text>
+                            <Text className="text-ink font-mono text-sm font-bold">
+                                {stats.badDays}
+                                <Text className="text-ink-faint text-[11px]"> / {stats.days}</Text>
+                            </Text>
+                        </View>
                     </View>
-                    <View className="flex-1 bg-surface-sunken rounded-lg px-3 py-2">
-                        <Text className="text-ink-faint text-[9px] uppercase tracking-wider font-bold">Total</Text>
-                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.totalVariance >= 0 ? 'text-brand' : 'text-accent'}`}>
-                            {formatCurrency(summaryStats.totalVariance)}
-                        </Text>
+
+                    {axis ? (
+                        <BarChart
+                            data={bars}
+                            width={CHART_WIDTH}
+                            height={axis.height}
+                            barWidth={BAR_WIDTH}
+                            spacing={BAR_GAP}
+                            initialSpacing={10}
+                            endSpacing={10}
+                            barBorderRadius={0}
+                            /* One faint rule per section, no vertical ruling:
+                               bars already mark the horizontal positions. */
+                            rulesColor={COLORS.grid}
+                            rulesThickness={1}
+                            /* Zero is the line the whole chart is read against. */
+                            showReferenceLine1
+                            referenceLine1Position={0}
+                            referenceLine1Config={{ color: COLORS.zero, thickness: 1 }}
+                            stepValue={axis.stepValue}
+                            noOfSections={axis.sectionsAbove}
+                            noOfSectionsBelowXAxis={axis.sectionsBelow}
+                            maxValue={axis.maxValue}
+                            mostNegativeValue={axis.mostNegativeValue}
+                            formatYLabel={(label: string) => money(Number(label))}
+                            yAxisThickness={0}
+                            xAxisThickness={1}
+                            xAxisColor={COLORS.grid}
+                            yAxisTextStyle={{ color: COLORS.axisText, fontSize: 8 }}
+                            yAxisLabelWidth={30}
+                            xAxisLabelTextStyle={{ color: COLORS.axisText, fontSize: 8 }}
+                            backgroundColor="transparent"
+                            isAnimated
+                            animationDuration={400}
+                            scrollAnimation={false}
+                        />
+                    ) : null}
+
+                    <View className="mt-2 flex-row items-center gap-3">
+                        <View className="flex-row items-center gap-1.5">
+                            <View
+                                style={{ width: 8, height: 8, backgroundColor: COLORS.negative }}
+                            />
+                            <Text className="text-ink-faint text-[10px]">Short</Text>
+                        </View>
+                        <View className="flex-row items-center gap-1.5">
+                            <View
+                                style={{ width: 8, height: 8, backgroundColor: COLORS.positive }}
+                            />
+                            <Text className="text-ink-faint text-[10px]">Over</Text>
+                        </View>
                     </View>
-                    <View className="flex-1 bg-surface-sunken rounded-lg px-3 py-2">
-                        <Text className="text-ink-faint text-[9px] uppercase tracking-wider font-bold">Worst day</Text>
-                        <Text className={`text-xs font-bold font-mono mt-0.5 ${summaryStats.minVariance >= 0 ? 'text-brand' : 'text-accent'}`}>
-                            {formatCurrency(summaryStats.minVariance)}
-                        </Text>
-                    </View>
-                </View>
-            ) : null}
-
-            {/*
-              No legend: there is a single series and the card title names it.
-              The old legend row, the per-point value labels and an oversized plot
-              were together making this section long enough to need scrolling.
-              Long histories now scroll sideways within the chart instead.
-            */}
-            {axis ? (
-                <LineChart
-                    data={lineData}
-                    width={CHART_WIDTH}
-                    height={CELL * (axis.sectionsAbove + axis.sectionsBelow)}
-                    spacing={CELL + 4}
-                    initialSpacing={16}
-                    endSpacing={16}
-
-                    color={COLORS.line}
-                    thickness={2}
-                    dataPointsRadius={4}
-                    curved={false}
-
-                    /* graph-paper ruling: horizontal rules + vertical lines = boxes */
-                    rulesColor={COLORS.grid}
-                    rulesThickness={1}
-                    showVerticalLines
-                    verticalLinesColor={COLORS.grid}
-                    verticalLinesThickness={1}
-
-                    /* zero is the reference this whole chart is read against */
-                    showReferenceLine1
-                    referenceLine1Position={0}
-                    referenceLine1Config={{
-                        color: COLORS.zero,
-                        thickness: 1.5,
-                        dashWidth: 0,
-                        dashGap: 0,
-                    }}
-
-                    stepValue={axis.stepValue}
-                    noOfSections={axis.sectionsAbove}
-                    noOfSectionsBelowXAxis={axis.sectionsBelow}
-                    maxValue={axis.maxValue}
-                    mostNegativeValue={axis.mostNegativeValue}
-                    formatYLabel={(label: string) => formatAxis(Number(label))}
-
-                    yAxisThickness={0}
-                    xAxisThickness={1}
-                    xAxisColor={COLORS.grid}
-                    yAxisTextStyle={{ color: COLORS.axisText, fontSize: 9 }}
-                    xAxisLabelTextStyle={{ color: COLORS.labelText, fontSize: 8 }}
-                    yAxisLabelWidth={34}
-                    backgroundColor="transparent"
-
-                    scrollToEnd
-                    disableScroll={false}
-
-                    /* Touch a point to read its value, instead of printing a
-                       number above every one of them. */
-                    pointerConfig={{
-                        pointerStripHeight: CELL * (axis.sectionsAbove + axis.sectionsBelow),
-                        pointerStripColor: COLORS.zero,
-                        pointerStripWidth: 1,
-                        pointerColor: COLORS.line,
-                        radius: 5,
-                        activatePointersOnLongPress: false,
-                        autoAdjustPointerLabelPosition: true,
-                        pointerLabelWidth: 108,
-                        pointerLabelHeight: 44,
-                        pointerLabelComponent: (items: { value: number; label: string }[]) => {
-                            const item = items?.[0];
-                            if (!item) return null;
-                            return (
-                                <View className="bg-surface border border-surface-border rounded-lg px-2.5 py-1.5">
-                                    <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
-                                        {item.label}
-                                    </Text>
-                                    <Text
-                                        className={`text-xs font-mono font-bold mt-0.5 ${item.value >= 0 ? 'text-brand' : 'text-accent'}`}
-                                    >
-                                        {formatCurrency(item.value)}
-                                    </Text>
-                                </View>
-                            );
-                        },
-                    }}
-                />
+                </>
             ) : null}
         </ChartCard>
     );
 }
 
-// ─── Main Export ──────────────────────────────────────────────────
+// ─── Main export ──────────────────────────────────────────────────
 export function InventoryReports({ filters }: { filters: ReportFilters }) {
     return (
         <View className="gap-3">
-            {/* Section header */}
             <View className="mb-2 mt-1">
                 <Text className="text-ink text-[15px] font-bold">Inventory</Text>
-                <Text className="text-ink-faint text-[11px]">Stock &amp; cash variance &middot; {formatPeriod(filters)}</Text>
+                <Text className="text-ink-faint text-[11px]">
+                    Stock &amp; cash variance
+                </Text>
             </View>
 
             <VarianceTrendChart filters={filters} />

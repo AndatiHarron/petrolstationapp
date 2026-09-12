@@ -14,6 +14,7 @@ import { useRouter, usePathname } from 'expo-router';
 import {
     Banknote,
     Building2,
+    ChevronRight,
     ClipboardList,
     FileText,
     LayoutDashboard,
@@ -30,6 +31,17 @@ import { LogoutButton } from '@/components/logout-button';
 const PANEL_WIDTH = Math.min(Math.round(Dimensions.get('window').width * 0.84), 336);
 const OPEN_MS = 240;
 const CLOSE_MS = 180;
+
+/** Rounding the free edge makes the panel read as a sheet over the page. */
+const PANEL_RADIUS = 26;
+
+// Tints over the navy header. Written as rgba rather than Tailwind opacity
+// modifiers so they resolve the same on both platforms.
+const ON_BRAND = {
+    chip: 'rgba(255,255,255,0.16)',
+    hairline: 'rgba(255,255,255,0.18)',
+    subdued: 'rgba(255,255,255,0.72)',
+};
 
 interface Destination {
     href: string;
@@ -54,18 +66,18 @@ interface Destination {
  * would refuse.
  */
 const DESTINATIONS: Destination[] = [
-    { href: '/admin', label: 'Dashboard', hint: 'Stock, prices and recent activity', Icon: LayoutDashboard, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
-    { href: '/admin/finance', label: 'Finance', hint: 'Shifts, credit sales and creditors', Icon: Banknote, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
-    { href: '/admin/reports', label: 'Reports', hint: 'End of day, monthly, credit, VAT', Icon: FileText, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
-    { href: '/admin/inventory', label: 'Stock', hint: 'Fuel deliveries and tank levels', Icon: Package, roles: ['admin', 'super-admin'] },
-    { href: '/admin/requests', label: 'Edit requests', hint: 'Approve corrections to locked shifts', Icon: ClipboardList, roles: ['admin', 'super-admin'] },
-    { href: '/admin/infrastructure', label: 'Setup', hint: 'Stations, tanks, pumps and products', Icon: Building2, roles: ['admin', 'super-admin'] },
-    { href: '/admin/system', label: 'System', hint: 'Users, roles and the activity log', Icon: Settings, roles: ['admin', 'super-admin'] },
-    { href: '/super-admin', label: 'Organizations', hint: 'Tenants and their administrators', Icon: Users, roles: ['super-admin'] },
-    { href: '/station-manager', label: 'My shift', hint: 'Open, run and close a shift', Icon: LayoutDashboard, roles: ['manager'], bottomTabFor: ['manager'] },
-    { href: '/station-manager/shifts', label: 'Shift history', hint: 'Past shifts and their variance', Icon: FileText, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/admin', label: 'Dashboard', hint: 'Stock and prices', Icon: LayoutDashboard, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
+    { href: '/admin/finance', label: 'Finance', hint: 'Shifts and credit', Icon: Banknote, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
+    { href: '/admin/reports', label: 'Reports', hint: 'End of day, monthly', Icon: FileText, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
+    { href: '/admin/inventory', label: 'Stock', hint: 'Deliveries and tanks', Icon: Package, roles: ['admin', 'super-admin'] },
+    { href: '/admin/requests', label: 'Edit requests', hint: 'Approve corrections', Icon: ClipboardList, roles: ['admin', 'super-admin'] },
+    { href: '/admin/infrastructure', label: 'Setup', hint: 'Stations and pumps', Icon: Building2, roles: ['admin', 'super-admin'] },
+    { href: '/admin/system', label: 'System', hint: 'Users and audit log', Icon: Settings, roles: ['admin', 'super-admin'] },
+    { href: '/super-admin', label: 'Organizations', hint: 'Tenants and admins', Icon: Users, roles: ['super-admin'] },
+    { href: '/station-manager', label: 'My shift', hint: 'Open, run and close', Icon: LayoutDashboard, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/station-manager/shifts', label: 'Shift history', hint: 'Past shifts', Icon: FileText, roles: ['manager'], bottomTabFor: ['manager'] },
     { href: '/station-manager/liftings', label: 'Deliveries', hint: 'Record fuel received', Icon: Package, roles: ['manager'], bottomTabFor: ['manager'] },
-    { href: '/station-manager/customers', label: 'Customers', hint: 'Credit account holders', Icon: Users, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/station-manager/customers', label: 'Customers', hint: 'Credit accounts', Icon: Users, roles: ['manager'], bottomTabFor: ['manager'] },
 ];
 
 /** The menu trigger in the top bar. The avatar lives inside the drawer. */
@@ -154,7 +166,15 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                 <Animated.View
                     style={{
                         width: PANEL_WIDTH,
-                        paddingTop: insets.top,
+                        borderTopRightRadius: PANEL_RADIUS,
+                        borderBottomRightRadius: PANEL_RADIUS,
+                        // Clipped so the navy header takes the panel's corner.
+                        overflow: 'hidden',
+                        shadowColor: '#04026e',
+                        shadowOpacity: 0.18,
+                        shadowRadius: 24,
+                        shadowOffset: { width: 8, height: 0 },
+                        elevation: 16,
                         transform: [
                             {
                                 translateX: slide.interpolate({
@@ -164,35 +184,67 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                             },
                         ],
                     }}
-                    className="h-full border-r border-surface-border bg-surface"
+                    className="h-full bg-surface"
                 >
-                    <View className="flex-row items-center gap-3 border-b border-surface-border px-4 py-4">
-                        <Avatar name={name} size={44} />
-                        <View className="min-w-0 flex-1">
-                            <Text className="text-ink text-base font-bold" numberOfLines={1}>
-                                {name ?? 'Signed in'}
-                            </Text>
-                            <Text className="text-ink-muted text-[11px]" numberOfLines={1}>
-                                {email ?? ''}
-                            </Text>
-                            {roles.length > 0 ? (
-                                <Text className="text-ink-faint text-[10px] font-semibold uppercase tracking-wider">
-                                    {roles.join(' · ')}
-                                </Text>
-                            ) : null}
+                    {/* The identity block carries the brand colour, so the drawer
+                        opens with who you are rather than a white strip. */}
+                    <View style={{ paddingTop: insets.top + 16 }} className="bg-brand px-5 pb-5">
+                        <View className="flex-row items-start justify-between gap-3">
+                            <Avatar name={name} size={48} inverted />
+                            <Pressable
+                                onPress={onClose}
+                                accessibilityRole="button"
+                                accessibilityLabel="Close menu"
+                                hitSlop={10}
+                                style={{ backgroundColor: ON_BRAND.chip }}
+                                className="h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                            >
+                                <X size={16} color="#ffffff" />
+                            </Pressable>
                         </View>
-                        <Pressable
-                            onPress={onClose}
-                            accessibilityRole="button"
-                            accessibilityLabel="Close menu"
-                            hitSlop={8}
-                            className="shrink-0 rounded-full bg-surface-sunken p-2"
+
+                        <Text
+                            className="mt-3 text-[17px] font-bold text-white"
+                            numberOfLines={1}
                         >
-                            <X size={15} color="#5c5c6b" />
-                        </Pressable>
+                            {name ?? 'Signed in'}
+                        </Text>
+                        {email ? (
+                            <Text
+                                style={{ color: ON_BRAND.subdued }}
+                                className="text-[11px]"
+                                numberOfLines={1}
+                            >
+                                {email}
+                            </Text>
+                        ) : null}
+
+                        {roles.length > 0 ? (
+                            <View className="mt-3 flex-row flex-wrap gap-1.5">
+                                {roles.map((role) => (
+                                    <View
+                                        key={role}
+                                        style={{ backgroundColor: ON_BRAND.chip }}
+                                        className="rounded-full px-2.5 py-1"
+                                    >
+                                        <Text className="text-[9px] font-bold uppercase tracking-wider text-white">
+                                            {role.replace(/-/g, ' ')}
+                                        </Text>
+                                    </View>
+                                ))}
+                            </View>
+                        ) : null}
                     </View>
 
-                    <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
+                    <ScrollView
+                        className="flex-1"
+                        contentContainerStyle={{
+                            paddingHorizontal: 10,
+                            paddingTop: 14,
+                            paddingBottom: 16,
+                        }}
+                        showsVerticalScrollIndicator={false}
+                    >
                         {available.length === 0 ? (
                             <View className="items-center px-5 py-8">
                                 <Text className="text-ink-muted text-center text-xs">
@@ -200,43 +252,87 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                                 </Text>
                             </View>
                         ) : (
-                            available.map((destination) => {
-                                const active = pathname === destination.href;
-                                const { Icon } = destination;
+                            <>
+                                <Text className="text-ink-faint mb-2 px-3 text-[9px] font-bold uppercase tracking-widest">
+                                    Go to
+                                </Text>
 
-                                return (
-                                    <Pressable
-                                        key={destination.href}
-                                        onPress={() => go(destination.href)}
-                                        accessibilityRole="button"
-                                        className={`flex-row items-center gap-3 px-4 py-3 ${
-                                            active ? 'bg-brand-subtle' : 'active:bg-surface-sunken'
-                                        }`}
-                                    >
-                                        {/* A left rail marks the current screen without
-                                            relying on colour alone. */}
-                                        <View
-                                            style={{ width: 3, height: 28, borderRadius: 2 }}
-                                            className={active ? 'bg-brand' : 'bg-transparent'}
-                                        />
-                                        <Icon size={18} color={active ? '#040273' : '#5c5c6b'} />
-                                        <View className="min-w-0 flex-1">
-                                            <Text
-                                                className={`text-sm ${active ? 'text-brand font-bold' : 'text-ink font-semibold'}`}
+                                {available.map((destination) => {
+                                    const active = pathname === destination.href;
+                                    const { Icon } = destination;
+
+                                    return (
+                                        <Pressable
+                                            key={destination.href}
+                                            onPress={() => go(destination.href)}
+                                            accessibilityRole="button"
+                                            accessibilityState={{ selected: active }}
+                                            className={`mb-1 flex-row items-center gap-3 rounded-2xl px-3 py-2.5 ${
+                                                active
+                                                    ? 'bg-brand-subtle'
+                                                    : 'active:bg-surface-sunken'
+                                            }`}
+                                        >
+                                            {/* The current screen is marked by a filled
+                                                tile and a bolder label, not colour alone. */}
+                                            <View
+                                                style={{ width: 34, height: 34, borderRadius: 12 }}
+                                                className={`items-center justify-center ${
+                                                    active ? 'bg-brand' : 'bg-surface-sunken'
+                                                }`}
                                             >
-                                                {destination.label}
-                                            </Text>
-                                            <Text className="text-ink-faint text-[11px]" numberOfLines={1}>
-                                                {destination.hint}
-                                            </Text>
-                                        </View>
-                                    </Pressable>
-                                );
-                            })
+                                                <Icon
+                                                    size={17}
+                                                    color={active ? '#ffffff' : '#5c5c6b'}
+                                                />
+                                            </View>
+
+                                            <View className="min-w-0 flex-1">
+                                                <Text
+                                                    className={`text-[13.5px] ${
+                                                        active
+                                                            ? 'text-brand font-bold'
+                                                            : 'text-ink font-semibold'
+                                                    }`}
+                                                    numberOfLines={1}
+                                                >
+                                                    {destination.label}
+                                                </Text>
+                                                {/* Hints are written short enough to
+                                                    sit on one line; two lines is the
+                                                    backstop so a long one wraps
+                                                    instead of ending in an ellipsis. */}
+                                                <Text
+                                                    className="text-ink-faint text-[10.5px]"
+                                                    numberOfLines={2}
+                                                >
+                                                    {destination.hint}
+                                                </Text>
+                                            </View>
+
+                                            <ChevronRight
+                                                size={15}
+                                                color={active ? '#040273' : '#c9c9d8'}
+                                            />
+                                        </Pressable>
+                                    );
+                                })}
+                            </>
                         )}
                     </ScrollView>
 
-                    <View className="flex-row items-center gap-3 border-t border-surface-border px-4 py-3">
+                    <View
+                        style={{ paddingBottom: insets.bottom + 12 }}
+                        className="flex-row items-center gap-3 border-t border-surface-border bg-surface-sunken px-4 pt-3"
+                    >
+                        <View className="min-w-0 flex-1">
+                            <Text className="text-ink text-[11px] font-bold">
+                                Petrol Integrity
+                            </Text>
+                            <Text className="text-ink-faint text-[10px]" numberOfLines={1}>
+                                Signed in on this device
+                            </Text>
+                        </View>
                         <LogoutButton />
                     </View>
                 </Animated.View>
