@@ -59,7 +59,7 @@ export const LoginForm = () => {
 
 
   return (
-    <View className="w-full gap-5">
+    <View className="w-full gap-4">
       <form.Field name="email">
         {(field) => (
           <InputField
@@ -122,8 +122,9 @@ export const LoginForm = () => {
         entering={FadeInDown.delay(400).duration(400).springify()}
         className="items-center"
       >
-        <Text className="text-sm font-medium text-ink-muted">
-          Forgot your password? <Text className="font-semibold text-ink-muted">Get help</Text>
+        <Text className="text-ink-muted text-xs">
+          Forgot your password?{' '}
+          <Text className="text-brand font-semibold">Get help</Text>
         </Text>
       </Animated.View>
     </View>
