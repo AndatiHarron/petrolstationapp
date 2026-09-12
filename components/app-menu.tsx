@@ -17,6 +17,7 @@ import {
     ClipboardList,
     FileText,
     LayoutDashboard,
+    Menu,
     Package,
     Settings,
     Users,
@@ -61,13 +62,9 @@ const DESTINATIONS: Destination[] = [
     { href: '/station-manager/customers', label: 'Customers', hint: 'Credit account holders', Icon: Users, roles: ['manager'] },
 ];
 
-/**
- * The menu trigger: a circular initials avatar rather than a hamburger, so the
- * control reads as "you and your places" rather than an anonymous list icon.
- */
+/** The menu trigger in the top bar. The avatar lives inside the drawer. */
 export function AppMenuButton() {
     const [open, setOpen] = useState(false);
-    const { name } = useRoles();
 
     return (
         <>
@@ -76,9 +73,9 @@ export function AppMenuButton() {
                 accessibilityRole="button"
                 accessibilityLabel="Open menu"
                 hitSlop={10}
-                className="rounded-full active:opacity-70"
+                className="h-9 w-9 items-center justify-center rounded-full active:bg-surface-sunken"
             >
-                <Avatar name={name} size={34} />
+                <Menu size={22} color="#040273" />
             </Pressable>
 
             <AppDrawer visible={open} onClose={() => setOpen(false)} />
