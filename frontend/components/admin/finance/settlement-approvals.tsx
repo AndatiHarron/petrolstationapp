@@ -7,6 +7,7 @@ import {
     useRejectSettlement,
     useSettlements,
     type Settlement,
+    type SettlementStatus,
 } from '@/features/settlements';
 import { getApiErrorMessage } from '@/lib/api-error';
 
@@ -21,17 +22,35 @@ const METHOD_LABELS: Record<string, string> = {
     cheque: 'Cheque',
 };
 
+const STATUS_STYLES: Record<SettlementStatus, { pill: string; text: string; label: string }> = {
+    PENDING: { pill: 'bg-amber-50', text: 'text-amber-700', label: 'Awaiting approval' },
+    APPROVED: { pill: 'bg-emerald-50', text: 'text-emerald-700', label: 'Approved' },
+    REJECTED: { pill: 'bg-accent-subtle', text: 'text-accent', label: 'Rejected' },
+};
+
+export type SettlementFilter = 'all' | 'pending' | 'approved' | 'rejected';
+
+interface SettlementApprovalsProps {
+    /** Follows the screen's filter chips, so an approved payment stays visible. */
+    filter?: SettlementFilter;
+}
+
 /**
- * Admin approval of the payments managers have recorded against credit
- * customers. Approving is what actually reduces the customer's balance, so the
- * effect is stated on each row before the button is pressed.
+ * Admin review of the payments managers have recorded against credit customers.
+ *
+ * Approving is what actually reduces the customer's balance, so pending rows
+ * state the effect before the button is pressed, and settled rows keep showing
+ * what the balance moved from and to.
  */
-export function SettlementApprovals() {
-    const { data, isLoading, isError, refetch } = useSettlements('pending');
+export function SettlementApprovals({ filter = 'all' }: SettlementApprovalsProps) {
+    const { data, isLoading, isError, refetch } = useSettlements(
+        filter === 'all' ? undefined : filter
+    );
     const { mutateAsync: approve, isPending: approving } = useApproveSettlement();
     const [rejecting, setRejecting] = useState<Settlement | null>(null);
 
     const settlements = data?.data ?? [];
+    const pendingCount = settlements.filter((settlement) => settlement.status === 'PENDING').length;
 
     const onApprove = async (settlement: Settlement) => {
         try {
@@ -48,11 +67,11 @@ export function SettlementApprovals() {
 
     return (
         <View className="mb-6">
-            <View className="mb-3 flex-row items-center gap-2">
+            <View className="mb-1 flex-row items-center gap-2">
                 <Text className="text-ink text-xl font-bold">Credit payments</Text>
-                {settlements.length > 0 ? (
-                    <View className="rounded-full bg-brand-subtle px-2 py-0.5">
-                        <Text className="text-brand text-xs font-bold">{settlements.length}</Text>
+                {pendingCount > 0 ? (
+                    <View className="rounded-full bg-amber-50 px-2 py-0.5">
+                        <Text className="text-amber-700 text-xs font-bold">{pendingCount}</Text>
                     </View>
                 ) : null}
             </View>
@@ -75,82 +94,148 @@ export function SettlementApprovals() {
                 </Pressable>
             ) : settlements.length === 0 ? (
                 <View className="items-center rounded-xl bg-surface-sunken py-8">
-                    <Text className="text-ink-muted text-sm">Nothing awaiting approval</Text>
+                    <Text className="text-ink-muted text-sm">
+                        {filter === 'all' ? 'No credit payments yet' : `No ${filter} payments`}
+                    </Text>
                 </View>
             ) : (
                 <View className="gap-2">
-                    {settlements.map((settlement) => (
-                        <View
-                            key={settlement.id}
-                            className="rounded-xl border border-surface-border bg-surface p-4"
-                        >
-                            <View className="flex-row items-start justify-between gap-3">
-                                <View className="min-w-0 flex-1">
-                                    <Text className="text-ink text-sm font-bold" numberOfLines={1}>
-                                        {settlement.customer_name ?? 'Customer'}
-                                    </Text>
-                                    <Text className="text-ink-faint text-[11px]" numberOfLines={1}>
-                                        {METHOD_LABELS[settlement.method] ?? settlement.method}
-                                        {settlement.reference ? ` · ${settlement.reference}` : ''}
+                    {settlements.map((settlement) => {
+                        const status = STATUS_STYLES[settlement.status];
+                        const isPending = settlement.status === 'PENDING';
+
+                        // Pending rows project the effect; settled rows record it.
+                        const from = isPending
+                            ? settlement.customer_balance
+                            : (settlement.balance_before ?? settlement.customer_balance);
+                        const to = isPending
+                            ? Math.max(settlement.customer_balance - settlement.amount, 0)
+                            : (settlement.balance_after ?? from);
+
+                        return (
+                            <View
+                                key={settlement.id}
+                                className="rounded-xl border border-surface-border bg-surface p-4"
+                            >
+                                <View className="flex-row items-start justify-between gap-3">
+                                    <View className="min-w-0 flex-1">
+                                        <Text className="text-ink text-sm font-bold" numberOfLines={1}>
+                                            {settlement.customer_name ?? 'Customer'}
+                                        </Text>
+                                        <Text className="text-ink-faint text-[11px]" numberOfLines={1}>
+                                            {METHOD_LABELS[settlement.method] ?? settlement.method}
+                                            {settlement.reference ? ` · ${settlement.reference}` : ''}
+                                        </Text>
+                                    </View>
+                                    <Text
+                                        className="text-ink font-mono text-base font-bold"
+                                        style={{ maxWidth: '46%' }}
+                                        numberOfLines={1}
+                                        adjustsFontSizeToFit
+                                        minimumFontScale={0.7}
+                                    >
+                                        {money(settlement.amount)}
                                     </Text>
                                 </View>
-                                <Text
-                                    className="text-ink shrink-0 font-mono text-base font-bold"
-                                    numberOfLines={1}
-                                    adjustsFontSizeToFit
-                                    minimumFontScale={0.7}
-                                >
-                                    {money(settlement.amount)}
+
+                                <View className="mt-2 flex-row items-center gap-2">
+                                    <View className={`rounded-full px-2 py-0.5 ${status.pill}`}>
+                                        <Text
+                                            className={`text-[9px] font-bold uppercase tracking-wider ${status.text}`}
+                                        >
+                                            {status.label}
+                                        </Text>
+                                    </View>
+                                    {settlement.approved_by ? (
+                                        <Text className="text-ink-faint text-[10px]" numberOfLines={1}>
+                                            by {settlement.approved_by}
+                                        </Text>
+                                    ) : null}
+                                </View>
+
+                                <View className="mt-3 rounded-lg bg-surface-sunken px-3 py-2">
+                                    <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-wider">
+                                        {isPending
+                                            ? 'Balance after'
+                                            : settlement.status === 'APPROVED'
+                                              ? 'Balance moved'
+                                              : 'Balance unchanged'}
+                                    </Text>
+
+                                    {settlement.status === 'REJECTED' ? (
+                                        <Text className="text-ink-muted mt-0.5 font-mono text-xs font-bold">
+                                            {money(settlement.customer_balance)}
+                                        </Text>
+                                    ) : (
+                                        <View className="mt-0.5 flex-row items-baseline gap-1.5">
+                                            <Text className="text-ink-muted shrink font-mono text-xs" numberOfLines={1}>
+                                                {money(from)}
+                                            </Text>
+                                            <Text className="text-ink-faint shrink-0 text-xs">&rarr;</Text>
+                                            <Text
+                                                className="text-brand shrink font-mono text-xs font-bold"
+                                                numberOfLines={1}
+                                            >
+                                                {money(to)}
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+
+                                {settlement.rejection_reason ? (
+                                    <View className="mt-2 rounded-lg bg-accent-subtle px-3 py-2">
+                                        <Text className="text-accent text-[11px] leading-4">
+                                            {settlement.rejection_reason}
+                                        </Text>
+                                    </View>
+                                ) : settlement.notes ? (
+                                    <Text className="text-ink-muted mt-2 text-[11px]">
+                                        {settlement.notes}
+                                    </Text>
+                                ) : null}
+
+                                <Text className="text-ink-faint mt-2 text-[10px]" numberOfLines={1}>
+                                    {settlement.recorded_by ?? 'Unknown'}
+                                    {settlement.station_name ? ` · ${settlement.station_name}` : ''}
+                                    {settlement.approved_at
+                                        ? ` · approved ${settlement.approved_at}`
+                                        : settlement.rejected_at
+                                          ? ` · rejected ${settlement.rejected_at}`
+                                          : settlement.recorded_at
+                                            ? ` · ${settlement.recorded_at}`
+                                            : ''}
                                 </Text>
+
+                                {/* Only a pending payment can still be decided. */}
+                                {isPending ? (
+                                    <View className="mt-3 flex-row gap-2">
+                                        <Pressable
+                                            onPress={() => onApprove(settlement)}
+                                            disabled={approving}
+                                            accessibilityRole="button"
+                                            accessibilityLabel={`Approve ${money(settlement.amount)} from ${settlement.customer_name}`}
+                                            className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-full bg-brand py-2.5 ${
+                                                approving ? 'opacity-50' : 'active:opacity-80'
+                                            }`}
+                                        >
+                                            <Check size={14} color="#ffffff" />
+                                            <Text className="text-white text-[11px] font-bold">Approve</Text>
+                                        </Pressable>
+
+                                        <Pressable
+                                            onPress={() => setRejecting(settlement)}
+                                            accessibilityRole="button"
+                                            accessibilityLabel="Reject payment"
+                                            className="flex-row items-center justify-center gap-1.5 rounded-full border border-accent/30 bg-accent-subtle px-4 py-2.5 active:opacity-80"
+                                        >
+                                            <X size={14} color="#bf0a30" />
+                                            <Text className="text-accent text-[11px] font-bold">Reject</Text>
+                                        </Pressable>
+                                    </View>
+                                ) : null}
                             </View>
-
-                            {/* State the effect before the decision is made. */}
-                            <View className="mt-3 flex-row items-baseline justify-between gap-2 rounded-lg bg-surface-sunken px-3 py-2">
-                                <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-wider">
-                                    Balance after
-                                </Text>
-                                <Text className="text-brand shrink font-mono text-xs font-bold" numberOfLines={1}>
-                                    {money(settlement.customer_balance)} &rarr;{' '}
-                                    {money(Math.max(settlement.customer_balance - settlement.amount, 0))}
-                                </Text>
-                            </View>
-
-                            {settlement.notes ? (
-                                <Text className="text-ink-muted mt-2 text-[11px]">{settlement.notes}</Text>
-                            ) : null}
-
-                            <Text className="text-ink-faint mt-2 text-[10px]">
-                                {settlement.recorded_by ?? 'Unknown'}
-                                {settlement.station_name ? ` · ${settlement.station_name}` : ''}
-                                {settlement.recorded_at ? ` · ${settlement.recorded_at}` : ''}
-                            </Text>
-
-                            <View className="mt-3 flex-row gap-2">
-                                <Pressable
-                                    onPress={() => onApprove(settlement)}
-                                    disabled={approving}
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`Approve ${money(settlement.amount)} from ${settlement.customer_name}`}
-                                    className={`flex-1 flex-row items-center justify-center gap-1.5 rounded-full bg-brand py-2.5 ${
-                                        approving ? 'opacity-50' : 'active:opacity-80'
-                                    }`}
-                                >
-                                    <Check size={14} color="#ffffff" />
-                                    <Text className="text-white text-[11px] font-bold">Approve</Text>
-                                </Pressable>
-
-                                <Pressable
-                                    onPress={() => setRejecting(settlement)}
-                                    accessibilityRole="button"
-                                    accessibilityLabel="Reject payment"
-                                    className="flex-row items-center justify-center gap-1.5 rounded-full border border-accent/30 bg-accent-subtle px-4 py-2.5 active:opacity-80"
-                                >
-                                    <X size={14} color="#bf0a30" />
-                                    <Text className="text-accent text-[11px] font-bold">Reject</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    ))}
+                        );
+                    })}
                 </View>
             )}
 

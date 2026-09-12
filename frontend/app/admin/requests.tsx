@@ -257,7 +257,7 @@ export default function AdminRequestsScreen() {
                         keyExtractor={(item) => item.id}
                         ListHeaderComponent={
                             <View className="mb-2">
-                                <SettlementApprovals />
+                                <SettlementApprovals filter={filterStatus} />
                                 <Text className="text-ink text-xl font-bold">Shift edit requests</Text>
                                 <Text className="text-ink-muted mt-1 text-xs">
                                     Corrections managers have asked to make to locked shifts.
