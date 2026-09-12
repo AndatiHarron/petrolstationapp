@@ -112,6 +112,18 @@ class Shift extends Model
         return $this->belongsTo(Station::class);
     }
 
+    /** The attendant who opened the shift. */
+    public function startedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'started_by_user_id');
+    }
+
+    /** The user who closed and reconciled it, once locked. */
+    public function lockedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'locked_by_user_id');
+    }
+
     public function meterReadings(): HasMany
     {
         return $this->hasMany(MeterReading::class);

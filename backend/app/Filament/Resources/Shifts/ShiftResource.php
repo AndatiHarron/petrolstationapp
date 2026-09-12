@@ -13,6 +13,7 @@ use App\Models\Tank;
 use App\Services\ShiftReconciliationService;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
@@ -25,7 +26,9 @@ use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -117,6 +120,35 @@ class ShiftResource extends Resource
                     ->options([
                         'LOCKED' => 'Pending Approval',
                         'APPROVED' => 'Approved',
+                        SelectFilter::make('station')
+                            ->relationship('station', 'name')
+                            ->searchable()
+                            ->preload(),
+
+                        SelectFilter::make('startedBy')
+                            ->relationship('startedBy', 'name')
+                            ->label('Attendant')
+                            ->searchable()
+                            ->preload(),
+
+                        Filter::make('started_at')
+                            ->label('Shift date')
+                            ->schema([
+                                DatePicker::make('from'),
+                                DatePicker::make('until'),
+                            ])
+                            ->query(fn ($query, array $data) => $query
+                                ->when($data['from'] ?? null, fn ($q, $date) => $q->whereDate('started_at', '>=', $date))
+                                ->when($data['until'] ?? null, fn ($q, $date) => $q->whereDate('started_at', '<=', $date))),
+
+                        // The reason most people open this table.
+                        Filter::make('has_variance')
+                            ->label('Has variance')
+                            ->query(fn ($query) => $query->where(fn ($q) => $q
+                                ->where('cash_variance', '!=', 0)
+                                ->orWhere('stock_variance_liters', '!=', 0))),
+
+                        TrashedFilter::make(),
                     ]),
             ])
             ->recordActions([

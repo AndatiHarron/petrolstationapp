@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Stations;
 use App\Filament\Resources\Stations\Pages\CreateStation;
 use App\Filament\Resources\Stations\Pages\EditStation;
 use App\Filament\Resources\Stations\Pages\ListStations;
-use App\Filament\Resources\Stations\Schemas\StationForm;
-use App\Filament\Resources\Stations\Tables\StationsTable;
 use App\Models\Station;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -17,6 +15,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class StationResource extends Resource
@@ -24,6 +23,7 @@ class StationResource extends Resource
     protected static ?string $model = Station::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Infrastructure';
 
     protected static ?string $recordTitleAttribute = 'station';
@@ -32,14 +32,14 @@ class StationResource extends Resource
     {
         return $schema->schema([
             TextInput::make('name')
-            ->required()
-            ->maxLength(255),
+                ->required()
+                ->maxLength(255),
 
             TextInput::make('location')
-            ->maxLength(255),
+                ->maxLength(255),
 
             Toggle::make('is_active')
-            ->required()
+                ->required(),
         ]);
     }
 
@@ -50,8 +50,16 @@ class StationResource extends Resource
             TextColumn::make('location')->searchable(),
             IconColumn::make('is_active')->boolean(),
         ])
+            ->filters([
+                SelectFilter::make('is_active')
+                    ->label('Status')
+                    ->options([
+                        '1' => 'Active',
+                        '0' => 'Inactive',
+                    ]),
+            ])
             ->recordActions([
-                EditAction::make()
+                EditAction::make(),
             ]);
     }
 
