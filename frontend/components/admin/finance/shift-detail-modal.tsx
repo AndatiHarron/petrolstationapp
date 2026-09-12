@@ -371,7 +371,9 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                 <View style={styles.shiftHeader}>
                                     <View style={styles.row}>
                                         <Clock size={20} color="#046c4e" />
-                                        <Text style={styles.stationName}>{shift.station_name}</Text>
+                                        <Text style={styles.stationName} numberOfLines={1}>
+                                            {shift.station_name}
+                                        </Text>
                                     </View>
                                     <Text style={styles.date}>{formattedDate}</Text>
                                     <View
@@ -399,21 +401,39 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                     <View style={styles.innerCard}>
                                         <View style={[styles.financialRow, styles.financialRowBorder]}>
                                             <Text style={styles.fieldLabel}>Expected</Text>
-                                            <Text style={styles.fieldValue}>{formattedExpected}</Text>
+                                            <Text
+                                                style={[styles.fieldValue, styles.rowValue]}
+                                                numberOfLines={1}
+                                                adjustsFontSizeToFit
+                                                minimumFontScale={0.7}
+                                            >
+                                                {formattedExpected}
+                                            </Text>
                                         </View>
                                         <View style={[styles.financialRow, styles.financialRowBorder]}>
                                             <Text style={styles.fieldLabel}>Collected</Text>
-                                            <Text style={styles.collectedValue}>{formattedCollected}</Text>
+                                            <Text
+                                                style={[styles.collectedValue, styles.rowValue]}
+                                                numberOfLines={1}
+                                                adjustsFontSizeToFit
+                                                minimumFontScale={0.7}
+                                            >
+                                                {formattedCollected}
+                                            </Text>
                                         </View>
                                         <View style={styles.financialRow}>
                                             <Text style={styles.fieldLabel}>Variance</Text>
                                             <Text
                                                 style={[
                                                     styles.fieldValue,
+                                                    styles.rowValue,
                                                     (financials?.variance ?? 0) < 0
                                                         ? styles.varianceNegative
                                                         : styles.variancePositive,
                                                 ]}
+                                                numberOfLines={1}
+                                                adjustsFontSizeToFit
+                                                minimumFontScale={0.7}
                                             >
                                                 {formattedVariance}
                                             </Text>
@@ -441,12 +461,16 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                                 <Text
                                                     style={[
                                                         styles.fieldValue,
+                                                        styles.rowValue,
                                                         wetVarianceLiters < 0
                                                             ? styles.varianceNegative
                                                             : wetVarianceLiters > 0
                                                               ? styles.variancePositive
                                                               : undefined,
                                                     ]}
+                                                    numberOfLines={1}
+                                                    adjustsFontSizeToFit
+                                                    minimumFontScale={0.7}
                                                 >
                                                     {formattedWetVariance}
                                                 </Text>
@@ -455,7 +479,12 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                                 <Text style={styles.fieldLabel}>
                                                     Total sold (L)
                                                 </Text>
-                                                <Text style={styles.fieldValue}>
+                                                <Text
+                                                    style={[styles.fieldValue, styles.rowValue]}
+                                                    numberOfLines={1}
+                                                    adjustsFontSizeToFit
+                                                    minimumFontScale={0.7}
+                                                >
                                                     {formattedWetSold}
                                                 </Text>
                                             </View>
@@ -830,6 +859,13 @@ const styles = StyleSheet.create({
     fieldLabel: {
         color: '#5c5c6b',
         fontSize: 14,
+        flexShrink: 0,
+        marginRight: 12,
+    },
+    // Applied to the value in any label/value row.
+    rowValue: {
+        flex: 1,
+        textAlign: 'right',
     },
     fieldValue: {
         color: '#12121a',
@@ -882,6 +918,9 @@ const styles = StyleSheet.create({
         color: '#12121a',
         fontSize: 16,
         fontWeight: '600',
+    },
+    invoiceRowValue: {
+        flexShrink: 1,
     },
     invoiceAmount: {
         color: '#046c4e',
