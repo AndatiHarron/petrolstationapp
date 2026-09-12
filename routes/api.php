@@ -76,5 +76,6 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
         Route::get('/pl', [ReportController::class, 'pl']);
         Route::get('/tax-summary', [ReportController::class, 'taxSummary']);
         Route::get('/variance-trend', [ReportController::class, 'varianceTrend']);
+        Route::get('/customers/{customer}/statement', [ReportController::class, 'customerStatement']);
     });
 });
