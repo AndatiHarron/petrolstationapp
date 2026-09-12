@@ -741,7 +741,8 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
     },
     scrollView: {
-        flex: 1,
+        // Deliberately no flex: the panel is capped by maxHeight rather than
+        // flexed, so a flex child would collapse and the sheet would not scroll.
         paddingHorizontal: 24,
     },
     scrollContent: {
@@ -899,7 +900,6 @@ const styles = StyleSheet.create({
         opacity: 0.6,
     },
     emptyState: {
-        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 80,
