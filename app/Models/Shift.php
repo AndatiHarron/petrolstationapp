@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -27,6 +28,41 @@ class Shift extends Model
     protected $keyType = 'string';
 
     protected $guarded = [];
+
+    /**
+     * Assign the human-readable reference as the shift is created, so it is never
+     * missing. The UUID primary key is unchanged — this is the number people read
+     * and quote, in DDMMYYYY-HHMM form (e.g. 12092026-0819).
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (self $shift): void {
+            if (blank($shift->shift_number)) {
+                $shift->shift_number = static::nextShiftNumber(
+                    $shift->started_at ? Carbon::parse($shift->started_at) : now()
+                );
+            }
+        });
+    }
+
+    /**
+     * Two stations can open a shift in the same minute, so a bare timestamp is not
+     * unique. Where it is already taken, a counter is appended (…-0819-2).
+     */
+    public static function nextShiftNumber(?Carbon $startedAt = null): string
+    {
+        $base = ($startedAt ?? now())->format('dmY-Hi');
+
+        $candidate = $base;
+        $suffix = 1;
+
+        while (static::withoutGlobalScopes()->withTrashed()->where('shift_number', $candidate)->exists()) {
+            $suffix++;
+            $candidate = "{$base}-{$suffix}";
+        }
+
+        return $candidate;
+    }
 
     public function getActivitylogOptions(): LogOptions
     {

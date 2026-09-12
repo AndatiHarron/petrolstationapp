@@ -16,6 +16,7 @@ class ShiftResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'shift_number' => $this->shift_number,
             'station_name' => $this->station->name,
             'started_at' => $this->started_at->toDateTimeString(),
             'status' => $this->status,

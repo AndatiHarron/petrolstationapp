@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ShiftController extends Controller
 {
@@ -308,12 +307,9 @@ class ShiftController extends Controller
 
             $customer = $sales->first()->customer;
             $totalAmount = $sales->sum('amount');
-            $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
-
-            // Ensure unique invoice number
-            while (Invoice::where('invoice_number', $invoiceNumber)->exists()) {
-                $invoiceNumber = 'INV-'.strtoupper(Str::random(8));
-            }
+            // DDMMYYYY-NNN, dated to when the shift was locked and incrementing
+            // within that day.
+            $invoiceNumber = Invoice::nextInvoiceNumber($shift->locked_at ?? now());
 
             $pdf = Pdf::loadView('pdfs.invoice', [
                 'organization_name' => $shift->organization->name ?? 'N/A',
@@ -321,7 +317,7 @@ class ShiftController extends Controller
                 'invoice_number' => $invoiceNumber,
                 'customer_name' => $customer->name,
                 'date' => ($shift->locked_at ?? now())->format('Y-m-d'),
-                'shift_id' => $shift->id,
+                'shift_id' => $shift->shift_number ?? $shift->id,
                 'sales' => $sales,
                 'total_amount' => $totalAmount,
             ]);
@@ -331,6 +327,8 @@ class ShiftController extends Controller
 
             $invoice = Invoice::create([
                 'organization_id' => $shift->organization_id,
+                // The foreign key takes the UUID; only the printed PDF quotes the
+                // human-readable shift_number.
                 'shift_id' => $shift->id,
                 'customer_id' => $customerId,
                 'invoice_number' => $invoiceNumber,
