@@ -336,6 +336,8 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
+                <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Dismiss" />
+
                 <View style={styles.container}>
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Shift Details</Text>
@@ -704,14 +706,19 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0,0,0,0.4)',
+    },
+    backdrop: {
+        flex: 1,
     },
     container: {
-        flex: 1,
-        marginTop: 96,
+        maxHeight: '88%',
         backgroundColor: '#ffffff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
+        borderTopWidth: 1,
+        borderTopColor: '#e6e6ee',
         borderCurve: 'continuous',
     },
     header: {
