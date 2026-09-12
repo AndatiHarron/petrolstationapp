@@ -51,7 +51,7 @@ if (typeof globalThis !== 'undefined') {
 }
 
 function InitialLayout() {
-  const { checkSession, isLoading } = useAuthStore();
+  const { checkSession, isLoading, token } = useAuthStore();
 
   useEffect(() => {
     checkSession();
@@ -77,12 +77,23 @@ function InitialLayout() {
   }
 
   return (
+    // Auth routing is declarative on purpose. Imperatively calling router.replace()
+    // on logout was unreliable — it worked on the first sign-out and then failed on
+    // every later one, because the authenticated routes stayed mounted in the
+    // navigator. Gating the screens on the token means signing out removes them
+    // outright, so there is no stale route left to be stranded on.
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(main)" />
-      <Stack.Screen name="station-manager" />
-      <Stack.Screen name="admin" />
-      <Stack.Screen name="super-admin" />
+      <Stack.Protected guard={!token}>
+        <Stack.Screen name="(auth)" />
+      </Stack.Protected>
+
+      <Stack.Protected guard={!!token}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(main)" />
+        <Stack.Screen name="station-manager" />
+        <Stack.Screen name="admin" />
+        <Stack.Screen name="super-admin" />
+      </Stack.Protected>
     </Stack>
   );
 }
@@ -91,7 +102,7 @@ export default function RootLayout() {
   return (
     <ErrorBoundary label="Root">
       <SafeAreaProvider>
-        <StatusBar style="light" backgroundColor="#0f172a" />
+        <StatusBar style="dark" backgroundColor="#ffffff" />
         <GestureHandlerRootView style={{ flex: 1 }}>
           <QueryClientProvider client={queryClient}>
             <InitialLayout />

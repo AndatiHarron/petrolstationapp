@@ -31,10 +31,12 @@ export function useProtectedRoute() {
         const inAuthGroup = segments[0] === '(auth)';
 
         try {
-            if (!token && !inAuthGroup) {
-                // Not signed in and not in auth group -> Redirect to login
-                router.replace('/(auth)/login');
-            } else if (token) {
+            // Signing out is handled declaratively by <Stack.Protected> in the root
+            // layout, which unmounts the authenticated routes when the token clears.
+            // This hook only decides *which* authenticated area a signed-in user
+            // belongs to; it must not redirect on a missing token or it races the
+            // unmount and strands the user on a dead screen.
+            if (token) {
                 // User is signed in
                 // API returns { data: UserResource } directly
                 const userResponse = userData as unknown as { data?: { roles?: string[] } };

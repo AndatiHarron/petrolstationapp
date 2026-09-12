@@ -29,18 +29,24 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
     },
     logout: async () => {
-        // Clear in-memory token immediately
+        console.log('LOGOUT: invoked');
+
+        // Clear in-memory token first so no in-flight request re-authenticates.
         setApiAuthToken(null);
-        set({ token: null });
 
-        // Clear all React Query cache to prevent stale role data
+        // Sign out synchronously, THEN clean up storage. Awaiting SecureStore before
+        // this line meant a slow or hanging native call blocked the entire sign-out
+        // and the tap appeared to do nothing. Dropping the token is the sign-out:
+        // the root layout gates the authenticated routes on it via <Stack.Protected>,
+        // so they unmount and the router returns to the auth group by itself.
         queryClient.clear();
+        set({ token: null, isLoading: false });
+        console.log('LOGOUT: token cleared');
 
-        // Best-effort persistence cleanup
+        // Best-effort persistence cleanup; never block the UI on it.
         SecureStore.deleteItemAsync('auth_token').catch(() => {
-            // ignore
+            // ignore persistence errors
         });
-        router.replace('/(auth)/login');
     },
     checkSession: async () => {
         try {
