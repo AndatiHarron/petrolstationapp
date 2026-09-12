@@ -173,7 +173,7 @@ export default function InventoryTab() {
                         activeOpacity={0.8}
                     >
                         <Ionicons name="add" size={18} color="#fff" />
-                        <Text className="text-black font-bold text-sm">Add Lifting</Text>
+                        <Text className="text-white font-bold text-sm">Offloading</Text>
                     </TouchableOpacity>
                 </View>
 
@@ -190,7 +190,7 @@ export default function InventoryTab() {
                     onPageChange={handlePageChange}
                 />
 
-                {/* Add Lifting Modal */}
+                {/* Offloading modal */}
                 <AddLiftingModal
                     visible={isCreateModalOpen}
                     onClose={() => setIsCreateModalOpen(false)}

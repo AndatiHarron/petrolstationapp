@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
+import { View, Text, TouchableOpacity, ActivityIndicator, RefreshControl, Modal, ScrollView, Alert, KeyboardAvoidingView, Platform, FlatList, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
 import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
+import { RecordPaymentModal } from '../../components/station-manager/record-payment-modal';
 
 // Custom fetch function for paginated customers
 const fetchCustomers = async (page: number): Promise<CustomersIndex200> => {
@@ -89,6 +90,7 @@ export default function CustomersScreen() {
 
     // Details Modal State
     const [selectedCustomer, setSelectedCustomer] = useState<CustomersIndex200['data'][number] | null>(null);
+    const [payingCustomer, setPayingCustomer] = useState<CustomersIndex200['data'][number] | null>(null);
 
     const editRequestMutation = useEditRequestsStore({
         mutation: {
@@ -266,7 +268,21 @@ export default function CustomersScreen() {
                     <FlashList
                         data={customersList}
                         renderItem={({ item }) => (
-                            <CustomerItem item={item} onPress={handleCustomerPress} />
+                            <View>
+                                <CustomerItem item={item} onPress={handleCustomerPress} />
+                                {Number(item.current_balance) > 0 ? (
+                                    <Pressable
+                                        onPress={() => setPayingCustomer(item)}
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`Record a payment from ${item.name}`}
+                                        className="mb-2 self-start rounded-full border border-brand/20 bg-brand-subtle px-3 py-1.5 active:opacity-80"
+                                    >
+                                        <Text className="text-brand text-[11px] font-bold">
+                                            Record payment
+                                        </Text>
+                                    </Pressable>
+                                ) : null}
+                            </View>
                         )}
                         keyExtractor={(item) => item.id?.toString() || Math.random().toString()}
                         refreshControl={
@@ -294,6 +310,14 @@ export default function CustomersScreen() {
                     />
                 )}
             </View>
+
+            <RecordPaymentModal
+                visible={!!payingCustomer}
+                customerId={payingCustomer?.id ?? null}
+                customerName={payingCustomer?.name}
+                outstanding={Number(payingCustomer?.current_balance ?? 0)}
+                onClose={() => setPayingCustomer(null)}
+            />
 
             {/* Create Customer/Request Edit Modal */}
             <Modal

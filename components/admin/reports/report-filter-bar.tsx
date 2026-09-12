@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Modal } from 'react-native';
 import { Building2, CalendarRange, Check, X } from 'lucide-react-native';
 import { useStationsIndex } from '@/features/api/station/station';
+import { DateRangePicker, displayRange } from '@/components/date-range-picker';
 import type { StationsIndex200 } from '@/features/api/model';
 import {
     PERIOD_PRESETS,
@@ -29,6 +30,7 @@ export function ReportFilterBar({
     showStationFilter = true,
 }: ReportFilterBarProps) {
     const [periodOpen, setPeriodOpen] = useState(false);
+    const [rangeOpen, setRangeOpen] = useState(false);
     const [stationOpen, setStationOpen] = useState(false);
     const [activePreset, setActivePreset] = useState<PeriodPresetId>('this_month');
 
@@ -52,7 +54,7 @@ export function ReportFilterBar({
         <View className="mb-4 gap-2">
             <View className="flex-row gap-2">
                 <Pressable
-                    onPress={() => setPeriodOpen(true)}
+                    onPress={() => setRangeOpen(true)}
                     accessibilityRole="button"
                     className="flex-1 flex-row items-center gap-2 rounded-xl border border-surface-border bg-surface px-3 py-2.5 active:bg-surface-sunken"
                 >
@@ -62,7 +64,7 @@ export function ReportFilterBar({
                             Period
                         </Text>
                         <Text className="text-ink text-xs font-semibold" numberOfLines={1}>
-                            {formatPeriod(filters)}
+                            {displayRange(filters.start_date, filters.end_date)}
                         </Text>
                     </View>
                 </Pressable>
@@ -112,8 +114,37 @@ export function ReportFilterBar({
                             </Pressable>
                         );
                     })}
+                    <Pressable
+                        onPress={() => setRangeOpen(true)}
+                        accessibilityRole="button"
+                        className={`rounded-full border px-2.5 py-1 ${
+                            activePreset === 'custom'
+                                ? 'border-brand bg-brand'
+                                : 'border-surface-border bg-surface active:bg-surface-sunken'
+                        }`}
+                    >
+                        <Text
+                            className={`text-[10px] font-semibold ${
+                                activePreset === 'custom' ? 'text-white' : 'text-ink-muted'
+                            }`}
+                        >
+                            Custom
+                        </Text>
+                    </Pressable>
                 </View>
             </ScrollView>
+
+            <DateRangePicker
+                visible={rangeOpen}
+                start={filters.start_date}
+                end={filters.end_date}
+                onClose={() => setRangeOpen(false)}
+                onApply={(start, end) => {
+                    setActivePreset('custom');
+                    onChange({ ...filters, start_date: start, end_date: end });
+                    setRangeOpen(false);
+                }}
+            />
 
             <PickerSheet
                 visible={periodOpen}

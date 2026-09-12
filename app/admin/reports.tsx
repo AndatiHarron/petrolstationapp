@@ -232,10 +232,10 @@ function EndOfDayBody({ report }: { report: NonNullable<ReturnType<typeof useEnd
                     { key: 'shift', label: 'Shift', width: 118 },
                     { key: 'attendant', label: 'Attendant', width: 104 },
                     { key: 'time', label: 'Open / close', width: 96 },
-                    { key: 'litres', label: 'Litres', width: 74, align: 'right' },
-                    { key: 'expected', label: 'Expected', width: 96, align: 'right' },
-                    { key: 'collected', label: 'Collected', width: 96, align: 'right' },
-                    { key: 'variance', label: 'Variance', width: 96, align: 'right' },
+                    { key: 'litres', label: 'Litres', width: 100, align: 'right' },
+                    { key: 'expected', label: 'Expected', width: 124, align: 'right' },
+                    { key: 'collected', label: 'Collected', width: 124, align: 'right' },
+                    { key: 'variance', label: 'Variance', width: 124, align: 'right' },
                 ]}
                 rows={report.shifts.map((shift) => ({
                     shift: { text: shift.shift_number ?? '-' },
@@ -267,7 +267,7 @@ function EndOfDayBody({ report }: { report: NonNullable<ReturnType<typeof useEnd
                         columns={[
                             { key: 'customer', label: 'Customer', width: 150 },
                             { key: 'vehicle', label: 'Vehicle', width: 104 },
-                            { key: 'amount', label: 'Amount', width: 104, align: 'right' },
+                            { key: 'amount', label: 'Amount', width: 124, align: 'right' },
                         ]}
                         rows={report.credit_sales.map((sale) => ({
                             customer: { text: sale.customer_name ?? '-' },
@@ -346,10 +346,10 @@ function MonthlyBody({ report }: { report: NonNullable<ReturnType<typeof useMont
                 columns={[
                     { key: 'date', label: 'Date', width: 96 },
                     { key: 'shifts', label: 'Shifts', width: 62, align: 'right' },
-                    { key: 'litres', label: 'Litres', width: 80, align: 'right' },
-                    { key: 'expected', label: 'Expected', width: 100, align: 'right' },
-                    { key: 'collected', label: 'Collected', width: 100, align: 'right' },
-                    { key: 'variance', label: 'Variance', width: 100, align: 'right' },
+                    { key: 'litres', label: 'Litres', width: 100, align: 'right' },
+                    { key: 'expected', label: 'Expected', width: 124, align: 'right' },
+                    { key: 'collected', label: 'Collected', width: 124, align: 'right' },
+                    { key: 'variance', label: 'Variance', width: 124, align: 'right' },
                 ]}
                 rows={report.daily.map((day) => ({
                     date: { text: day.date },
@@ -391,10 +391,10 @@ function CreditBody({ report }: { report: NonNullable<ReturnType<typeof useCredi
                 emptyMessage="No credit activity or balances"
                 columns={[
                     { key: 'customer', label: 'Customer', width: 140 },
-                    { key: 'opening', label: 'Opening', width: 94, align: 'right' },
-                    { key: 'charges', label: 'Charges', width: 94, align: 'right' },
-                    { key: 'balance', label: 'Balance', width: 94, align: 'right' },
-                    { key: 'limit', label: 'Limit', width: 90, align: 'right' },
+                    { key: 'opening', label: 'Opening', width: 124, align: 'right' },
+                    { key: 'charges', label: 'Charges', width: 124, align: 'right' },
+                    { key: 'balance', label: 'Balance', width: 124, align: 'right' },
+                    { key: 'limit', label: 'Limit', width: 100, align: 'right' },
                     { key: 'used', label: 'Used', width: 78, align: 'right' },
                 ]}
                 rows={report.customers.map((customer) => ({
@@ -442,11 +442,11 @@ function UsersBody({ report }: { report: NonNullable<ReturnType<typeof useUserRe
                 columns={[
                     { key: 'name', label: 'Attendant', width: 128 },
                     { key: 'shifts', label: 'Shifts', width: 62, align: 'right' },
-                    { key: 'litres', label: 'Litres', width: 84, align: 'right' },
-                    { key: 'expected', label: 'Expected', width: 100, align: 'right' },
-                    { key: 'collected', label: 'Collected', width: 100, align: 'right' },
-                    { key: 'variance', label: 'Variance', width: 100, align: 'right' },
-                    { key: 'avg', label: 'Avg / shift', width: 96, align: 'right' },
+                    { key: 'litres', label: 'Litres', width: 100, align: 'right' },
+                    { key: 'expected', label: 'Expected', width: 124, align: 'right' },
+                    { key: 'collected', label: 'Collected', width: 124, align: 'right' },
+                    { key: 'variance', label: 'Variance', width: 124, align: 'right' },
+                    { key: 'avg', label: 'Avg / shift', width: 124, align: 'right' },
                 ]}
                 rows={report.users.map((user) => ({
                     name: { text: user.user_name },
@@ -501,9 +501,9 @@ function VatBody({ report }: { report: NonNullable<ReturnType<typeof useVatRepor
                 emptyMessage="No VAT activity in this period"
                 columns={[
                     { key: 'period', label: 'Period', width: 100 },
-                    { key: 'output', label: 'Output VAT', width: 110, align: 'right' },
-                    { key: 'input', label: 'Input VAT', width: 110, align: 'right' },
-                    { key: 'net', label: 'Net', width: 110, align: 'right' },
+                    { key: 'output', label: 'Output VAT', width: 124, align: 'right' },
+                    { key: 'input', label: 'Input VAT', width: 124, align: 'right' },
+                    { key: 'net', label: 'Net', width: 124, align: 'right' },
                 ]}
                 rows={report.periods.map((period) => ({
                     period: { text: period.label },

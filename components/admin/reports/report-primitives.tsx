@@ -37,7 +37,7 @@ export function TileRow({
                 return (
                     <View
                         key={tile.label}
-                        style={{ minWidth: 118 }}
+                        style={{ minWidth: 152 }}
                         className="rounded-xl border border-surface-border bg-surface-sunken px-3.5 py-3"
                     >
                         <Text className="text-ink-faint text-[9px] font-bold uppercase tracking-wider">
@@ -48,6 +48,8 @@ export function TileRow({
                                 signed ? (negative ? 'text-accent' : 'text-emerald-700') : 'text-ink'
                             }`}
                             numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
                         >
                             {tile.value}
                         </Text>
@@ -151,6 +153,8 @@ export function DataTable({
                                     key={column.key}
                                     style={{ width: column.width }}
                                     numberOfLines={1}
+                                    adjustsFontSizeToFit={column.align === 'right'}
+                                    minimumFontScale={0.75}
                                     className={`px-3 py-2.5 text-[11px] ${
                                         column.align === 'right' ? 'text-right font-mono' : ''
                                     } ${

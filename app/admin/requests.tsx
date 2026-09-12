@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/button';
 import { InputField } from '@/components/input-field';
+import { SettlementApprovals } from '../../components/admin/finance/settlement-approvals';
 import {
     getEditRequestsIndexQueryKey,
     useEditRequestsIndex,
@@ -220,6 +221,8 @@ export default function AdminRequestsScreen() {
                 {/* Filters */}
                 <View className="px-4 py-3">
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <SettlementApprovals />
+
                         <View className="flex-row gap-2">
                             {filterButtons.map((btn) => (
                                 <TouchableOpacity
