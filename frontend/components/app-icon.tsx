@@ -1,4 +1,5 @@
 import React from 'react';
+import { View, type StyleProp, type ViewStyle } from 'react-native';
 import {
     Banknote,
     Building2,
@@ -58,9 +59,20 @@ interface AppIconProps {
     name: string;
     size?: number;
     color?: string;
+    /** Call sites converted from SymbolView pass spacing through style. */
+    style?: StyleProp<ViewStyle>;
 }
 
-export function AppIcon({ name, size = 20, color = '#5c5c6b' }: AppIconProps) {
+export function AppIcon({ name, size = 20, color = '#5c5c6b', style }: AppIconProps) {
     const Glyph = REGISTRY[name] ?? Circle;
+
+    if (style) {
+        return (
+            <View style={style}>
+                <Glyph size={size} color={color} />
+            </View>
+        );
+    }
+
     return <Glyph size={size} color={color} />;
 }
