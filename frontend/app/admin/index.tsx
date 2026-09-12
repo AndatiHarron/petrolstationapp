@@ -1,0 +1,50 @@
+import React from 'react';
+import { View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
+import Animated from 'react-native-reanimated';
+import { AdminHeader } from '../../components/admin/dashboard/header';
+import { QuickStats } from '../../components/admin/dashboard/quick-stats';
+import { WetStockLevels } from '../../components/admin/dashboard/wet-stock-levels';
+import { ProductPrices } from '../../components/admin/dashboard/product-prices';
+import { RecentActivity } from '../../components/admin/dashboard/recent-activity';
+import { FinancialReports } from '../../components/admin/reports/financial-reports';
+import { InventoryReports } from '../../components/admin/reports/inventory-reports';
+
+export default function AdminDashboard() {
+    return (
+        <View className="flex-1 bg-white">
+            <StatusBar style="dark" backgroundColor="#ffffff" />
+            <SafeAreaView className="flex-1">
+                <Animated.ScrollView
+                    className="flex-1 px-4"
+                    contentContainerStyle={{ paddingBottom: 40 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Header */}
+                    <View className="mb-6 mt-4">
+                        <AdminHeader />
+                    </View>
+
+                    {/* Quick Stats Row */}
+                    <QuickStats />
+
+                    {/* Wet Stock Section */}
+                    <WetStockLevels />
+
+                    {/* Products Overview */}
+                    <ProductPrices />
+
+                    {/* Recent Activity */}
+                    <RecentActivity />
+
+                    {/* Financial Reports */}
+                    <FinancialReports />
+
+                    {/* Inventory Reports */}
+                    <InventoryReports />
+                </Animated.ScrollView>
+            </SafeAreaView>
+        </View>
+    );
+}
