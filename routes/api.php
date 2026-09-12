@@ -77,5 +77,12 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
         Route::get('/tax-summary', [ReportController::class, 'taxSummary']);
         Route::get('/variance-trend', [ReportController::class, 'varianceTrend']);
         Route::get('/customers/{customer}/statement', [ReportController::class, 'customerStatement']);
+
+        // Composite reports. All five accept ?format=pdf for a download.
+        Route::get('/end-of-day', [ReportController::class, 'endOfDay']);
+        Route::get('/monthly', [ReportController::class, 'monthly']);
+        Route::get('/credit', [ReportController::class, 'credit']);
+        Route::get('/users', [ReportController::class, 'users']);
+        Route::get('/vat', [ReportController::class, 'vat']);
     });
 });

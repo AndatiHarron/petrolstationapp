@@ -9,7 +9,10 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Lifting;
 use App\Models\Shift;
+use App\Services\ReportBuilder;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -286,6 +289,124 @@ class ReportController extends Controller
                 'line_count' => $lines->count(),
             ],
         ]);
+    }
+
+    // ─── Composite reports ────────────────────────────────────────
+
+    /**
+     * End of Day Report
+     *
+     * Every shift on one calendar day, combined. This is the document a station
+     * closes the day against.
+     */
+    public function endOfDay(ReportFilterRequest $request)
+    {
+        $day = $request->day();
+        $report = $this->builder()->endOfDay($day, $request->stationId());
+
+        return $this->deliver($request, $report, 'end-of-day', 'End of Day Report', $day->format('D, j M Y'));
+    }
+
+    /**
+     * Monthly Report
+     */
+    public function monthly(ReportFilterRequest $request)
+    {
+        $month = $request->startDate();
+        $report = $this->builder()->monthly($month, $request->stationId());
+
+        return $this->deliver($request, $report, 'monthly', 'Monthly Report', $report['month']);
+    }
+
+    /**
+     * Credit Report
+     */
+    public function credit(ReportFilterRequest $request)
+    {
+        $report = $this->builder()->credit(
+            $request->startDate(),
+            $request->endDate(),
+            $request->stationId(),
+            $request->customerId()
+        );
+
+        return $this->deliver($request, $report, 'credit', 'Credit Report', $this->periodLabel($request));
+    }
+
+    /**
+     * User Report
+     *
+     * Per-attendant performance, worst variance first.
+     */
+    public function users(ReportFilterRequest $request)
+    {
+        $report = $this->builder()->users(
+            $request->startDate(),
+            $request->endDate(),
+            $request->stationId(),
+            $request->userId()
+        );
+
+        return $this->deliver($request, $report, 'users', 'Attendant Report', $this->periodLabel($request));
+    }
+
+    /**
+     * VAT Report
+     */
+    public function vat(ReportFilterRequest $request)
+    {
+        $report = $this->builder()->vat(
+            $request->startDate(),
+            $request->endDate(),
+            $request->stationId()
+        );
+
+        return $this->deliver($request, $report, 'vat', 'VAT Report', $this->periodLabel($request));
+    }
+
+    // ─── Shared ───────────────────────────────────────────────────
+
+    private function builder(): ReportBuilder
+    {
+        return new ReportBuilder(Auth::user()->organization_id);
+    }
+
+    private function periodLabel(ReportFilterRequest $request): string
+    {
+        return $request->startDate()->format('j M Y').' to '.$request->endDate()->format('j M Y');
+    }
+
+    /**
+     * Return the report as JSON, or stream it as a PDF when format=pdf.
+     *
+     * @param  array<string, mixed>  $report
+     */
+    private function deliver(
+        ReportFilterRequest $request,
+        array $report,
+        string $view,
+        string $title,
+        string $subtitle
+    ): Response|\Illuminate\Http\JsonResponse {
+        if (! $request->wantsPdf()) {
+            return response()->json(['data' => $report]);
+        }
+
+        $user = Auth::user();
+
+        $pdf = Pdf::loadView("reports.{$view}", [
+            'report' => $report,
+            'title' => $title,
+            'subtitle' => $subtitle,
+            'organization' => $user->organization?->name ?? 'Organization',
+            'station' => $report['station'] ?? 'All stations',
+            'generatedAt' => now()->format('j M Y, H:i'),
+            'generatedBy' => $user->name,
+        ])->setPaper('a4', in_array($view, ['end-of-day', 'users', 'credit'], true) ? 'landscape' : 'portrait');
+
+        $filename = $title.' '.($report['date'] ?? $report['start_date'] ?? now()->toDateString()).'.pdf';
+
+        return $pdf->download(str_replace(' ', '-', strtolower($filename)));
     }
 
     /**

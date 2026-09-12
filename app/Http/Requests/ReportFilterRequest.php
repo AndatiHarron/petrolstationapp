@@ -53,6 +53,19 @@ class ReportFilterRequest extends FormRequest
             'month' => ['nullable', 'integer', 'between:1,12'],
             'year' => ['nullable', 'integer', 'between:2000,2100'],
             'days' => ['nullable', 'integer', 'between:1,730'],
+
+            // A single calendar day, for the end-of-day report.
+            'date' => ['nullable', 'date'],
+
+            // Report delivery: inline JSON or a downloadable PDF.
+            'format' => ['nullable', 'in:json,pdf'],
+            'user_id' => [
+                'nullable',
+                'uuid',
+                Rule::exists('users', 'id')->where(
+                    fn ($query) => $query->where('organization_id', $this->user()->organization_id)
+                ),
+            ],
         ];
     }
 
@@ -84,6 +97,7 @@ class ReportFilterRequest extends FormRequest
             'end_date.after_or_equal' => 'The end date must not be before the start date.',
             'station_id.exists' => 'That station does not belong to your organization.',
             'customer_id.exists' => 'That customer does not belong to your organization.',
+            'user_id.exists' => 'That user does not belong to your organization.',
             'days.between' => 'The day range must be between 1 and 730 days.',
         ];
     }
@@ -142,5 +156,25 @@ class ReportFilterRequest extends FormRequest
     public function customerId(): ?string
     {
         return $this->input('customer_id');
+    }
+
+    public function userId(): ?string
+    {
+        return $this->input('user_id');
+    }
+
+    /**
+     * The single day an end-of-day report covers. Defaults to today.
+     */
+    public function day(): Carbon
+    {
+        return $this->filled('date')
+            ? Carbon::parse($this->input('date'))->startOfDay()
+            : now()->startOfDay();
+    }
+
+    public function wantsPdf(): bool
+    {
+        return $this->input('format') === 'pdf';
     }
 }
