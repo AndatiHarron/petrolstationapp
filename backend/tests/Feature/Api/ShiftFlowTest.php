@@ -1,0 +1,229 @@
+<?php
+
+use App\Models\Customer;
+use App\Models\Nozzle;
+use App\Models\Tank;
+use App\Models\User;
+use Database\Seeders\DevSeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\postJson;
+use function Pest\Laravel\seed;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    seed(RolesAndPermissionsSeeder::class);
+    seed(DevSeeder::class);
+});
+
+test('full shift lifecycle with perfect math and image evidence', function () {
+    Storage::fake('public');
+
+    $user = User::where('email', 'manager@octane.com')->first();
+    actingAs($user);
+
+    $startResponse = postJson('/api/v1/shifts/start');
+    $startResponse->assertStatus(201);
+    $shiftId = $startResponse->json('data.id');
+
+    $nozzle = Nozzle::first();
+    $tank = Tank::first();
+
+    // Scenario: Sold 100 Liters.
+    // Price = 180. Expected Cash = 18,000.
+    // Tank Dip should drop by 20mm (since 1mm = 5L in our Seeder).
+    $payload = [
+        'payments' => [
+            'cash' => 18000,
+            'mpesa' => 0,
+            'credit' => [],
+        ],
+        'meters' => [
+            [
+                'nozzle_id' => $nozzle->id,
+                'opening_reading' => 5000,
+                'closing_reading' => 5100,
+                'evidence' => UploadedFile::fake()->image('pump_reading.jpg'),
+            ],
+        ],
+        'dips' => [
+            [
+                'tank_id' => $tank->id,
+                'dip_mm' => 1980,
+            ],
+        ],
+    ];
+
+    $lockResponse = postJson("/api/v1/shifts/{$shiftId}/lock", $payload);
+
+    $lockResponse->assertStatus(200)
+        ->assertJsonPath('data.status', 'LOCKED')
+        ->assertJsonPath('data.financials.expected', 18000)
+        ->assertJsonPath('data.financials.collected', 18000)
+        ->assertJsonPath('data.financials.variance', 0);
+
+    $evidencePath = $lockResponse->json('data.readings.0.evidence_path');
+    expect($evidencePath)->not->toBeNull();
+
+    Storage::disk('public')->assertExists($evidencePath);
+});
+
+test('detects theft variance', function () {
+    $user = User::where('email', 'manager@octane.com')->first();
+    actingAs($user);
+
+    $start = postJson('/api/v1/shifts/start');
+    $shiftId = $start->json('data.id');
+    $nozzle = Nozzle::first();
+    $tank = Tank::first();
+
+    $payload = [
+        'payments' => [
+            'cash' => 13000,
+        ],
+        'meters' => [
+            [
+                'nozzle_id' => $nozzle->id,
+                'opening_reading' => 5000,
+                'closing_reading' => 5100,
+            ],
+        ],
+        'dips' => [
+            [
+                'tank_id' => $tank->id,
+                'dip_mm' => 1980,
+            ],
+        ],
+    ];
+
+    $res = postJson("/api/v1/shifts/{$shiftId}/lock", $payload);
+
+    $res->assertStatus(200);
+    expect($res->json('data.financials.variance'))->toBe(-5000)
+        ->and($res->json('data.variance_alert'))->toBeTrue();
+
+});
+
+test('locks shift with specific customer credit debt', function () {
+    $user = User::where('email', 'manager@octane.com')->first();
+    actingAs($user);
+
+    $customer = Customer::create([
+        'id' => Str::uuid(),
+        'organization_id' => $user->organization_id,
+        'name' => 'Kabras Transport',
+        'email' => 'accounts@kabras.com',
+        'credit_limit' => 100000,
+        'current_balance' => 0,
+    ]);
+
+    $start = postJson('/api/v1/shifts/start');
+    $shiftId = $start->json('data.id');
+    $nozzle = Nozzle::first();
+    $tank = Tank::first();
+
+    $payload = [
+        'payments' => [
+            'cash' => 10000,
+            'credit' => [
+                [
+                    'customer_id' => $customer->id,
+                    'amount' => 8000,
+                    'vehicle_reg' => 'KBA 123X',
+                ],
+            ],
+        ],
+        'meters' => [
+            [
+                'nozzle_id' => $nozzle->id,
+                'opening_reading' => 5000,
+                'closing_reading' => 5100,
+            ],
+        ],
+        'dips' => [
+            [
+                'tank_id' => $tank->id,
+                'dip_mm' => 1980,
+            ],
+        ],
+    ];
+
+    $res = postJson("/api/v1/shifts/{$shiftId}/lock", $payload);
+    $res->assertStatus(200);
+
+    expect($res->json('data.financials.collected'))->toBe(18000)
+        ->and($res->json('data.financials.variance'))->toBe(0);
+
+    $this->assertDatabaseHas('credit_sales', [
+        'shift_id' => $shiftId,
+        'customer_id' => $customer->id,
+        'amount' => 8000,
+        'vehicle_reg' => 'KBA 123X',
+    ]);
+
+    expect($customer->refresh()->current_balance)->toEqual(8000.00);
+});
+
+test('cannot start shift when station has no nozzles', function () {
+    $user = User::where('email', 'manager@octane.com')->first();
+
+    // Reassign user to a station with no nozzles
+    $emptyStation = \App\Models\Station::factory()->create([
+        'organization_id' => $user->organization_id,
+    ]);
+    $user->update(['station_id' => $emptyStation->id]);
+
+    actingAs($user);
+
+    $response = postJson('/api/v1/shifts/start');
+
+    $response->assertStatus(422)
+        ->assertJsonFragment(['message' => 'Cannot start shift: no nozzles are configured for this station.']);
+
+    $this->assertDatabaseMissing('shifts', [
+        'station_id' => $emptyStation->id,
+        'status' => 'OPEN',
+    ]);
+});
+
+test('rejects closing meter reading less than opening reading', function () {
+    $user = User::where('email', 'manager@octane.com')->first();
+    actingAs($user);
+
+    $start = postJson('/api/v1/shifts/start');
+    $start->assertStatus(201);
+    $shiftId = $start->json('data.id');
+
+    $nozzle = Nozzle::first();
+    $tank = Tank::first();
+
+    $payload = [
+        'payments' => [
+            'cash' => 0,
+        ],
+        'meters' => [
+            [
+                'nozzle_id' => $nozzle->id,
+                'opening_reading' => 5000,
+                'closing_reading' => 4500,
+            ],
+        ],
+        'dips' => [
+            [
+                'tank_id' => $tank->id,
+                'dip_mm' => 2000,
+            ],
+        ],
+    ];
+
+    $response = postJson("/api/v1/shifts/{$shiftId}/lock", $payload);
+
+    $response->assertStatus(422)
+        ->assertJsonValidationErrors(['meters.0.closing_reading']);
+});

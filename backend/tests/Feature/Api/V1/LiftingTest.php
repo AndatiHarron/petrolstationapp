@@ -1,0 +1,372 @@
+<?php
+
+use App\Models\Lifting;
+use App\Models\Organization;
+use App\Models\Station;
+use App\Models\Tank;
+use App\Models\User;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+
+use function Pest\Laravel\deleteJson;
+use function Pest\Laravel\getJson;
+use function Pest\Laravel\postJson;
+use function Pest\Laravel\putJson;
+use function Pest\Laravel\seed;
+
+uses(RefreshDatabase::class);
+
+beforeEach(function () {
+    seed(RolesAndPermissionsSeeder::class);
+});
+
+test('creating a lifting increases tank volume', function () {
+    // 1. Setup
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+
+    // Create a Tank with 1,000 Liters
+    $tank = Tank::factory()->create([
+        'organization_id' => $org->id,
+        'station_id' => $station->id,
+        'current_volume' => 1000,
+        'capacity_liters' => 20000,
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $station->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    // 2. Act: Add 5,000 Liters
+    $data = [
+        'station_id' => $station->id,
+        'tank_id' => $tank->id,
+        'lifting_date' => now()->format('Y-m-d'),
+        'invoice_number' => 'INV-123',
+        'volume_liters' => 5000,
+        'buying_price_per_liter' => 100,
+        'total_cost' => 500000,
+    ];
+
+    postJson('/api/v1/liftings', $data)->assertStatus(201);
+
+    // 3. Assert: Tank should now be 6,000 Liters (1000 + 5000)
+    expect($tank->refresh()->current_volume)->toEqual(6000);
+});
+
+test('deleting a lifting decreases tank volume', function () {
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+    $tank = Tank::factory()->create([
+        'organization_id' => $org->id,
+        'station_id' => $station->id,
+        'current_volume' => 1000,
+    ]);
+
+    // Create an existing lifting of 5,000 Liters
+    $lifting = Lifting::factory()->create([
+        'station_id' => $station->id,
+        'tank_id' => $tank->id,
+        'volume_liters' => 5000,
+        'organization_id' => $org->id,
+    ]);
+
+    $super = User::factory()->create(['organization_id' => $org->id]);
+    $super->assignRole('super-admin');
+    Sanctum::actingAs($super);
+
+    // Act: Delete the lifting (soft delete)
+    deleteJson("/api/v1/liftings/{$lifting->id}")->assertOk();
+
+    // Assert: Tank volume should drop back to 1,000 (6000 - 5000)
+    expect($tank->refresh()->current_volume)->toEqual(1000.0);
+});
+
+test('manager cannot record lifting for a different station tank', function () {
+    $org = Organization::factory()->create();
+
+    // Station A (Manager's Station)
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+
+    // Station B (Another Station)
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+    $tankB = Tank::factory()->create(['station_id' => $stationB->id]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    // Act: Try to add fuel to Station B's tank
+    $data = [
+        'station_id' => $stationB->id, // Validation should catch this mismatch first
+        'tank_id' => $tankB->id,
+        'lifting_date' => now()->format('Y-m-d'),
+        'volume_liters' => 1000,
+        'buying_price_per_liter' => 100,
+        'total_cost' => 100000,
+    ];
+
+    postJson('/api/v1/liftings', $data)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['station_id']);
+});
+
+test('creating a lifting auto-calculates tax_paid if omitted', function () {
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+
+    $product = \App\Models\Product::factory()->create([
+        'organization_id' => $org->id,
+        'vat_rate' => 16.0,
+    ]);
+    $tank = Tank::factory()->create([
+        'organization_id' => $org->id,
+        'station_id' => $station->id,
+        'product_id' => $product->id,
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $station->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    $data = [
+        'station_id' => $station->id,
+        'tank_id' => $tank->id,
+        'lifting_date' => now()->format('Y-m-d'),
+        'invoice_number' => 'INV-TAX',
+        'volume_liters' => 1160,
+        'buying_price_per_liter' => 1,
+        'total_cost' => 1160,
+        // 'tax_paid' is omitted
+    ];
+
+    $response = postJson('/api/v1/liftings', $data)->assertStatus(201);
+
+    // 1160 with 16% VAT should result in 160 tax
+    $response->assertJsonPath('data.tax_paid', 160);
+
+    $this->assertDatabaseHas('liftings', [
+        'invoice_number' => 'INV-TAX',
+        'tax_paid' => 160,
+    ]);
+});
+
+test('manager cannot delete old liftings', function () {
+    $org = Organization::factory()->create();
+    $lifting = Lifting::factory()->create([
+        'organization_id' => $org->id,
+        'created_at' => now()->subHours(25), // 25 hours old
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    deleteJson("/api/v1/liftings/{$lifting->id}")
+        ->assertStatus(403);
+});
+
+test('super admin can delete old liftings', function () {
+    $org = Organization::factory()->create();
+    $lifting = Lifting::factory()->create([
+        'organization_id' => $org->id,
+        'created_at' => now()->subHours(48),
+    ]);
+
+    $super = User::factory()->create(['organization_id' => $org->id]);
+    $super->assignRole('super-admin');
+    Sanctum::actingAs($super);
+
+    deleteJson("/api/v1/liftings/{$lifting->id}")
+        ->assertOk();
+});
+
+test('admin can delete liftings from their organization', function () {
+    $org = Organization::factory()->create();
+    $lifting = Lifting::factory()->create([
+        'organization_id' => $org->id,
+    ]);
+
+    $admin = User::factory()->create(['organization_id' => $org->id]);
+    $admin->assignRole('admin');
+    Sanctum::actingAs($admin);
+
+    deleteJson("/api/v1/liftings/{$lifting->id}")
+        ->assertOk();
+
+    $this->assertSoftDeleted('liftings', ['id' => $lifting->id]);
+});
+
+test('admin cannot delete liftings from another organization', function () {
+    $orgA = Organization::factory()->create();
+    $orgB = Organization::factory()->create();
+    $liftingB = Lifting::factory()->create([
+        'organization_id' => $orgB->id,
+    ]);
+
+    $adminA = User::factory()->create(['organization_id' => $orgA->id]);
+    $adminA->assignRole('admin');
+    Sanctum::actingAs($adminA);
+
+    deleteJson("/api/v1/liftings/{$liftingB->id}")
+        ->assertNotFound();
+});
+
+test('lifting date cannot be in the future', function () {
+    $user = User::factory()->create();
+    $user->assignRole('admin');
+    Sanctum::actingAs($user);
+
+    $data = Lifting::factory()->make([
+        'lifting_date' => now()->addDay()->format('Y-m-d'),
+    ])->toArray();
+
+    postJson('/api/v1/liftings', $data)
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['lifting_date']);
+});
+
+test('creating a lifting stores and returns supplier_name', function () {
+    // Setup
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+    $tank = Tank::factory()->create([
+        'organization_id' => $org->id,
+        'station_id' => $station->id,
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $station->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    $data = [
+        'station_id' => $station->id,
+        'tank_id' => $tank->id,
+        'lifting_date' => now()->format('Y-m-d'),
+        'invoice_number' => 'INV-555',
+        'supplier_name' => 'Acme Fuels Ltd',
+        'volume_liters' => 2000,
+        'buying_price_per_liter' => 120,
+        'total_cost' => 240000,
+    ];
+
+    $response = postJson('/api/v1/liftings', $data)->assertStatus(201);
+
+    $response->assertJsonPath('data.supplier_name', 'Acme Fuels Ltd');
+});
+
+test('updating supplier_name on a lifting works (admin)', function () {
+    $org = Organization::factory()->create();
+    $lifting = Lifting::factory()->create([
+        'organization_id' => $org->id,
+        'supplier_name' => 'Old Supplier',
+    ]);
+
+    $admin = User::factory()->create(['organization_id' => $org->id]);
+    $admin->assignRole('admin');
+    Sanctum::actingAs($admin);
+
+    putJson("/api/v1/liftings/{$lifting->id}", [
+        'supplier_name' => 'New Supplier Name',
+    ])->assertOk()
+        ->assertJsonPath('data.supplier_name', 'New Supplier Name');
+});
+
+test('supplier_name must be a string up to 255 chars if provided', function () {
+    $org = Organization::factory()->create();
+    $station = Station::factory()->create(['organization_id' => $org->id]);
+    $tank = Tank::factory()->create([
+        'organization_id' => $org->id,
+        'station_id' => $station->id,
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $station->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    // Invalid: too long
+    $tooLong = str_repeat('a', 256);
+
+    postJson('/api/v1/liftings', [
+        'station_id' => $station->id,
+        'tank_id' => $tank->id,
+        'lifting_date' => now()->format('Y-m-d'),
+        'invoice_number' => 'INV-777',
+        'supplier_name' => $tooLong,
+        'volume_liters' => 1000,
+        'buying_price_per_liter' => 100,
+        'total_cost' => 100000,
+    ])->assertStatus(422)
+        ->assertJsonValidationErrors(['supplier_name']);
+});
+
+test('manager can only see their own station liftings in index', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    Lifting::factory()->create(['station_id' => $stationA->id, 'organization_id' => $org->id]);
+    Lifting::factory()->create(['station_id' => $stationB->id, 'organization_id' => $org->id]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    $response = getJson('/api/v1/liftings')->assertOk();
+
+    // Should only see 1 record (from station A)
+    $response->assertJsonCount(1, 'data');
+});
+
+test('manager cannot view lifting from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $liftingB = Lifting::factory()->create(['station_id' => $stationB->id, 'organization_id' => $org->id]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    getJson("/api/v1/liftings/{$liftingB->id}")->assertStatus(403);
+});
+
+test('manager cannot update lifting from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $liftingB = Lifting::factory()->create([
+        'station_id' => $stationB->id,
+        'organization_id' => $org->id,
+        'created_at' => now(),
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    putJson("/api/v1/liftings/{$liftingB->id}", [
+        'supplier_name' => 'Should fail',
+    ])->assertStatus(403);
+});
+
+test('manager cannot delete lifting from another station', function () {
+    $org = Organization::factory()->create();
+    $stationA = Station::factory()->create(['organization_id' => $org->id]);
+    $stationB = Station::factory()->create(['organization_id' => $org->id]);
+
+    $liftingB = Lifting::factory()->create([
+        'station_id' => $stationB->id,
+        'organization_id' => $org->id,
+        'created_at' => now(),
+    ]);
+
+    $manager = User::factory()->create(['organization_id' => $org->id, 'station_id' => $stationA->id]);
+    $manager->assignRole('manager');
+    Sanctum::actingAs($manager);
+
+    deleteJson("/api/v1/liftings/{$liftingB->id}")->assertStatus(403);
+});

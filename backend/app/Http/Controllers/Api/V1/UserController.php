@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers\Api\V1;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Resources\UserResource;
+use App\Models\Station;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
+
+class UserController extends Controller
+{
+    public function index(Request $request)
+    {
+        Gate::authorize('viewAny', User::class);
+
+        $users = User::with(['organization', 'station'])->latest()->paginate(20);
+
+        return UserResource::collection($users);
+    }
+
+    public function store(StoreUserRequest $request)
+    {
+        Gate::authorize('create', User::class);
+
+        $data = $request->validated();
+        $user = $request->user();
+
+        if ($user->hasRole('admin')) {
+            $data['organization_id'] = $user->organization_id;
+
+            if (isset($data['station_id'])) {
+                $station = Station::find($data['station_id']);
+                if (! $station || $station->organization_id !== $user->organization_id) {
+                    abort(403, 'Unauthorized station for this organization.');
+                }
+            }
+        }
+
+        $newUser = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => Hash::make($data['password']),
+            'organization_id' => $data['organization_id'] ?? null,
+            'station_id' => $data['station_id'] ?? null,
+        ]);
+
+        $newUser->assignRole($data['role']);
+
+        return new UserResource($newUser);
+    }
+
+    public function show(User $user)
+    {
+        Gate::authorize('view', $user);
+
+        $user->load(['organization', 'station']);
+
+        return new UserResource($user);
+    }
+}
