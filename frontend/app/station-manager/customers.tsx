@@ -249,7 +249,7 @@ export default function CustomersScreen() {
                     )}
                 </View>
                 <TouchableOpacity onPress={handleAddPress}>
-                    <Ionicons name="add-circle" size={32} color="#3b82f6" />
+                    <Ionicons name="add-circle" size={32} color="#040273" />
                 </TouchableOpacity>
             </View>
 
@@ -323,7 +323,7 @@ export default function CustomersScreen() {
                             showsVerticalScrollIndicator={false}
                         >
                             {editingId && (
-                                <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
+                                <View className="mb-4 bg-brand-subtle border border-brand/20 p-4 rounded-xl">
                                     <Text className="text-brand text-sm">
                                         You are requesting an update to this customer. An admin will review your changes.
                                     </Text>

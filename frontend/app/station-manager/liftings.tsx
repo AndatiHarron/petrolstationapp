@@ -302,7 +302,7 @@ export default function LiftingsScreen() {
                     )}
                 </View>
                 <TouchableOpacity onPress={handleAddPress}>
-                    <Ionicons name="add-circle" size={32} color="#3b82f6" />
+                    <Ionicons name="add-circle" size={32} color="#040273" />
                 </TouchableOpacity>
             </View>
 
@@ -387,7 +387,7 @@ export default function LiftingsScreen() {
                             <View className="mb-4">
                                 <Text className="text-ink-muted text-sm font-medium mb-2">Tank *</Text>
                                 {isLoadingTanks ? (
-                                    <ActivityIndicator size="small" color="#3b82f6" />
+                                    <ActivityIndicator size="small" color="#040273" />
                                 ) : tanks.length === 0 ? (
                                     <View className="bg-amber-900/30 border border-amber-700/50 rounded-xl p-4">
                                         <Text className="text-amber-700 text-sm">No tanks found.</Text>
@@ -398,7 +398,7 @@ export default function LiftingsScreen() {
                                             <TouchableOpacity
                                                 key={tank.id}
                                                 onPress={() => handleTankChange(tank.id)}
-                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedTankId === tank.id ? 'bg-blue-600 border-blue-500' : 'bg-surface border-surface-border'}`}
+                                                className={`px-4 py-3 rounded-xl border mr-2 ${selectedTankId === tank.id ? 'bg-brand border-brand' : 'bg-surface border-surface-border'}`}
                                             >
                                                 <Text className={selectedTankId === tank.id ? 'text-ink font-bold' : 'text-ink'}>{tank.name}</Text>
                                             </TouchableOpacity>
@@ -468,7 +468,7 @@ export default function LiftingsScreen() {
                                     <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-row">
                                         <TouchableOpacity
                                             onPress={() => setSelectedSupplierId(null)}
-                                            className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-surface border-surface-border'}`}
+                                            className={`px-4 py-3 rounded-xl border mr-2 ${selectedSupplierId === null ? 'bg-ink-faint border-slate-500' : 'bg-surface border-surface-border'}`}
                                         >
                                             <Text className={selectedSupplierId === null ? 'text-ink font-bold' : 'text-ink'}>None</Text>
                                         </TouchableOpacity>

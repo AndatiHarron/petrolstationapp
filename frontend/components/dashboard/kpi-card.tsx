@@ -32,7 +32,7 @@ export const KPICard = ({ kpi, index }: KPICardProps) => {
       case 'revenue': return 'border-l-emerald-500';
       case 'inventory': return 'border-l-amber-500';
       case 'discrepancy': return 'border-l-red-500';
-      default: return 'border-l-blue-500';
+      default: return 'border-l-brand';
     }
   };
 

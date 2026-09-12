@@ -119,7 +119,7 @@ const DataDiff = ({ label, original, requested }: { label: string; original: any
                 </Text>
                 {changed && (
                     <>
-                        <Ionicons name="arrow-forward" size={12} color="#60a5fa" />
+                        <Ionicons name="arrow-forward" size={12} color="#040273" />
                         <Text className="text-emerald-400 text-sm font-mono font-bold">
                             {String(requested ?? '—')}
                         </Text>
@@ -226,7 +226,7 @@ export default function AdminRequestsScreen() {
                                     key={btn.value}
                                     onPress={() => setFilterStatus(btn.value)}
                                     className={`px-4 py-2 rounded-lg border ${filterStatus === btn.value
-                                        ? 'bg-blue-600 border-blue-500'
+                                        ? 'bg-brand border-brand'
                                         : 'bg-surface border-surface-border'
                                         }`}
                                 >
@@ -243,7 +243,7 @@ export default function AdminRequestsScreen() {
                 {/* List */}
                 {isLoading ? (
                     <View className="flex-1 items-center justify-center">
-                        <ActivityIndicator size="large" color="#60a5fa" />
+                        <ActivityIndicator size="large" color="#040273" />
                         <Text className="text-gray-600 mt-4">Loading requests...</Text>
                     </View>
                 ) : (

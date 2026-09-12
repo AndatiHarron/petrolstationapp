@@ -14,7 +14,7 @@ export const StatusIndicator = ({ indicator, index }: StatusIndicatorProps) => {
       case 'operational': return 'bg-emerald-500';
       case 'warning': return 'bg-amber-500';
       case 'critical': return 'bg-accent';
-      default: return 'bg-slate-500';
+      default: return 'bg-ink-faint';
     }
   };
 

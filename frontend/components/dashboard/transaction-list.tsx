@@ -19,7 +19,7 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
 
   const getIconColor = (type: Transaction['type']) => {
     switch (type) {
-      case 'sale': return '#3b82f6'; // blue
+      case 'sale': return '#040273'; // blue
       case 'refund': return '#bf0a30'; // red
       case 'adjustment': return '#f59e0b'; // amber
       default: return '#8b8b99'; // slate
@@ -33,7 +33,7 @@ export const TransactionList = ({ transactions }: TransactionListProps) => {
           Recent Activity
         </Text>
         <TouchableOpacity>
-          <Text className="text-xs font-bold text-blue-400">View All</Text>
+          <Text className="text-xs font-bold text-brand">View All</Text>
         </TouchableOpacity>
       </View>
 

@@ -54,7 +54,7 @@ export function InventorySection() {
                     {MOCK_WET_STOCK.map((tank, index) => {
                         // Calculate height percentage for visualization (max 150px height)
                         const height = Math.max(20, tank.level * 180);
-                        const color = tank.level > 0.3 ? 'bg-blue-500' : 'bg-accent';
+                        const color = tank.level > 0.3 ? 'bg-brand' : 'bg-accent';
 
                         return (
                             <View key={index} className="items-center gap-2">

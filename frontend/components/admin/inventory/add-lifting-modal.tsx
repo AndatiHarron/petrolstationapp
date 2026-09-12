@@ -140,8 +140,8 @@ export function AddLiftingModal({
                     {/* Header */}
                     <View className="p-6 border-b border-surface-border flex-row justify-between items-center bg-surface-sunken rounded-t-3xl">
                         <View className="flex-row items-center gap-3">
-                            <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center">
-                                <Ionicons name="add" size={22} color="#3b82f6" />
+                            <View className="w-10 h-10 rounded-full bg-brand-subtle items-center justify-center">
+                                <Ionicons name="add" size={22} color="#040273" />
                             </View>
                             <Text className="text-xl font-bold text-ink">New Lifting</Text>
                         </View>
@@ -161,7 +161,7 @@ export function AddLiftingModal({
                             <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Station *</Text>
                             {isLoadingStations ? (
                                 <View className="h-12 items-center justify-center">
-                                    <ActivityIndicator size="small" color="#3b82f6" />
+                                    <ActivityIndicator size="small" color="#040273" />
                                 </View>
                             ) : stations.length === 0 ? (
                                 <View className="bg-amber-900/30 border border-amber-700/50 rounded-xl p-4">
@@ -175,7 +175,7 @@ export function AddLiftingModal({
                                                 key={station.id}
                                                 onPress={() => handleStationChange(station.id)}
                                                 className={`px-4 py-3 rounded-xl border ${selectedStationId === station.id
-                                                    ? 'bg-blue-600 border-blue-500'
+                                                    ? 'bg-brand border-brand'
                                                     : 'bg-surface border-surface-border'
                                                     }`}
                                             >
@@ -194,7 +194,7 @@ export function AddLiftingModal({
                             <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Tank *</Text>
                             {isLoadingTanks ? (
                                 <View className="h-12 items-center justify-center">
-                                    <ActivityIndicator size="small" color="#3b82f6" />
+                                    <ActivityIndicator size="small" color="#040273" />
                                 </View>
                             ) : filteredTanks.length === 0 ? (
                                 <View className="bg-surface border border-surface-border rounded-xl p-4">
@@ -210,7 +210,7 @@ export function AddLiftingModal({
                                                 key={tank.id}
                                                 onPress={() => handleTankChange(tank.id)}
                                                 className={`px-4 py-3 rounded-xl border ${selectedTankId === tank.id
-                                                    ? 'bg-blue-600 border-blue-500'
+                                                    ? 'bg-brand border-brand'
                                                     : 'bg-surface border-surface-border'
                                                     }`}
                                             >
@@ -293,7 +293,7 @@ export function AddLiftingModal({
                                     <View className="flex-row gap-2">
                                         <TouchableOpacity
                                             onPress={() => setSelectedSupplierId(null)}
-                                            className={`px-4 py-3 rounded-xl border ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-surface border-surface-border'}`}
+                                            className={`px-4 py-3 rounded-xl border ${selectedSupplierId === null ? 'bg-ink-faint border-slate-500' : 'bg-surface border-surface-border'}`}
                                         >
                                             <Text className={selectedSupplierId === null ? 'text-ink font-bold' : 'text-ink'}>None</Text>
                                         </TouchableOpacity>

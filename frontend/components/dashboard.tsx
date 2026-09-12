@@ -82,7 +82,7 @@ export const Dashboard = () => {
           <QuickActionButton
             label="Start Shift"
             icon="clock.fill"
-            color="#3b82f6"
+            color="#040273"
           />
           <QuickActionButton
             label="Report Issue"

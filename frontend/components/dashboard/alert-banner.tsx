@@ -45,12 +45,12 @@ export const AlertBanner = ({ alert, onDismiss }: AlertBannerProps) => {
         };
       default:
         return {
-          bg: 'bg-blue-900/20',
-          border: 'border-blue-500',
+          bg: 'bg-brand-subtle',
+          border: 'border-brand',
           icon: 'info.circle.fill',
-          iconColor: '#3b82f6',
-          text: 'text-blue-200',
-          title: 'text-blue-100'
+          iconColor: '#040273',
+          text: 'text-white',
+          title: 'text-white'
         };
     }
   };

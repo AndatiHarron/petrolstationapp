@@ -203,7 +203,7 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
                                 Nozzle Name *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="e.g. Pump 1 - Nozzle A"
                                 placeholderTextColor="#5c5c6b"
                                 value={name}
@@ -216,7 +216,7 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
                                 Counter Digits (1-10) *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="7"
                                 placeholderTextColor="#5c5c6b"
                                 keyboardType="numeric"
@@ -251,10 +251,10 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
                                                     setStationId(s.id);
                                                     setShowStationPicker(false);
                                                 }}
-                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-blue-600/20' : ''
+                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-brand/20' : ''
                                                     }`}
                                             >
-                                                <Text className={stationId === s.id ? 'text-blue-400' : 'text-ink'}>
+                                                <Text className={stationId === s.id ? 'text-brand' : 'text-ink'}>
                                                     {s.name}
                                                 </Text>
                                             </Pressable>
@@ -292,10 +292,10 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
                                                     setTankId(t.id);
                                                     setShowTankPicker(false);
                                                 }}
-                                                className={`p-3 border-b border-surface-border ${tankId === t.id ? 'bg-blue-600/20' : ''
+                                                className={`p-3 border-b border-surface-border ${tankId === t.id ? 'bg-brand/20' : ''
                                                     }`}
                                             >
-                                                <Text className={tankId === t.id ? 'text-blue-400' : 'text-ink'}>
+                                                <Text className={tankId === t.id ? 'text-brand' : 'text-ink'}>
                                                     {t.name}
                                                     {t.product_name ? ` (${t.product_name})` : ''}
                                                 </Text>
@@ -317,7 +317,7 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
                                 Current Reading *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="0"
                                 placeholderTextColor="#5c5c6b"
                                 keyboardType="numeric"
@@ -329,7 +329,7 @@ export function NozzleModal({ visible, onClose, nozzle }: NozzleModalProps) {
                         {/* Footer */}
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-blue-600/50' : 'bg-blue-600'
+                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
                                     }`}
                                 onPress={handleSubmit}
                                 disabled={isPending}

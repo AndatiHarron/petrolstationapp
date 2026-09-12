@@ -24,7 +24,7 @@ export const ChartCard = () => {
               key={p}
               onPress={() => setPeriod(p)}
               className={`rounded px-3 py-1 ${
-                period === p ? 'bg-slate-600' : 'bg-transparent'
+                period === p ? 'bg-ink-faint' : 'bg-transparent'
               }`}
             >
               <Text className={`text-xs font-medium capitalize ${
@@ -44,7 +44,7 @@ export const ChartCard = () => {
         {width > 0 && data.map((value, index) => (
           <View key={index} className="items-center" style={{ width: (width - 32) / data.length - 4 }}>
             <View 
-              className="w-full rounded-t-sm bg-blue-500 opacity-80"
+              className="w-full rounded-t-sm bg-brand opacity-80"
               style={{ height: `${value}%` }}
             />
           </View>

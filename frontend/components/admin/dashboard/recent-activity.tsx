@@ -10,7 +10,7 @@ function ActivityRowSkeleton() {
             <View className="h-4 w-48 bg-surface-border rounded mb-2 animate-pulse" />
             <View className="flex-row items-center gap-2">
                 <View className="h-2 w-16 bg-surface-border rounded animate-pulse" />
-                <View className="w-1 h-1 rounded-full bg-slate-600" />
+                <View className="w-1 h-1 rounded-full bg-ink-faint" />
                 <View className="h-2 w-24 bg-surface-border rounded animate-pulse" />
             </View>
         </View>
@@ -52,7 +52,7 @@ export function RecentActivity() {
                                 <Text className="text-ink-muted text-xs">
                                     {log.causer?.name ?? 'System'}
                                 </Text>
-                                <View className="w-1 h-1 rounded-full bg-slate-600" />
+                                <View className="w-1 h-1 rounded-full bg-ink-faint" />
                                 <Text className="text-ink-muted text-xs">
                                     {log.time_ago}
                                 </Text>

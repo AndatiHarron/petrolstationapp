@@ -85,7 +85,7 @@ export class ErrorBoundary extends Component<Props, State> {
                             onPress={() => this.setState({ hasError: false, error: null, errorInfo: null })}
                             style={{
                                 flex: 1,
-                                backgroundColor: '#3b82f6',
+                                backgroundColor: '#040273',
                                 paddingVertical: 14,
                                 borderRadius: 12,
                                 alignItems: 'center',

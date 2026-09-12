@@ -60,7 +60,7 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
                     <Text className="text-ink text-base font-bold">{item.station_name}</Text>
                     <Text className="text-ink-muted text-sm mt-0.5">{formatDate(item.started_at)}</Text>
                 </View>
-                <View className={`px-2.5 py-1 rounded-lg ${item.status === 'locked' ? 'bg-slate-600/40' : 'bg-emerald-500/15 border border-emerald-500/30'}`}>
+                <View className={`px-2.5 py-1 rounded-lg ${item.status === 'locked' ? 'bg-ink-faint/40' : 'bg-emerald-500/15 border border-emerald-500/30'}`}>
                     <Text className={`text-xs font-semibold ${item.status === 'locked' ? 'text-ink-muted' : 'text-emerald-700'}`}>
                         {item.status?.toUpperCase()}
                     </Text>
@@ -362,7 +362,7 @@ export function ShiftHistoryTab() {
 
                         {/* Progress Bar */}
                         <View className="flex-row h-1 w-full bg-surface">
-                            <View className={`h-full bg-blue-500 ${editStep === 1 ? 'w-1/3' : editStep === 2 ? 'w-2/3' : 'w-full'}`} />
+                            <View className={`h-full bg-brand ${editStep === 1 ? 'w-1/3' : editStep === 2 ? 'w-2/3' : 'w-full'}`} />
                         </View>
 
                         <ScrollView
@@ -371,7 +371,7 @@ export function ShiftHistoryTab() {
                             keyboardShouldPersistTaps="handled"
                             showsVerticalScrollIndicator={false}
                         >
-                            <View className="mb-4 bg-blue-500/10 border border-blue-500/30 p-4 rounded-xl">
+                            <View className="mb-4 bg-brand-subtle border border-brand/20 p-4 rounded-xl">
                                 <Text className="text-brand text-sm">
                                     Correct the shift data below. An admin will review your changes before they are applied.
                                 </Text>
@@ -575,7 +575,7 @@ export function ShiftHistoryTab() {
                             {editStep < 3 ? (
                                 <TouchableOpacity
                                     onPress={() => setEditStep(prev => (prev + 1) as any)}
-                                    className="flex-[2] py-4 bg-blue-600 rounded-xl items-center shadow-lg shadow-blue-900/40"
+                                    className="flex-[2] py-4 bg-brand rounded-xl items-center shadow-lg "
                                 >
                                     <Text className="text-ink font-bold uppercase tracking-wider">Next Step</Text>
                                 </TouchableOpacity>

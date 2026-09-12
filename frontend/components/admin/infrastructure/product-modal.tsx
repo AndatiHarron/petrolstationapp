@@ -150,7 +150,7 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                                 Product Name *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="e.g. Super Petrol"
                                 placeholderTextColor="#5c5c6b"
                                 value={name}
@@ -167,7 +167,7 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                                     <Text className="text-ink-muted font-bold">KES</Text>
                                 </View>
                                 <TextInput
-                                    className="bg-surface text-ink p-4 pl-14 rounded-xl border border-surface-border focus:border-blue-500"
+                                    className="bg-surface text-ink p-4 pl-14 rounded-xl border border-surface-border focus:border-brand"
                                     placeholder="0.00"
                                     placeholderTextColor="#5c5c6b"
                                     keyboardType="numeric"
@@ -182,7 +182,7 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                             </Text>
                             <View className="relative mb-6">
                                 <TextInput
-                                    className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500"
+                                    className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand"
                                     placeholder="16"
                                     placeholderTextColor="#5c5c6b"
                                     keyboardType="numeric"
@@ -198,7 +198,7 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                         {/* Footer */}
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-blue-600/50' : 'bg-blue-600'
+                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
                                     }`}
                                 onPress={handleSubmit}
                                 disabled={isPending}

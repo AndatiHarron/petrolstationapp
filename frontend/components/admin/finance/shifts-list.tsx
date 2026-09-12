@@ -60,7 +60,7 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
     const statusColors = {
         active: 'bg-emerald-500/10 text-emerald-400',
         locked: 'bg-amber-500/10 text-amber-400',
-        closed: 'bg-slate-500/10 text-ink-muted',
+        closed: 'bg-ink-faint/10 text-ink-muted',
     };
 
     const statusColor = statusColors[item.status as keyof typeof statusColors] || statusColors.active;
@@ -76,11 +76,11 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
         >
             <View className="flex-row items-start justify-between mb-3">
                 <View className="flex-row items-center flex-1">
-                    <View className={`p-3 rounded-xl mr-3 ${hasVarianceAlert ? 'bg-accent-subtle' : 'bg-blue-500/10'}`}>
+                    <View className={`p-3 rounded-xl mr-3 ${hasVarianceAlert ? 'bg-accent-subtle' : 'bg-brand-subtle'}`}>
                         {hasVarianceAlert ? (
                             <AlertTriangle size={20} color="#bf0a30" />
                         ) : (
-                            <Clock size={20} color="#3b82f6" />
+                            <Clock size={20} color="#040273" />
                         )}
                     </View>
                     <View className="flex-1">

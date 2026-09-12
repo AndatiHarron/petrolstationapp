@@ -242,7 +242,7 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                 Tank Name *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="e.g. Tank 1"
                                 placeholderTextColor="#5c5c6b"
                                 value={name}
@@ -273,10 +273,10 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                                     setStationId(s.id);
                                                     setShowStationPicker(false);
                                                 }}
-                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-blue-600/20' : ''
+                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-brand/20' : ''
                                                     }`}
                                             >
-                                                <Text className={stationId === s.id ? 'text-blue-400' : 'text-ink'}>
+                                                <Text className={stationId === s.id ? 'text-brand' : 'text-ink'}>
                                                     {s.name}
                                                 </Text>
                                             </Pressable>
@@ -310,10 +310,10 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                                     setProductId(p.id);
                                                     setShowProductPicker(false);
                                                 }}
-                                                className={`p-3 border-b border-surface-border ${productId === p.id ? 'bg-blue-600/20' : ''
+                                                className={`p-3 border-b border-surface-border ${productId === p.id ? 'bg-brand/20' : ''
                                                     }`}
                                             >
-                                                <Text className={productId === p.id ? 'text-blue-400' : 'text-ink'}>
+                                                <Text className={productId === p.id ? 'text-brand' : 'text-ink'}>
                                                     {p.name}
                                                 </Text>
                                             </Pressable>
@@ -329,7 +329,7 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                 Capacity (Liters) *
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="e.g. 10000"
                                 placeholderTextColor="#5c5c6b"
                                 keyboardType="numeric"
@@ -342,7 +342,7 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                 Current Volume (Liters)
                             </Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand mb-4"
                                 placeholder="0"
                                 placeholderTextColor="#5c5c6b"
                                 keyboardType="numeric"
@@ -429,7 +429,7 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                         {/* Footer */}
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
-                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-blue-600/50' : 'bg-blue-600'
+                                className={`rounded-xl py-4 items-center ${isPending ? 'bg-brand/50' : 'bg-brand'
                                     }`}
                                 onPress={handleSubmit}
                                 disabled={isPending}

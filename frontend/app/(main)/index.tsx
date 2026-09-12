@@ -23,7 +23,7 @@ export default function Home() {
           </Pressable>
         </Link>
         <Link href="/station-manager" asChild>
-          <Pressable className="bg-blue-500 px-6 py-3 rounded-full shadow-lg">
+          <Pressable className="bg-brand px-6 py-3 rounded-full shadow-lg">
             <Text className="text-black font-bold">Role: Station Manager</Text>
           </Pressable>
         </Link>

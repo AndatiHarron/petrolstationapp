@@ -70,7 +70,7 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                                     <Text className="text-ink-muted text-lg font-bold">KES</Text>
                                 </View>
                                 <TextInput
-                                    className="bg-surface text-ink font-black text-3xl p-4 pl-16 rounded-xl border border-surface-border focus:border-blue-500 focus:bg-surface h-20"
+                                    className="bg-surface text-ink font-black text-3xl p-4 pl-16 rounded-xl border border-surface-border focus:border-brand focus:bg-surface h-20"
                                     placeholder="0.00"
                                     placeholderTextColor="#5c5c6b"
                                     keyboardType="numeric"
@@ -93,7 +93,7 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                                         key={customer}
                                         onPress={() => setSelectedCustomer(customer)}
                                         className={`mr-3 px-4 py-3 rounded-xl border ${selectedCustomer === customer
-                                                ? 'bg-blue-600 border-blue-500'
+                                                ? 'bg-brand border-brand'
                                                 : 'bg-surface border-surface-border'
                                             }`}
                                     >
@@ -108,7 +108,7 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                             {/* Notes */}
                             <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">Additional Notes</Text>
                             <TextInput
-                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 focus:bg-surface min-h-[100px] mb-8"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-brand focus:bg-surface min-h-[100px] mb-8"
                                 placeholder="Driver name, vehicle registration..."
                                 placeholderTextColor="#5c5c6b"
                                 multiline
@@ -121,7 +121,7 @@ export function CreditSaleModal({ visible, onClose }: CreditSaleModalProps) {
                         {/* Footer */}
                         <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <TouchableOpacity
-                                className="bg-blue-600 rounded-xl py-4 items-center shadow-lg shadow-blue-900/20"
+                                className="bg-brand rounded-xl py-4 items-center shadow-lg "
                                 onPress={onClose} // Functionality would go here
                             >
                                 <Text className="text-ink font-bold text-lg">Confirm Credit Sale</Text>

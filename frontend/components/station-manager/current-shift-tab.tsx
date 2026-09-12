@@ -194,7 +194,7 @@ export function CurrentShiftTab() {
                             <TouchableOpacity
                                 onPress={handleStartShift}
                                 disabled={isStarting}
-                                className="bg-blue-600 w-full py-4 rounded-xl items-center flex-row justify-center gap-2 active:bg-blue-700"
+                                className="bg-brand w-full py-4 rounded-xl items-center flex-row justify-center gap-2 active:bg-brand"
                             >
                                 {isStarting ? (
                                     <ActivityIndicator size="small" color="#fff" />
