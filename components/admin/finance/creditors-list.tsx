@@ -1,9 +1,10 @@
-import React, { memo, useCallback, useMemo } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import React, {memo, useCallback, useMemo, useState} from 'react';
+import {View, Text, FlatList, Pressable} from 'react-native';
 import { AlertTriangle, Truck } from 'lucide-react-native';
 import { useCreditorsIndex } from '@/features/api/creditor/creditor';
 import type { CreditorsIndex200, SupplierResource } from '@/features/api/model';
 import { SkeletonCard } from '@/components/station-manager/skeleton-card';
+import { RecordSupplierPaymentSheet } from './supplier-payments';
 
 interface CreditorItemProps {
     item: SupplierResource;
@@ -70,8 +71,22 @@ export const CreditorsList = memo(function CreditorsList() {
         minimumFractionDigits: 0,
     }).format(totalOutstanding);
 
+    const [paying, setPaying] = useState<SupplierResource | null>(null);
+
     const renderItem = useCallback(({ item }: { item: SupplierResource }) => {
-        return <CreditorItem item={item} />;
+        return (
+            <View>
+                <CreditorItem item={item} />
+                <Pressable
+                    onPress={() => setPaying(item)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Record a payment to ${item.name}`}
+                    className="mb-3 self-start rounded-full border border-brand/20 bg-brand-subtle px-3 py-1.5 active:opacity-80"
+                >
+                    <Text className="text-brand text-[11px] font-bold">Pay supplier</Text>
+                </Pressable>
+            </View>
+        );
     }, []);
 
     const keyExtractor = useCallback((item: SupplierResource) => item.id, []);

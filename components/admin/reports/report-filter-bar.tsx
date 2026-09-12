@@ -91,6 +91,24 @@ export function ReportFilterBar({
             {/* Quick presets, so the common cases need no sheet at all. */}
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <View className="flex-row gap-2">
+                    <Pressable
+                        onPress={() => setRangeOpen(true)}
+                        accessibilityRole="button"
+                        className={`rounded-full border px-2.5 py-1 ${
+                            activePreset === 'custom'
+                                ? 'border-brand bg-brand'
+                                : 'border-surface-border bg-surface active:bg-surface-sunken'
+                        }`}
+                    >
+                        <Text
+                            className={`text-[10px] font-semibold ${
+                                activePreset === 'custom' ? 'text-white' : 'text-ink-muted'
+                            }`}
+                        >
+                            Custom
+                        </Text>
+                    </Pressable>
+
                     {PERIOD_PRESETS.map((preset) => {
                         const active = activePreset === preset.id;
                         return (
@@ -114,23 +132,6 @@ export function ReportFilterBar({
                             </Pressable>
                         );
                     })}
-                    <Pressable
-                        onPress={() => setRangeOpen(true)}
-                        accessibilityRole="button"
-                        className={`rounded-full border px-2.5 py-1 ${
-                            activePreset === 'custom'
-                                ? 'border-brand bg-brand'
-                                : 'border-surface-border bg-surface active:bg-surface-sunken'
-                        }`}
-                    >
-                        <Text
-                            className={`text-[10px] font-semibold ${
-                                activePreset === 'custom' ? 'text-white' : 'text-ink-muted'
-                            }`}
-                        >
-                            Custom
-                        </Text>
-                    </Pressable>
                 </View>
             </ScrollView>
 

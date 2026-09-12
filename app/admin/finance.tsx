@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { CreditSalesList } from '@/components/admin/finance/credit-sales-list';
 import { ShiftsList } from '@/components/admin/finance/shifts-list';
 import { CreditorsList } from '@/components/admin/finance/creditors-list';
+import { SupplierPayments } from '@/components/admin/finance/supplier-payments';
 import { CreditSaleDetailModal } from '@/components/admin/finance/credit-sale-detail-modal';
 import { ShiftDetailModal } from '@/components/admin/finance/shift-detail-modal';
 
@@ -42,6 +43,7 @@ export default function FinanceTab() {
                         <Text className="text-ink-muted text-sm mt-1">Financial reporting and analysis</Text>
                     </View>
 
+                    <SupplierPayments />
                     <CreditorsList />
                     <CreditSalesList onItemPress={handleCreditSalePress} />
                     <ShiftsList onItemPress={handleShiftPress} />
