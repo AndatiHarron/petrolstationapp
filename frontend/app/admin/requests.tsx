@@ -221,8 +221,6 @@ export default function AdminRequestsScreen() {
                 {/* Filters */}
                 <View className="px-4 py-3">
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <SettlementApprovals />
-
                         <View className="flex-row gap-2">
                             {filterButtons.map((btn) => (
                                 <TouchableOpacity
@@ -233,8 +231,11 @@ export default function AdminRequestsScreen() {
                                         : 'bg-surface border-surface-border'
                                         }`}
                                 >
-                                    <Text className={`text-sm font-semibold ${filterStatus === btn.value ? 'text-black' : 'text-gray-600'}
-                                        }`}>
+                                    <Text
+                                        className={`text-sm font-semibold ${
+                                            filterStatus === btn.value ? 'text-white' : 'text-ink-muted'
+                                        }`}
+                                    >
                                         {btn.label}
                                     </Text>
                                 </TouchableOpacity>
@@ -247,13 +248,22 @@ export default function AdminRequestsScreen() {
                 {isLoading ? (
                     <View className="flex-1 items-center justify-center">
                         <ActivityIndicator size="large" color="#040273" />
-                        <Text className="text-gray-600 mt-4">Loading requests...</Text>
+                        <Text className="text-ink-muted mt-4">Loading requests...</Text>
                     </View>
                 ) : (
                     <FlatList<EditRequestResource>
                         data={filteredRequests}
                         renderItem={({ item }) => <RequestItem item={item} onPress={setSelectedRequest} />}
                         keyExtractor={(item) => item.id}
+                        ListHeaderComponent={
+                            <View className="mb-2">
+                                <SettlementApprovals />
+                                <Text className="text-ink text-xl font-bold">Shift edit requests</Text>
+                                <Text className="text-ink-muted mt-1 text-xs">
+                                    Corrections managers have asked to make to locked shifts.
+                                </Text>
+                            </View>
+                        }
                         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
                         refreshControl={
                             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />
