@@ -8,13 +8,13 @@ import type { ProductResource, ProductsIndex200 } from '@/features/api/model';
 // Skeleton loader for a single product card
 export function ProductCardSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-center justify-between">
                 <View className="flex-1">
-                    <View className="h-5 w-28 bg-slate-700 rounded mb-2 animate-pulse" />
-                    <View className="h-3 w-20 bg-slate-700 rounded animate-pulse" />
+                    <View className="h-5 w-28 bg-surface-border rounded mb-2 animate-pulse" />
+                    <View className="h-3 w-20 bg-surface-border rounded animate-pulse" />
                 </View>
-                <View className="h-7 w-24 bg-slate-700 rounded animate-pulse" />
+                <View className="h-7 w-24 bg-surface-border rounded animate-pulse" />
             </View>
         </View>
     );
@@ -46,16 +46,16 @@ const ProductCard = memo(function ProductCard({
     }).format(product.current_price);
 
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-start justify-between">
                 <View className="flex-1">
                     <View className="flex-row items-center mb-2">
-                        <Package size={18} color="#94a3b8" />
-                        <Text className="text-white font-semibold text-base ml-2">{product.name}</Text>
+                        <Package size={18} color="#8b8b99" />
+                        <Text className="text-ink font-semibold text-base ml-2">{product.name}</Text>
                     </View>
                     <View className="flex-row items-center">
                         <Text className="text-emerald-400 font-bold text-lg ml-1">{formattedPrice}</Text>
-                        <Text className="text-slate-500 text-xs ml-2">VAT: {product.vat_rate * 100}%</Text>
+                        <Text className="text-ink-muted text-xs ml-2">VAT: {product.vat_rate * 100}%</Text>
                     </View>
                 </View>
                 <View className="flex-row items-center gap-2">
@@ -68,9 +68,9 @@ const ProductCard = memo(function ProductCard({
                     <Pressable
                         onPress={handleDelete}
                         disabled={isDeleting}
-                        className="p-2 bg-red-500/20 rounded-lg active:opacity-70"
+                        className="p-2 bg-accent-subtle rounded-lg active:opacity-70"
                     >
-                        <Trash2 size={16} color={isDeleting ? '#94a3b8' : '#ef4444'} />
+                        <Trash2 size={16} color={isDeleting ? '#8b8b99' : '#bf0a30'} />
                     </Pressable>
                 </View>
             </View>
@@ -123,7 +123,7 @@ export function ProductsList({ onAddProduct, onEditProduct, onDeleteProduct }: P
         <View className="flex-1">
             {/* Header with Add Button */}
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-slate-400 text-sm">
+                <Text className="text-ink-muted text-sm">
                     {products.length} product{products.length !== 1 ? 's' : ''}
                 </Text>
                 {onAddProduct ? (
@@ -132,16 +132,16 @@ export function ProductsList({ onAddProduct, onEditProduct, onDeleteProduct }: P
                         className="flex-row items-center px-3 py-2 bg-emerald-500 rounded-lg active:opacity-80"
                     >
                         <Plus size={16} color="#ffffff" />
-                        <Text className="text-white font-medium text-sm ml-1">Add Product</Text>
+                        <Text className="text-ink font-medium text-sm ml-1">Add Product</Text>
                     </Pressable>
                 ) : null}
             </View>
 
             {products.length === 0 ? (
-                <View className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 items-center">
-                    <Package size={48} color="#64748b" />
-                    <Text className="text-slate-400 text-lg mt-4">No products found</Text>
-                    <Text className="text-slate-500 text-sm mt-1">Add a product to get started</Text>
+                <View className="bg-surface-sunken border border-surface-border rounded-xl p-8 items-center">
+                    <Package size={48} color="#5c5c6b" />
+                    <Text className="text-ink-muted text-lg mt-4">No products found</Text>
+                    <Text className="text-ink-muted text-sm mt-1">Add a product to get started</Text>
                 </View>
             ) : (
                 <FlashList
@@ -152,7 +152,7 @@ export function ProductsList({ onAddProduct, onEditProduct, onDeleteProduct }: P
                         <RefreshControl
                             refreshing={isRefetching}
                             onRefresh={refetch}
-                            tintColor="#94a3b8"
+                            tintColor="#8b8b99"
                         />
                     }
                 />

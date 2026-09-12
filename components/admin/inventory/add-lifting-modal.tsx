@@ -136,17 +136,17 @@ export function AddLiftingModal({
                 className="flex-1 justify-end"
                 keyboardVerticalOffset={0}
             >
-                <View className="bg-slate-900 border-t border-slate-700 h-[92%] rounded-t-3xl shadow-2xl">
+                <View className="bg-surface-sunken border-t border-surface-border h-[92%] rounded-t-3xl shadow-2xl">
                     {/* Header */}
-                    <View className="p-6 border-b border-slate-800 flex-row justify-between items-center bg-slate-800/50 rounded-t-3xl">
+                    <View className="p-6 border-b border-surface-border flex-row justify-between items-center bg-surface-sunken rounded-t-3xl">
                         <View className="flex-row items-center gap-3">
                             <View className="w-10 h-10 rounded-full bg-blue-500/20 items-center justify-center">
                                 <Ionicons name="add" size={22} color="#3b82f6" />
                             </View>
-                            <Text className="text-xl font-bold text-white">New Lifting</Text>
+                            <Text className="text-xl font-bold text-ink">New Lifting</Text>
                         </View>
                         <TouchableOpacity onPress={handleClose}>
-                            <Ionicons name="close-circle" size={28} color="#64748b" />
+                            <Ionicons name="close-circle" size={28} color="#5c5c6b" />
                         </TouchableOpacity>
                     </View>
 
@@ -158,7 +158,7 @@ export function AddLiftingModal({
                     >
                         {/* Station Selector */}
                         <View className="mb-5">
-                            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Station *</Text>
+                            <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Station *</Text>
                             {isLoadingStations ? (
                                 <View className="h-12 items-center justify-center">
                                     <ActivityIndicator size="small" color="#3b82f6" />
@@ -176,10 +176,10 @@ export function AddLiftingModal({
                                                 onPress={() => handleStationChange(station.id)}
                                                 className={`px-4 py-3 rounded-xl border ${selectedStationId === station.id
                                                     ? 'bg-blue-600 border-blue-500'
-                                                    : 'bg-slate-800 border-slate-700'
+                                                    : 'bg-surface border-surface-border'
                                                     }`}
                                             >
-                                                <Text className={selectedStationId === station.id ? 'text-white font-bold' : 'text-slate-300'}>
+                                                <Text className={selectedStationId === station.id ? 'text-ink font-bold' : 'text-ink'}>
                                                     {station.name}
                                                 </Text>
                                             </TouchableOpacity>
@@ -191,14 +191,14 @@ export function AddLiftingModal({
 
                         {/* Tank Selector */}
                         <View className="mb-5">
-                            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Tank *</Text>
+                            <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Tank *</Text>
                             {isLoadingTanks ? (
                                 <View className="h-12 items-center justify-center">
                                     <ActivityIndicator size="small" color="#3b82f6" />
                                 </View>
                             ) : filteredTanks.length === 0 ? (
-                                <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                                    <Text className="text-slate-500 text-sm">
+                                <View className="bg-surface border border-surface-border rounded-xl p-4">
+                                    <Text className="text-ink-muted text-sm">
                                         {selectedStationId ? 'No tanks for selected station.' : 'Select a station first.'}
                                     </Text>
                                 </View>
@@ -211,14 +211,14 @@ export function AddLiftingModal({
                                                 onPress={() => handleTankChange(tank.id)}
                                                 className={`px-4 py-3 rounded-xl border ${selectedTankId === tank.id
                                                     ? 'bg-blue-600 border-blue-500'
-                                                    : 'bg-slate-800 border-slate-700'
+                                                    : 'bg-surface border-surface-border'
                                                     }`}
                                             >
-                                                <Text className={selectedTankId === tank.id ? 'text-white font-bold' : 'text-slate-300'}>
+                                                <Text className={selectedTankId === tank.id ? 'text-ink font-bold' : 'text-ink'}>
                                                     {tank.name}
                                                 </Text>
                                                 {tank.product_name ? (
-                                                    <Text className="text-slate-500 text-xs mt-0.5">{tank.product_name}</Text>
+                                                    <Text className="text-ink-muted text-xs mt-0.5">{tank.product_name}</Text>
                                                 ) : null}
                                             </TouchableOpacity>
                                         ))}
@@ -259,8 +259,8 @@ export function AddLiftingModal({
 
                         {/* Total Cost (Auto-calculated) */}
                         <View className="mb-5">
-                            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Total Cost (Auto-calculated)</Text>
-                            <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                            <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Total Cost (Auto-calculated)</Text>
+                            <View className="bg-surface border border-surface-border rounded-xl p-4">
                                 <Text className="text-emerald-400 font-mono font-bold text-lg">
                                     KES {(formData.total_cost || 0).toLocaleString()}
                                 </Text>
@@ -269,8 +269,8 @@ export function AddLiftingModal({
 
                         {/* Tax Paid (Auto-calculated) */}
                         <View className="mb-5">
-                            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Tax Paid (Auto-calculated)</Text>
-                            <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
+                            <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Tax Paid (Auto-calculated)</Text>
+                            <View className="bg-surface border border-surface-border rounded-xl p-4">
                                 <Text className="text-orange-400 font-mono font-bold text-lg">
                                     KES {(formData.tax_paid || 0).toLocaleString()}
                                 </Text>
@@ -279,31 +279,31 @@ export function AddLiftingModal({
 
                         {/* Supplier Selector */}
                         <View className="mb-5">
-                            <Text className="text-slate-400 text-xs font-bold uppercase tracking-widest mb-2">Supplier (Optional)</Text>
+                            <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Supplier (Optional)</Text>
                             {isLoadingCreditors ? (
                                 <View className="h-12 items-center justify-center">
                                     <ActivityIndicator size="small" color="#38bdf8" />
                                 </View>
                             ) : creditors.length === 0 ? (
-                                <View className="bg-slate-800 border border-slate-700 rounded-xl p-4">
-                                    <Text className="text-slate-500 text-sm">No suppliers available.</Text>
+                                <View className="bg-surface border border-surface-border rounded-xl p-4">
+                                    <Text className="text-ink-muted text-sm">No suppliers available.</Text>
                                 </View>
                             ) : (
                                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                                     <View className="flex-row gap-2">
                                         <TouchableOpacity
                                             onPress={() => setSelectedSupplierId(null)}
-                                            className={`px-4 py-3 rounded-xl border ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-slate-800 border-slate-700'}`}
+                                            className={`px-4 py-3 rounded-xl border ${selectedSupplierId === null ? 'bg-slate-600 border-slate-500' : 'bg-surface border-surface-border'}`}
                                         >
-                                            <Text className={selectedSupplierId === null ? 'text-white font-bold' : 'text-slate-300'}>None</Text>
+                                            <Text className={selectedSupplierId === null ? 'text-ink font-bold' : 'text-ink'}>None</Text>
                                         </TouchableOpacity>
                                         {creditors.map((creditor) => (
                                             <TouchableOpacity
                                                 key={creditor.id}
                                                 onPress={() => setSelectedSupplierId(creditor.id)}
-                                                className={`px-4 py-3 rounded-xl border ${selectedSupplierId === creditor.id ? 'bg-sky-600 border-sky-500' : 'bg-slate-800 border-slate-700'}`}
+                                                className={`px-4 py-3 rounded-xl border ${selectedSupplierId === creditor.id ? 'bg-sky-600 border-sky-500' : 'bg-surface border-surface-border'}`}
                                             >
-                                                <Text className={selectedSupplierId === creditor.id ? 'text-white font-bold' : 'text-slate-300'}>{creditor.name}</Text>
+                                                <Text className={selectedSupplierId === creditor.id ? 'text-ink font-bold' : 'text-ink'}>{creditor.name}</Text>
                                             </TouchableOpacity>
                                         ))}
                                     </View>
@@ -312,13 +312,13 @@ export function AddLiftingModal({
                         </View>
 
                         {/* Credit Toggle */}
-                        <View className="mb-5 flex-row items-center justify-between bg-slate-800 border border-slate-700 rounded-xl p-4">
-                            <Text className="text-white font-medium">Bought on Credit?</Text>
+                        <View className="mb-5 flex-row items-center justify-between bg-surface border border-surface-border rounded-xl p-4">
+                            <Text className="text-ink font-medium">Bought on Credit?</Text>
                             <Switch
                                 value={isCredit}
                                 onValueChange={setIsCredit}
-                                trackColor={{ false: '#475569', true: '#f59e0b' }}
-                                thumbColor={isCredit ? '#ffffff' : '#94a3b8'}
+                                trackColor={{ false: '#5c5c6b', true: '#f59e0b' }}
+                                thumbColor={isCredit ? '#ffffff' : '#8b8b99'}
                             />
                         </View>
 

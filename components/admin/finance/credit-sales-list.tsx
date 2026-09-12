@@ -33,7 +33,7 @@ const CreditSaleItem = memo(function CreditSaleItem({ item, onPress }: CreditSal
     return (
         <TouchableOpacity
             onPress={handlePress}
-            className="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 mb-3"
+            className="bg-surface/70 border border-surface-border rounded-2xl p-4 mb-3"
             activeOpacity={0.7}
         >
             <View className="flex-row items-center justify-between">
@@ -42,13 +42,13 @@ const CreditSaleItem = memo(function CreditSaleItem({ item, onPress }: CreditSal
                         <CreditCard size={20} color="#10b981" />
                     </View>
                     <View className="flex-1">
-                        <Text className="text-white font-semibold text-base mb-1" numberOfLines={1}>
+                        <Text className="text-ink font-semibold text-base mb-1" numberOfLines={1}>
                             {item.customer_name || 'Unknown Customer'}
                         </Text>
                         <View className="flex-row items-center">
-                            <Text className="text-slate-400 text-sm mr-3">{formattedDate}</Text>
+                            <Text className="text-ink-muted text-sm mr-3">{formattedDate}</Text>
                             {item.vehicle_reg && (
-                                <Text className="text-slate-500 text-sm" numberOfLines={1}>
+                                <Text className="text-ink-muted text-sm" numberOfLines={1}>
                                     {item.vehicle_reg}
                                 </Text>
                             )}
@@ -59,7 +59,7 @@ const CreditSaleItem = memo(function CreditSaleItem({ item, onPress }: CreditSal
                     <Text className="text-emerald-400 font-bold text-base mr-2">
                         {formattedAmount}
                     </Text>
-                    <ChevronRight size={18} color="#64748b" />
+                    <ChevronRight size={18} color="#5c5c6b" />
                 </View>
             </View>
         </TouchableOpacity>
@@ -116,7 +116,7 @@ export const CreditSalesList = memo(function CreditSalesList({ onItemPress }: Cr
         return (
             <TouchableOpacity
                 onPress={handleLoadMore}
-                className="bg-slate-800/50 border border-slate-700/50 rounded-xl py-3 mx-1 mb-2"
+                className="bg-surface-sunken border border-surface-border rounded-xl py-3 mx-1 mb-2"
                 activeOpacity={0.7}
             >
                 <Text className="text-emerald-400 text-center font-semibold">Load More</Text>
@@ -139,10 +139,10 @@ export const CreditSalesList = memo(function CreditSalesList({ onItemPress }: Cr
 
         return (
             <View className="items-center justify-center py-12">
-                <View className="bg-slate-800/50 p-6 rounded-2xl">
-                    <CreditCard size={40} color="#64748b" />
+                <View className="bg-surface-sunken p-6 rounded-2xl">
+                    <CreditCard size={40} color="#5c5c6b" />
                 </View>
-                <Text className="text-slate-400 text-base mt-4">No credit sales found</Text>
+                <Text className="text-ink-muted text-base mt-4">No credit sales found</Text>
             </View>
         );
     }, [isLoading]);
@@ -151,9 +151,9 @@ export const CreditSalesList = memo(function CreditSalesList({ onItemPress }: Cr
     return (
         <View className="mb-6">
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white text-xl font-bold">Credit Sales</Text>
+                <Text className="text-ink text-xl font-bold">Credit Sales</Text>
                 {meta && (
-                    <Text className="text-slate-500 text-sm">
+                    <Text className="text-ink-muted text-sm">
                         Page {meta.current_page} of {meta.last_page}
                     </Text>
                 )}

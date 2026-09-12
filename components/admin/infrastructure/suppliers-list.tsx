@@ -8,13 +8,13 @@ import type { SupplierResource, CreditorsIndex200 } from '@/features/api/model';
 // Skeleton loader for a single supplier card
 function SupplierCardSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-center justify-between">
                 <View className="flex-1">
-                    <View className="h-5 w-36 bg-slate-700 rounded mb-2 animate-pulse" />
-                    <View className="h-3 w-28 bg-slate-700/60 rounded animate-pulse" />
+                    <View className="h-5 w-36 bg-surface-border rounded mb-2 animate-pulse" />
+                    <View className="h-3 w-28 bg-surface-border/60 rounded animate-pulse" />
                 </View>
-                <View className="h-7 w-24 bg-slate-700 rounded-full animate-pulse" />
+                <View className="h-7 w-24 bg-surface-border rounded-full animate-pulse" />
             </View>
         </View>
     );
@@ -44,39 +44,39 @@ const SupplierCard = memo(function SupplierCard({
         supplier.current_balance > 0
             ? 'text-amber-400'
             : supplier.current_balance < 0
-                ? 'text-red-400'
+                ? 'text-accent'
                 : 'text-emerald-400';
 
     const balanceBgColor =
         supplier.current_balance > 0
             ? 'bg-amber-500/15'
             : supplier.current_balance < 0
-                ? 'bg-red-500/15'
+                ? 'bg-accent/15'
                 : 'bg-emerald-500/15';
 
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-start justify-between">
                 <View className="flex-1 mr-3">
                     <View className="flex-row items-center mb-1.5">
                         <View className="w-8 h-8 rounded-lg bg-sky-500/15 items-center justify-center mr-2.5">
                             <Truck size={16} color="#38bdf8" />
                         </View>
-                        <Text className="text-white font-semibold text-base">{supplier.name}</Text>
+                        <Text className="text-ink font-semibold text-base">{supplier.name}</Text>
                     </View>
 
                     {/* Contact info row */}
                     <View className="flex-row items-center flex-wrap ml-[42px] gap-3">
                         {supplier.email ? (
                             <View className="flex-row items-center">
-                                <Mail size={12} color="#64748b" />
-                                <Text className="text-slate-500 text-xs ml-1">{supplier.email}</Text>
+                                <Mail size={12} color="#5c5c6b" />
+                                <Text className="text-ink-muted text-xs ml-1">{supplier.email}</Text>
                             </View>
                         ) : null}
                         {supplier.phone ? (
                             <View className="flex-row items-center">
-                                <Phone size={12} color="#64748b" />
-                                <Text className="text-slate-500 text-xs ml-1">{supplier.phone}</Text>
+                                <Phone size={12} color="#5c5c6b" />
+                                <Text className="text-ink-muted text-xs ml-1">{supplier.phone}</Text>
                             </View>
                         ) : null}
                     </View>
@@ -101,9 +101,9 @@ const SupplierCard = memo(function SupplierCard({
                         <Pressable
                             onPress={handleDelete}
                             disabled={isDeleting}
-                            className="p-2 bg-red-500/20 rounded-lg active:opacity-70"
+                            className="p-2 bg-accent-subtle rounded-lg active:opacity-70"
                         >
-                            <Trash2 size={14} color={isDeleting ? '#94a3b8' : '#ef4444'} />
+                            <Trash2 size={14} color={isDeleting ? '#8b8b99' : '#bf0a30'} />
                         </Pressable>
                     </View>
                 </View>
@@ -157,7 +157,7 @@ export function SuppliersList({ onAddSupplier, onEditSupplier, onDeleteSupplier 
         <View className="flex-1">
             {/* Header with Add Button */}
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-slate-400 text-sm">
+                <Text className="text-ink-muted text-sm">
                     {suppliers.length} supplier{suppliers.length !== 1 ? 's' : ''}
                 </Text>
                 {onAddSupplier ? (
@@ -166,16 +166,16 @@ export function SuppliersList({ onAddSupplier, onEditSupplier, onDeleteSupplier 
                         className="flex-row items-center px-3 py-2 bg-sky-500 rounded-lg active:opacity-80"
                     >
                         <Plus size={16} color="#ffffff" />
-                        <Text className="text-white font-medium text-sm ml-1">Add Supplier</Text>
+                        <Text className="text-ink font-medium text-sm ml-1">Add Supplier</Text>
                     </Pressable>
                 ) : null}
             </View>
 
             {suppliers.length === 0 ? (
-                <View className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 items-center">
-                    <Truck size={48} color="#64748b" />
-                    <Text className="text-slate-400 text-lg mt-4">No suppliers found</Text>
-                    <Text className="text-slate-500 text-sm mt-1">Add a supplier to get started</Text>
+                <View className="bg-surface-sunken border border-surface-border rounded-xl p-8 items-center">
+                    <Truck size={48} color="#5c5c6b" />
+                    <Text className="text-ink-muted text-lg mt-4">No suppliers found</Text>
+                    <Text className="text-ink-muted text-sm mt-1">Add a supplier to get started</Text>
                 </View>
             ) : (
                 <FlashList
@@ -186,7 +186,7 @@ export function SuppliersList({ onAddSupplier, onEditSupplier, onDeleteSupplier 
                         <RefreshControl
                             refreshing={isRefetching}
                             onRefresh={refetch}
-                            tintColor="#94a3b8"
+                            tintColor="#8b8b99"
                         />
                     }
                 />

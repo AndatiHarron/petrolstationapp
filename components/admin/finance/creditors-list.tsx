@@ -25,17 +25,17 @@ const CreditorItem = memo(function CreditorItem({ item }: CreditorItemProps) {
         : '—';
 
     return (
-        <View className="bg-slate-800/70 border border-slate-700/50 rounded-2xl p-4 mb-3">
+        <View className="bg-surface/70 border border-surface-border rounded-2xl p-4 mb-3">
             <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center flex-1">
                     <View className="bg-amber-500/10 p-3 rounded-xl mr-3">
                         <Truck size={20} color="#f59e0b" />
                     </View>
                     <View className="flex-1">
-                        <Text className="text-white font-semibold text-base mb-1" numberOfLines={1}>
+                        <Text className="text-ink font-semibold text-base mb-1" numberOfLines={1}>
                             {item.name}
                         </Text>
-                        <Text className="text-slate-400 text-sm">Last updated: {formattedDate}</Text>
+                        <Text className="text-ink-muted text-sm">Last updated: {formattedDate}</Text>
                     </View>
                 </View>
                 <View className="bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 rounded-lg ml-2">
@@ -91,11 +91,11 @@ export const CreditorsList = memo(function CreditorsList() {
 
         return (
             <View className="items-center justify-center py-12">
-                <View className="bg-slate-800/50 p-6 rounded-2xl">
-                    <AlertTriangle size={40} color="#64748b" />
+                <View className="bg-surface-sunken p-6 rounded-2xl">
+                    <AlertTriangle size={40} color="#5c5c6b" />
                 </View>
-                <Text className="text-slate-400 text-base mt-4">No outstanding supplier credits</Text>
-                <Text className="text-slate-600 text-sm mt-1">All credit liftings are settled</Text>
+                <Text className="text-ink-muted text-base mt-4">No outstanding supplier credits</Text>
+                <Text className="text-ink-faint text-sm mt-1">All credit liftings are settled</Text>
             </View>
         );
     }, [isLoading]);
@@ -104,7 +104,7 @@ export const CreditorsList = memo(function CreditorsList() {
         <View className="mb-6">
             <View className="flex-row items-center justify-between mb-4">
                 <View className="flex-row items-center gap-2">
-                    <Text className="text-white text-xl font-bold">Creditors</Text>
+                    <Text className="text-ink text-xl font-bold">Creditors</Text>
                     {outstandingCreditors.length > 0 && (
                         <View className="bg-amber-500/20 px-2 py-0.5 rounded-full">
                             <Text className="text-amber-400 text-xs font-bold">{outstandingCreditors.length}</Text>

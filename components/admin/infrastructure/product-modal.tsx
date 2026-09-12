@@ -114,27 +114,27 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 h-[85%] flex overflow-hidden">
+                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border h-[85%] flex overflow-hidden">
                         {/* Handle Bar */}
                         <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-slate-700 rounded-full" />
+                            <View className="w-12 h-1 bg-surface-border rounded-full" />
                         </View>
 
                         {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-slate-800">
+                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
                             <View>
-                                <Text className="text-white text-2xl font-bold">
+                                <Text className="text-ink text-2xl font-bold">
                                     {isEditing ? 'Edit Product' : 'New Product'}
                                 </Text>
-                                <Text className="text-slate-400 text-sm">
+                                <Text className="text-ink-muted text-sm">
                                     {isEditing ? 'Update product details' : 'Add a new fuel product'}
                                 </Text>
                             </View>
                             <Pressable
                                 onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center"
+                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             >
-                                <X size={16} color="#94a3b8" />
+                                <X size={16} color="#8b8b99" />
                             </Pressable>
                         </View>
 
@@ -146,30 +146,30 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                             showsVerticalScrollIndicator={false}
                         >
                             {/* Name Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Product Name *
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
                                 placeholder="e.g. Super Petrol"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={name}
                                 onChangeText={setName}
                                 autoFocus
                             />
 
                             {/* Price Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Current Price (KES) *
                             </Text>
                             <View className="relative mb-4">
                                 <View className="absolute left-4 top-4 z-10">
-                                    <Text className="text-slate-500 font-bold">KES</Text>
+                                    <Text className="text-ink-muted font-bold">KES</Text>
                                 </View>
                                 <TextInput
-                                    className="bg-slate-800 text-white p-4 pl-14 rounded-xl border border-slate-700 focus:border-blue-500"
+                                    className="bg-surface text-ink p-4 pl-14 rounded-xl border border-surface-border focus:border-blue-500"
                                     placeholder="0.00"
-                                    placeholderTextColor="#475569"
+                                    placeholderTextColor="#5c5c6b"
                                     keyboardType="numeric"
                                     value={currentPrice}
                                     onChangeText={setCurrentPrice}
@@ -177,33 +177,33 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
                             </View>
 
                             {/* VAT Rate Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 VAT Rate (%)
                             </Text>
                             <View className="relative mb-6">
                                 <TextInput
-                                    className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-blue-500"
+                                    className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500"
                                     placeholder="16"
-                                    placeholderTextColor="#475569"
+                                    placeholderTextColor="#5c5c6b"
                                     keyboardType="numeric"
                                     value={vatRate}
                                     onChangeText={setVatRate}
                                 />
                                 <View className="absolute right-4 top-4">
-                                    <Text className="text-slate-500 font-bold">%</Text>
+                                    <Text className="text-ink-muted font-bold">%</Text>
                                 </View>
                             </View>
                         </ScrollView>
 
                         {/* Footer */}
-                        <View className="p-6 border-t border-slate-800 bg-slate-900 pb-10">
+                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
                                 className={`rounded-xl py-4 items-center ${isPending ? 'bg-blue-600/50' : 'bg-blue-600'
                                     }`}
                                 onPress={handleSubmit}
                                 disabled={isPending}
                             >
-                                <Text className="text-white font-bold text-lg">
+                                <Text className="text-ink font-bold text-lg">
                                     {isPending ? 'Saving...' : isEditing ? 'Update Product' : 'Create Product'}
                                 </Text>
                             </Pressable>

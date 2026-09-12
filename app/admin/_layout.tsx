@@ -6,15 +6,15 @@ import React from 'react';
 export default function AdminLayout() {
     return (
         <>
-            <StatusBar style="light" backgroundColor="#0f172a" />
+            <StatusBar style="dark" backgroundColor="#ffffff" />
             <Tabs
                 screenOptions={{
                     tabBarStyle: {
-                        backgroundColor: '#0f172a',
-                        borderTopColor: '#1e293b',
+                        backgroundColor: '#ffffff',
+                        borderTopColor: '#e6e6ee',
                     },
-                    tabBarActiveTintColor: '#10b981',
-                    tabBarInactiveTintColor: '#64748b',
+                    tabBarActiveTintColor: '#040273',
+                    tabBarInactiveTintColor: '#8b8b99',
                     headerShown: false,
                 }}
             >

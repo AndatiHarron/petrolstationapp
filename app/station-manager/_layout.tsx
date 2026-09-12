@@ -12,10 +12,10 @@ export default function StationManagerLayout() {
                 screenOptions={{
                     tabBarStyle: {
                         backgroundColor: '#ffffff',
-                        borderTopColor: '#1e293b',
+                        borderTopColor: '#e6e6ee',
                     },
-                    tabBarActiveTintColor: '#10b981',
-                    tabBarInactiveTintColor: '#64748b',
+                    tabBarActiveTintColor: '#040273',
+                    tabBarInactiveTintColor: '#8b8b99',
                     headerShown: false,
                 }}
             >

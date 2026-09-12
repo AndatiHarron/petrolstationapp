@@ -103,25 +103,25 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 h-[90%] flex overflow-hidden">
+                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border h-[90%] flex overflow-hidden">
                         <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-slate-700 rounded-full" />
+                            <View className="w-12 h-1 bg-surface-border rounded-full" />
                         </View>
 
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-slate-800">
+                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
                             <View>
-                                <Text className="text-white text-2xl font-bold">
+                                <Text className="text-ink text-2xl font-bold">
                                     New Manager
                                 </Text>
-                                <Text className="text-slate-400 text-sm">
+                                <Text className="text-ink-muted text-sm">
                                     Create a manager and assign to a station
                                 </Text>
                             </View>
                             <Pressable
                                 onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center"
+                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             >
-                                <X size={16} color="#94a3b8" />
+                                <X size={16} color="#8b8b99" />
                             </Pressable>
                         </View>
 
@@ -131,26 +131,26 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                             contentContainerStyle={{ paddingBottom: 24 }}
                             showsVerticalScrollIndicator={false}
                         >
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Name *
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-emerald-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-emerald-500 mb-4"
                                 placeholder="e.g. John Doe"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={name}
                                 onChangeText={setName}
                                 autoFocus
                                 autoCapitalize="words"
                             />
 
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Email *
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-emerald-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-emerald-500 mb-4"
                                 placeholder="e.g. john@example.com"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -158,14 +158,14 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                                 autoCorrect={false}
                             />
 
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Password * (min 8 characters)
                             </Text>
                             <View className="relative mb-4">
                                 <TextInput
-                                    className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-emerald-500 pr-12"
+                                    className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-emerald-500 pr-12"
                                     placeholder="Enter password"
-                                    placeholderTextColor="#475569"
+                                    placeholderTextColor="#5c5c6b"
                                     value={password}
                                     onChangeText={setPassword}
                                     secureTextEntry={!isPasswordVisible}
@@ -182,33 +182,33 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                                     <Ionicons
                                         name={isPasswordVisible ? 'eye-off-outline' : 'eye-outline'}
                                         size={20}
-                                        color="#94a3b8"
+                                        color="#8b8b99"
                                     />
                                 </Pressable>
                             </View>
 
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Station *
                             </Text>
                             <Pressable
                                 onPress={() => setShowStationPicker(!showStationPicker)}
-                                className="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-2 flex-row justify-between items-center"
+                                className="bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center"
                             >
                                 <Text
                                     className={
-                                        selectedStation ? 'text-white' : 'text-slate-500'
+                                        selectedStation ? 'text-ink' : 'text-ink-muted'
                                     }
                                 >
                                     {selectedStation?.name ?? 'Select a station'}
                                 </Text>
-                                <ChevronDown size={20} color="#64748b" />
+                                <ChevronDown size={20} color="#5c5c6b" />
                             </Pressable>
                             {showStationPicker ? (
-                                <View className="bg-slate-800 rounded-xl border border-slate-700 mb-4 max-h-40">
+                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
                                     <ScrollView nestedScrollEnabled>
                                         {stations.length === 0 ? (
                                             <View className="p-4">
-                                                <Text className="text-slate-500 text-sm">
+                                                <Text className="text-ink-muted text-sm">
                                                     No stations yet. Create one first.
                                                 </Text>
                                             </View>
@@ -220,7 +220,7 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                                                         setSelectedStationId(station.id);
                                                         setShowStationPicker(false);
                                                     }}
-                                                    className={`p-3 border-b border-slate-700 ${
+                                                    className={`p-3 border-b border-surface-border ${
                                                         selectedStationId === station.id
                                                             ? 'bg-emerald-600/20'
                                                             : ''
@@ -230,7 +230,7 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                                                         className={
                                                             selectedStationId === station.id
                                                                 ? 'text-emerald-400'
-                                                                : 'text-white'
+                                                                : 'text-ink'
                                                         }
                                                     >
                                                         {station.name}
@@ -245,7 +245,7 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                             )}
                         </ScrollView>
 
-                        <View className="p-6 border-t border-slate-800 bg-slate-900 pb-10">
+                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
                                 className={`rounded-xl py-4 items-center ${
                                     isPending ? 'bg-emerald-600/50' : 'bg-emerald-600'
@@ -253,7 +253,7 @@ export function CreateManagerModal({ visible, onClose }: CreateManagerModalProps
                                 onPress={handleSubmit}
                                 disabled={isPending || stations.length === 0}
                             >
-                                <Text className="text-white font-bold text-lg">
+                                <Text className="text-ink font-bold text-lg">
                                     {isPending
                                         ? 'Creating...'
                                         : 'Create Manager'}

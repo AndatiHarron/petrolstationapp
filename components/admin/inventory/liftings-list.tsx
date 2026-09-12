@@ -8,17 +8,17 @@ import { PaginationControls } from '../../pagination-controls';
 // ─── Skeleton Loader ───────────────────────────────────────────────
 function LiftingSkeleton() {
     return (
-        <View className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700/50">
+        <View className="bg-surface p-4 rounded-xl mb-3 border border-surface-border">
             <View className="flex-row justify-between items-start mb-2">
                 <View className="flex-1">
-                    <View className="h-5 w-32 bg-slate-700 rounded animate-pulse mb-2" />
-                    <View className="h-3 w-20 bg-slate-700/60 rounded animate-pulse" />
+                    <View className="h-5 w-32 bg-surface-border rounded animate-pulse mb-2" />
+                    <View className="h-3 w-20 bg-surface-border/60 rounded animate-pulse" />
                 </View>
-                <View className="h-6 w-20 bg-slate-700 rounded-full animate-pulse" />
+                <View className="h-6 w-20 bg-surface-border rounded-full animate-pulse" />
             </View>
             <View className="flex-row justify-between mt-2">
-                <View className="h-3 w-24 bg-slate-700/40 rounded animate-pulse" />
-                <View className="h-4 w-28 bg-slate-700/40 rounded animate-pulse" />
+                <View className="h-3 w-24 bg-surface-border rounded animate-pulse" />
+                <View className="h-4 w-28 bg-surface-border rounded animate-pulse" />
             </View>
         </View>
     );
@@ -29,13 +29,13 @@ function LiftingItem({ item, onPress }: { item: LiftingResource; onPress: (item:
     return (
         <TouchableOpacity
             onPress={() => onPress(item)}
-            className="bg-slate-800 p-4 rounded-xl mb-3 border border-slate-700/50"
+            className="bg-surface p-4 rounded-xl mb-3 border border-surface-border"
             activeOpacity={0.7}
         >
             <View className="flex-row justify-between items-start mb-2">
                 <View className="flex-1">
-                    <Text className="text-white text-lg font-bold">{item.tank_name}</Text>
-                    <Text className="text-slate-400 text-sm">{item.product_name} • {item.station_name}</Text>
+                    <Text className="text-ink text-lg font-bold">{item.tank_name}</Text>
+                    <Text className="text-ink-muted text-sm">{item.product_name} • {item.station_name}</Text>
                 </View>
                 <View className="items-end gap-1">
                     <View className="bg-emerald-500/20 px-3 py-1 rounded-full">
@@ -50,15 +50,15 @@ function LiftingItem({ item, onPress }: { item: LiftingResource; onPress: (item:
             </View>
             <View className="flex-row justify-between items-center mt-2">
                 <View>
-                    <Text className="text-slate-500 text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
+                    <Text className="text-ink-muted text-xs">{new Date(item.lifting_date).toLocaleDateString()}</Text>
                     {item.supplier?.name ? (
                         <Text className="text-sky-400 text-xs mt-0.5">{item.supplier?.name}</Text>
                     ) : null}
                 </View>
-                <Text className="text-slate-300 font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
+                <Text className="text-ink font-mono text-sm">KES {item.total_cost.toLocaleString()}</Text>
             </View>
             {item.invoice_number ? (
-                <Text className="text-slate-600 text-xs mt-1">Inv: {item.invoice_number}</Text>
+                <Text className="text-ink-faint text-xs mt-1">Inv: {item.invoice_number}</Text>
             ) : null}
         </TouchableOpacity>
     );
@@ -109,9 +109,9 @@ export function LiftingsList({
                 }
                 ListEmptyComponent={() => (
                     <View className="items-center justify-center p-10">
-                        <Ionicons name="cube-outline" size={48} color="#475569" />
-                        <Text className="text-slate-400 text-center mt-4 text-base font-semibold">No liftings found</Text>
-                        <Text className="text-slate-600 text-center text-sm mt-2">Tap + to record a new fuel delivery.</Text>
+                        <Ionicons name="cube-outline" size={48} color="#5c5c6b" />
+                        <Text className="text-ink-muted text-center mt-4 text-base font-semibold">No liftings found</Text>
+                        <Text className="text-ink-faint text-center text-sm mt-2">Tap + to record a new fuel delivery.</Text>
                     </View>
                 )}
                 ListFooterComponent={() =>

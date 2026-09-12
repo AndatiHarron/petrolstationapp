@@ -60,7 +60,7 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
     const statusColors = {
         active: 'bg-emerald-500/10 text-emerald-400',
         locked: 'bg-amber-500/10 text-amber-400',
-        closed: 'bg-slate-500/10 text-slate-400',
+        closed: 'bg-slate-500/10 text-ink-muted',
     };
 
     const statusColor = statusColors[item.status as keyof typeof statusColors] || statusColors.active;
@@ -70,24 +70,24 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
             onPress={handlePress}
             className={`border rounded-2xl p-4 mb-3 ${hasVarianceAlert
                 ? 'bg-red-950/20 border-red-800/50'
-                : 'bg-slate-800/70 border-slate-700/50'
+                : 'bg-surface/70 border-surface-border'
                 }`}
             activeOpacity={0.7}
         >
             <View className="flex-row items-start justify-between mb-3">
                 <View className="flex-row items-center flex-1">
-                    <View className={`p-3 rounded-xl mr-3 ${hasVarianceAlert ? 'bg-red-500/10' : 'bg-blue-500/10'}`}>
+                    <View className={`p-3 rounded-xl mr-3 ${hasVarianceAlert ? 'bg-accent-subtle' : 'bg-blue-500/10'}`}>
                         {hasVarianceAlert ? (
-                            <AlertTriangle size={20} color="#ef4444" />
+                            <AlertTriangle size={20} color="#bf0a30" />
                         ) : (
                             <Clock size={20} color="#3b82f6" />
                         )}
                     </View>
                     <View className="flex-1">
-                        <Text className="text-white font-semibold text-base mb-1" numberOfLines={1}>
+                        <Text className="text-ink font-semibold text-base mb-1" numberOfLines={1}>
                             {item.station_name}
                         </Text>
-                        <Text className="text-slate-400 text-sm">{formattedDate}</Text>
+                        <Text className="text-ink-muted text-sm">{formattedDate}</Text>
                     </View>
                 </View>
                 <View className={`px-3 py-1 rounded-full ${statusColor}`}>
@@ -97,47 +97,47 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
                 </View>
             </View>
 
-            <View className="bg-slate-900/50 rounded-xl p-3 mb-2">
+            <View className="bg-surface-sunken rounded-xl p-3 mb-2">
                 <View className="flex-row justify-between items-center mb-2">
-                    <Text className="text-slate-500 text-sm">Expected</Text>
-                    <Text className="text-slate-300 font-semibold">{formattedExpected}</Text>
+                    <Text className="text-ink-muted text-sm">Expected</Text>
+                    <Text className="text-ink font-semibold">{formattedExpected}</Text>
                 </View>
                 <View className="flex-row justify-between items-center">
-                    <Text className="text-slate-500 text-sm">Collected</Text>
+                    <Text className="text-ink-muted text-sm">Collected</Text>
                     <Text className="text-emerald-400 font-semibold">{formattedCollected}</Text>
                 </View>
             </View>
 
-            <View className="bg-slate-900/40 rounded-xl px-3 py-2 mb-2">
+            <View className="bg-surface-sunken/40 rounded-xl px-3 py-2 mb-2">
                 <View className="flex-row items-center justify-between">
-                    <Text className="text-slate-500 text-sm">Wet stock variance</Text>
+                    <Text className="text-ink-muted text-sm">Wet stock variance</Text>
                     <Text
                         className={`font-bold text-sm ${typeof wetVarianceLiters === 'number'
                             ? wetVarianceLiters > 0
                                 ? 'text-emerald-400'
                                 : wetVarianceLiters < 0
-                                    ? 'text-red-400'
-                                    : 'text-slate-400'
-                            : 'text-slate-500'
+                                    ? 'text-accent'
+                                    : 'text-ink-muted'
+                            : 'text-ink-muted'
                             }`}
                     >
                         {wetVarianceText}
                     </Text>
                 </View>
                 {wetSoldText ? (
-                    <Text className="text-slate-600 text-xs mt-1">{wetSoldText}</Text>
+                    <Text className="text-ink-faint text-xs mt-1">{wetSoldText}</Text>
                 ) : null}
             </View>
 
             <View className="flex-row items-center justify-between">
                 <View className="flex-row items-center">
-                    <Text className="text-slate-500 text-sm mr-2">Variance:</Text>
+                    <Text className="text-ink-muted text-sm mr-2">Variance:</Text>
                     <Text
                         className={`font-bold text-sm ${variance > 0
                             ? 'text-emerald-400'
                             : variance < 0
-                                ? 'text-red-400'
-                                : 'text-slate-400'
+                                ? 'text-accent'
+                                : 'text-ink-muted'
                             }`}
                     >
                         {variance > 0 ? '+' : ''}
@@ -147,7 +147,7 @@ const ShiftItem = memo(function ShiftItem({ item, onPress }: ShiftItemProps) {
                         }).format(variance)}
                     </Text>
                 </View>
-                <ChevronRight size={18} color="#64748b" />
+                <ChevronRight size={18} color="#5c5c6b" />
             </View>
         </TouchableOpacity>
     );
@@ -201,7 +201,7 @@ export const ShiftsList = memo(function ShiftsList({ onItemPress }: ShiftsListPr
         return (
             <TouchableOpacity
                 onPress={handleLoadMore}
-                className="bg-slate-800/50 border border-slate-700/50 rounded-xl py-3 mx-1 mb-2"
+                className="bg-surface-sunken border border-surface-border rounded-xl py-3 mx-1 mb-2"
                 activeOpacity={0.7}
             >
                 <Text className="text-emerald-400 text-center font-semibold">Load More</Text>
@@ -224,10 +224,10 @@ export const ShiftsList = memo(function ShiftsList({ onItemPress }: ShiftsListPr
 
         return (
             <View className="items-center justify-center py-12">
-                <View className="bg-slate-800/50 p-6 rounded-2xl">
-                    <Clock size={40} color="#64748b" />
+                <View className="bg-surface-sunken p-6 rounded-2xl">
+                    <Clock size={40} color="#5c5c6b" />
                 </View>
-                <Text className="text-slate-400 text-base mt-4">No shifts found</Text>
+                <Text className="text-ink-muted text-base mt-4">No shifts found</Text>
             </View>
         );
     }, [isLoading]);
@@ -235,9 +235,9 @@ export const ShiftsList = memo(function ShiftsList({ onItemPress }: ShiftsListPr
     return (
         <View className="mb-6">
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-white text-xl font-bold">Shifts</Text>
+                <Text className="text-ink text-xl font-bold">Shifts</Text>
                 {meta && (
-                    <Text className="text-slate-500 text-sm">
+                    <Text className="text-ink-muted text-sm">
                         Page {meta.current_page} of {meta.last_page}
                     </Text>
                 )}

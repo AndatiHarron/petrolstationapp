@@ -17,11 +17,11 @@ function isManager(user: UserResource): boolean {
 
 function ManagerCardSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-center justify-between">
                 <View className="flex-1">
-                    <View className="h-5 w-32 bg-slate-700 rounded mb-2 animate-pulse" />
-                    <View className="h-3 w-40 bg-slate-700 rounded animate-pulse" />
+                    <View className="h-5 w-32 bg-surface-border rounded mb-2 animate-pulse" />
+                    <View className="h-3 w-40 bg-surface-border rounded animate-pulse" />
                 </View>
             </View>
         </View>
@@ -38,21 +38,21 @@ const ManagerCard = memo(function ManagerCard({
     stationName: string | null;
 }) {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-start justify-between">
                 <View className="flex-1">
                     <View className="flex-row items-center mb-2">
-                        <Users size={18} color="#94a3b8" />
-                        <Text className="text-white font-semibold text-base ml-2">{name}</Text>
+                        <Users size={18} color="#8b8b99" />
+                        <Text className="text-ink font-semibold text-base ml-2">{name}</Text>
                     </View>
-                    <Text className="text-slate-500 text-sm ml-6">{email}</Text>
+                    <Text className="text-ink-muted text-sm ml-6">{email}</Text>
                     {stationName ? (
                         <View className="flex-row items-center ml-6 mt-1">
-                            <Building2 size={14} color="#64748b" />
-                            <Text className="text-slate-400 text-xs ml-1">{stationName}</Text>
+                            <Building2 size={14} color="#5c5c6b" />
+                            <Text className="text-ink-muted text-xs ml-1">{stationName}</Text>
                         </View>
                     ) : (
-                        <Text className="text-slate-500 text-xs ml-6 mt-1">Unassigned</Text>
+                        <Text className="text-ink-muted text-xs ml-6 mt-1">Unassigned</Text>
                     )}
                 </View>
                 <View className="px-2.5 py-1 rounded-full bg-emerald-500/20">
@@ -95,7 +95,7 @@ export function ManagersList({ onAddManager }: ManagersListProps) {
     return (
         <View className="flex-1">
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-slate-400 text-sm">
+                <Text className="text-ink-muted text-sm">
                     {managers.length} manager{managers.length !== 1 ? 's' : ''}
                 </Text>
                 {onAddManager ? (
@@ -104,16 +104,16 @@ export function ManagersList({ onAddManager }: ManagersListProps) {
                         className="flex-row items-center px-3 py-2 bg-emerald-500 rounded-lg active:opacity-80"
                     >
                         <UserPlus size={16} color="#ffffff" />
-                        <Text className="text-white font-medium text-sm ml-1">Add Manager</Text>
+                        <Text className="text-ink font-medium text-sm ml-1">Add Manager</Text>
                     </Pressable>
                 ) : null}
             </View>
 
             {managers.length === 0 ? (
-                <View className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 items-center">
-                    <Users size={48} color="#64748b" />
-                    <Text className="text-slate-400 text-lg mt-4">No managers found</Text>
-                    <Text className="text-slate-500 text-sm mt-1">
+                <View className="bg-surface-sunken border border-surface-border rounded-xl p-8 items-center">
+                    <Users size={48} color="#5c5c6b" />
+                    <Text className="text-ink-muted text-lg mt-4">No managers found</Text>
+                    <Text className="text-ink-muted text-sm mt-1">
                         Create managers and assign them to stations
                     </Text>
                     {onAddManager ? (
@@ -121,7 +121,7 @@ export function ManagersList({ onAddManager }: ManagersListProps) {
                             onPress={onAddManager}
                             className="mt-4 bg-emerald-500 px-6 py-3 rounded-xl active:opacity-80"
                         >
-                            <Text className="text-white font-semibold">Add Manager</Text>
+                            <Text className="text-ink font-semibold">Add Manager</Text>
                         </Pressable>
                     ) : null}
                 </View>
@@ -135,7 +135,7 @@ export function ManagersList({ onAddManager }: ManagersListProps) {
                         <RefreshControl
                             refreshing={isRefetching}
                             onRefresh={refetch}
-                            tintColor="#94a3b8"
+                            tintColor="#8b8b99"
                         />
                     }
                 />

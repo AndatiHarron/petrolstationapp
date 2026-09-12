@@ -100,9 +100,9 @@ const InvoiceRow = memo(function InvoiceRow({
                     ]}
                 >
                     {isDownloading ? (
-                        <ActivityIndicator size="small" color="#10b981" />
+                        <ActivityIndicator size="small" color="#046c4e" />
                     ) : (
-                        <Download size={18} color="#10b981" />
+                        <Download size={18} color="#046c4e" />
                     )}
                 </Pressable>
             </View>
@@ -331,7 +331,8 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
         <Modal
             visible={!!shiftId}
             animationType="slide"
-            presentationStyle="formSheet"
+            transparent
+            statusBarTranslucent
             onRequestClose={onClose}
         >
             <View style={styles.overlay}>
@@ -339,7 +340,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Shift Details</Text>
                         <Pressable onPress={onClose} style={styles.closeButton}>
-                            <X size={20} color="#94a3b8" />
+                            <X size={20} color="#8b8b99" />
                         </Pressable>
                     </View>
 
@@ -367,7 +368,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                             <>
                                 <View style={styles.shiftHeader}>
                                     <View style={styles.row}>
-                                        <Clock size={20} color="#10b981" />
+                                        <Clock size={20} color="#046c4e" />
                                         <Text style={styles.stationName}>{shift.station_name}</Text>
                                     </View>
                                     <Text style={styles.date}>{formattedDate}</Text>
@@ -390,7 +391,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
 
                                 <View style={[styles.card, { marginBottom: 16 }]}>
                                     <View style={styles.sectionHeader}>
-                                        <FileText size={18} color="#64748b" />
+                                        <FileText size={18} color="#5c5c6b" />
                                         <Text style={styles.sectionTitle}>Financial Summary</Text>
                                     </View>
                                     <View style={styles.innerCard}>
@@ -420,7 +421,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
 
                                 <View style={[styles.card, { marginBottom: 16 }]}>
                                     <View style={styles.sectionHeader}>
-                                        <Droplets size={18} color="#64748b" />
+                                        <Droplets size={18} color="#5c5c6b" />
                                         <Text style={styles.sectionTitle}>Wet Stock Variance</Text>
                                     </View>
                                     {typeof wetVarianceLiters === 'number' &&
@@ -466,7 +467,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
 
                                 <View style={[styles.card, { marginBottom: 16 }]}>
                                     <View style={styles.sectionHeader}>
-                                        <Camera size={18} color="#64748b" />
+                                        <Camera size={18} color="#5c5c6b" />
                                         <Text style={styles.sectionTitle}>Meter Evidence</Text>
                                     </View>
                                     {readingsWithEvidence.length === 0 ? (
@@ -482,7 +483,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                                             <View style={styles.evidenceThumbnailSkeleton}>
                                                                 <ActivityIndicator
                                                                     size="small"
-                                                                    color="#64748b"
+                                                                    color="#5c5c6b"
                                                                 />
                                                             </View>
                                                         </View>
@@ -537,12 +538,12 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                                                     item.id ? (
                                                                         <ActivityIndicator
                                                                             size="small"
-                                                                            color="#10b981"
+                                                                            color="#046c4e"
                                                                         />
                                                                     ) : (
                                                                         <Download
                                                                             size={16}
-                                                                            color="#10b981"
+                                                                            color="#046c4e"
                                                                         />
                                                                     )}
                                                                 </Pressable>
@@ -609,7 +610,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                 {isLocked ? (
                                     <View style={[styles.card, { marginBottom: 24 }]}>
                                         <View style={styles.sectionHeader}>
-                                            <FileText size={18} color="#64748b" />
+                                            <FileText size={18} color="#5c5c6b" />
                                             <Text style={styles.sectionTitle}>Invoices</Text>
                                         </View>
 
@@ -674,7 +675,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                             onPress={closeEvidenceViewer}
                             style={styles.fullscreenIconButton}
                         >
-                            <X size={22} color="#e2e8f0" />
+                            <X size={22} color="#e6e6ee" />
                         </Pressable>
 
                         {selectedEvidence ? (
@@ -682,7 +683,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                                 onPress={() => handleEvidenceDownload(selectedEvidence)}
                                 style={styles.fullscreenIconButton}
                             >
-                                <Download size={20} color="#10b981" />
+                                <Download size={20} color="#046c4e" />
                             </Pressable>
                         ) : null}
                     </View>
@@ -708,7 +709,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         marginTop: 96,
-        backgroundColor: '#0f172a',
+        backgroundColor: '#ffffff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         borderCurve: 'continuous',
@@ -720,15 +721,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#1e293b',
+        borderBottomColor: '#e6e6ee',
     },
     headerTitle: {
-        color: '#ffffff',
+        color: '#12121a',
         fontSize: 20,
         fontWeight: 'bold',
     },
     closeButton: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#f7f7fa',
         padding: 8,
         borderRadius: 9999,
     },
@@ -742,18 +743,18 @@ const styles = StyleSheet.create({
         gap: 16,
     },
     card: {
-        backgroundColor: 'rgba(30,41,59,0.5)',
+        backgroundColor: '#f7f7fa',
         borderRadius: 16,
         padding: 20,
         borderCurve: 'continuous',
     },
     innerCard: {
-        backgroundColor: 'rgba(15,23,42,0.5)',
+        backgroundColor: '#ffffff',
         borderRadius: 12,
         padding: 16,
     },
     skeleton: {
-        backgroundColor: 'rgba(51,65,85,0.5)',
+        backgroundColor: '#e6e6ee',
         borderRadius: 4,
     },
     row: {
@@ -765,13 +766,13 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     stationName: {
-        color: '#ffffff',
+        color: '#12121a',
         fontSize: 22,
         fontWeight: 'bold',
         marginLeft: 8,
     },
     date: {
-        color: '#94a3b8',
+        color: '#8b8b99',
         fontSize: 14,
     },
     statusBadge: {
@@ -781,20 +782,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
     },
     statusLocked: {
-        backgroundColor: 'rgba(245,158,11,0.15)',
+        backgroundColor: '#fdf2dd',
     },
     statusActive: {
-        backgroundColor: 'rgba(16,185,129,0.15)',
+        backgroundColor: '#e6f4ef',
     },
     statusText: {
         fontSize: 12,
         fontWeight: 'bold',
     },
     statusTextLocked: {
-        color: '#f59e0b',
+        color: '#8a5a00',
     },
     statusTextActive: {
-        color: '#10b981',
+        color: '#046c4e',
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -802,7 +803,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     sectionTitle: {
-        color: '#94a3b8',
+        color: '#5c5c6b',
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 8,
@@ -816,38 +817,38 @@ const styles = StyleSheet.create({
     },
     financialRowBorder: {
         borderBottomWidth: 1,
-        borderBottomColor: '#1e293b',
+        borderBottomColor: '#e6e6ee',
     },
     fieldLabel: {
-        color: '#64748b',
+        color: '#5c5c6b',
         fontSize: 14,
     },
     fieldValue: {
-        color: '#ffffff',
+        color: '#12121a',
         fontSize: 16,
         fontWeight: '600',
     },
     collectedValue: {
-        color: '#10b981',
+        color: '#046c4e',
         fontSize: 16,
         fontWeight: '600',
     },
     variancePositive: {
-        color: '#10b981',
+        color: '#046c4e',
     },
     varianceNegative: {
-        color: '#ef4444',
+        color: '#bf0a30',
     },
     alertBox: {
-        backgroundColor: 'rgba(239,68,68,0.1)',
+        backgroundColor: '#fceaee',
         borderWidth: 1,
-        borderColor: 'rgba(239,68,68,0.3)',
+        borderColor: 'rgba(191,10,48,0.25)',
         borderRadius: 12,
         padding: 16,
         marginBottom: 16,
     },
     alertText: {
-        color: '#ef4444',
+        color: '#bf0a30',
         fontSize: 14,
         fontWeight: '500',
     },
@@ -856,7 +857,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     invoiceRow: {
-        backgroundColor: 'rgba(15,23,42,0.5)',
+        backgroundColor: '#f7f7fa',
         borderRadius: 12,
         padding: 16,
         borderCurve: 'continuous',
@@ -870,19 +871,19 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     invoiceNumber: {
-        color: '#ffffff',
+        color: '#12121a',
         fontSize: 16,
         fontWeight: '600',
     },
     invoiceAmount: {
-        color: '#10b981',
+        color: '#046c4e',
         fontSize: 14,
         marginTop: 4,
     },
     downloadButton: {
         padding: 12,
         borderRadius: 12,
-        backgroundColor: 'rgba(16,185,129,0.1)',
+        backgroundColor: '#e6f4ef',
     },
     downloadButtonPressed: {
         opacity: 0.8,
@@ -897,11 +898,11 @@ const styles = StyleSheet.create({
         paddingVertical: 80,
     },
     emptyText: {
-        color: '#94a3b8',
+        color: '#8b8b99',
         fontSize: 16,
     },
     hintText: {
-        color: '#64748b',
+        color: '#5c5c6b',
         fontSize: 14,
         marginBottom: 16,
     },
@@ -920,7 +921,7 @@ const styles = StyleSheet.create({
         height: 80,
         borderRadius: 12,
         borderCurve: 'continuous',
-        backgroundColor: 'rgba(30,41,59,0.5)',
+        backgroundColor: '#f7f7fa',
     },
     evidenceThumbWrap: {
         width: 80,
@@ -932,7 +933,7 @@ const styles = StyleSheet.create({
         height: 80,
         borderRadius: 12,
         borderCurve: 'continuous',
-        backgroundColor: 'rgba(51,65,85,0.5)',
+        backgroundColor: '#e6e6ee',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -944,7 +945,7 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         backgroundColor: 'rgba(15,23,42,0.8)',
         borderWidth: 1,
-        borderColor: 'rgba(16,185,129,0.25)',
+        borderColor: 'rgba(255,255,255,0.35)',
     },
     fullscreenOverlay: {
         flex: 1,
@@ -968,7 +969,7 @@ const styles = StyleSheet.create({
         borderRadius: 9999,
         backgroundColor: 'rgba(15,23,42,0.7)',
         borderWidth: 1,
-        borderColor: 'rgba(148,163,184,0.25)',
+        borderColor: 'rgba(255,255,255,0.28)',
     },
     fullscreenImage: {
         width: '100%',
@@ -977,7 +978,7 @@ const styles = StyleSheet.create({
         borderCurve: 'continuous',
     },
     evidenceLabel: {
-        color: '#94a3b8',
+        color: '#8b8b99',
         fontSize: 11,
         textAlign: 'center',
     },

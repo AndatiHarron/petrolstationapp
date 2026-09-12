@@ -10,14 +10,14 @@ const READING_FORMATTER = new Intl.NumberFormat('en-KE', { useGrouping: true });
 // Skeleton loader for a single nozzle card
 export function NozzleCardSkeleton() {
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-center justify-between mb-3">
-                <View className="h-5 w-32 bg-slate-700 rounded animate-pulse" />
-                <View className="h-6 w-20 bg-slate-700 rounded animate-pulse" />
+                <View className="h-5 w-32 bg-surface-border rounded animate-pulse" />
+                <View className="h-6 w-20 bg-surface-border rounded animate-pulse" />
             </View>
             <View className="flex-row gap-2">
-                <View className="h-3 w-24 bg-slate-700 rounded animate-pulse" />
-                <View className="h-3 w-20 bg-slate-700 rounded animate-pulse" />
+                <View className="h-3 w-24 bg-surface-border rounded animate-pulse" />
+                <View className="h-3 w-20 bg-surface-border rounded animate-pulse" />
             </View>
         </View>
     );
@@ -44,31 +44,31 @@ const NozzleCard = memo(function NozzleCard({
     }, [nozzle, onEdit]);
 
     return (
-        <View className="bg-slate-800 border border-slate-700/50 rounded-xl p-4 mb-3">
+        <View className="bg-surface border border-surface-border rounded-xl p-4 mb-3">
             <View className="flex-row items-start justify-between">
                 <View className="flex-1">
                     <View className="flex-row items-center mb-2">
-                        <Gauge size={18} color="#94a3b8" />
-                        <Text className="text-white font-semibold text-base ml-2">{nozzle.name}</Text>
+                        <Gauge size={18} color="#8b8b99" />
+                        <Text className="text-ink font-semibold text-base ml-2">{nozzle.name}</Text>
                     </View>
                     <View className="flex-row items-center mb-1">
                         <Text className="text-emerald-400 font-bold text-lg">
                             {READING_FORMATTER.format(nozzle.current_reading)}
                         </Text>
-                        <Text className="text-slate-500 text-xs ml-2">
+                        <Text className="text-ink-muted text-xs ml-2">
                             {nozzle.digits}-digit counter
                         </Text>
                     </View>
                     {nozzle.station_name ? (
                         <View className="flex-row items-center mt-1">
-                            <MapPin size={12} color="#64748b" />
-                            <Text className="text-slate-500 text-xs ml-1">{nozzle.station_name}</Text>
+                            <MapPin size={12} color="#5c5c6b" />
+                            <Text className="text-ink-muted text-xs ml-1">{nozzle.station_name}</Text>
                         </View>
                     ) : null}
                     {nozzle.tank_name ? (
                         <View className="flex-row items-center mt-1">
-                            <Cylinder size={12} color="#64748b" />
-                            <Text className="text-slate-500 text-xs ml-1">{nozzle.tank_name}</Text>
+                            <Cylinder size={12} color="#5c5c6b" />
+                            <Text className="text-ink-muted text-xs ml-1">{nozzle.tank_name}</Text>
                         </View>
                     ) : null}
                     {nozzle.product_name ? (
@@ -88,9 +88,9 @@ const NozzleCard = memo(function NozzleCard({
                     <Pressable
                         onPress={handleDelete}
                         disabled={isDeleting}
-                        className="p-2 bg-red-500/20 rounded-lg active:opacity-70"
+                        className="p-2 bg-accent-subtle rounded-lg active:opacity-70"
                     >
-                        <Trash2 size={16} color={isDeleting ? '#94a3b8' : '#ef4444'} />
+                        <Trash2 size={16} color={isDeleting ? '#8b8b99' : '#bf0a30'} />
                     </Pressable>
                 </View>
             </View>
@@ -143,7 +143,7 @@ export function NozzlesList({ onAddNozzle, onEditNozzle, onDeleteNozzle }: Nozzl
         <View className="flex-1">
             {/* Header with Add Button */}
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-slate-400 text-sm">
+                <Text className="text-ink-muted text-sm">
                     {nozzles.length} nozzle{nozzles.length !== 1 ? 's' : ''}
                 </Text>
                 {onAddNozzle ? (
@@ -152,16 +152,16 @@ export function NozzlesList({ onAddNozzle, onEditNozzle, onDeleteNozzle }: Nozzl
                         className="flex-row items-center px-3 py-2 bg-emerald-500 rounded-lg active:opacity-80"
                     >
                         <Plus size={16} color="#ffffff" />
-                        <Text className="text-white font-medium text-sm ml-1">Add Nozzle</Text>
+                        <Text className="text-ink font-medium text-sm ml-1">Add Nozzle</Text>
                     </Pressable>
                 ) : null}
             </View>
 
             {nozzles.length === 0 ? (
-                <View className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-8 items-center">
-                    <Gauge size={48} color="#64748b" />
-                    <Text className="text-slate-400 text-lg mt-4">No nozzles found</Text>
-                    <Text className="text-slate-500 text-sm mt-1">Add a nozzle to get started</Text>
+                <View className="bg-surface-sunken border border-surface-border rounded-xl p-8 items-center">
+                    <Gauge size={48} color="#5c5c6b" />
+                    <Text className="text-ink-muted text-lg mt-4">No nozzles found</Text>
+                    <Text className="text-ink-muted text-sm mt-1">Add a nozzle to get started</Text>
                 </View>
             ) : (
                 <FlashList
@@ -173,7 +173,7 @@ export function NozzlesList({ onAddNozzle, onEditNozzle, onDeleteNozzle }: Nozzl
                         <RefreshControl
                             refreshing={isRefetching}
                             onRefresh={refetch}
-                            tintColor="#94a3b8"
+                            tintColor="#8b8b99"
                         />
                     }
                 />

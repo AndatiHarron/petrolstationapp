@@ -18,10 +18,10 @@ interface StatItem {
 // Skeleton loader for a single stat card
 function StatCardSkeleton() {
     return (
-        <View className="flex-1 min-w-[160px] bg-slate-800 border border-slate-700/50 rounded-xl p-4">
-            <View className="h-3 w-16 bg-slate-700 rounded mb-3 animate-pulse" />
-            <View className="h-7 w-12 bg-slate-700 rounded mb-2 animate-pulse" />
-            <View className="h-2 w-10 bg-slate-700 rounded animate-pulse" />
+        <View className="flex-1 min-w-[160px] bg-surface-sunken border border-surface-border rounded-xl p-4">
+            <View className="h-3 w-16 bg-surface-border rounded mb-3 animate-pulse" />
+            <View className="h-7 w-12 bg-surface-border rounded mb-2 animate-pulse" />
+            <View className="h-2 w-10 bg-surface-border rounded animate-pulse" />
         </View>
     );
 }
@@ -36,11 +36,11 @@ function StatCard({ title, value, subtitle, onPress }: {
     return (
         <Pressable
             onPress={onPress}
-            className="flex-1 min-w-[160px] bg-slate-800 border border-slate-700/50 rounded-xl p-4 active:opacity-80"
+            className="flex-1 min-w-[160px] bg-surface border border-surface-border rounded-xl p-4 active:opacity-80"
         >
-            <Text className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">{title}</Text>
-            <Text className="text-2xl font-bold text-white">{value}</Text>
-            {subtitle ? <Text className="text-slate-500 text-xs mt-1">{subtitle}</Text> : null}
+            <Text className="text-ink-faint text-xs font-semibold uppercase tracking-wider mb-2">{title}</Text>
+            <Text className="text-2xl font-bold text-brand">{value}</Text>
+            {subtitle ? <Text className="text-ink-muted text-xs mt-1">{subtitle}</Text> : null}
         </Pressable>
     );
 }

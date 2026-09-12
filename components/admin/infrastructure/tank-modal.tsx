@@ -206,27 +206,27 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 max-h-[90%]">
+                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border max-h-[90%]">
                         {/* Handle Bar */}
                         <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-slate-700 rounded-full" />
+                            <View className="w-12 h-1 bg-surface-border rounded-full" />
                         </View>
 
                         {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-slate-800">
+                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
                             <View>
-                                <Text className="text-white text-2xl font-bold">
+                                <Text className="text-ink text-2xl font-bold">
                                     {isEditing ? 'Edit Tank' : 'New Tank'}
                                 </Text>
-                                <Text className="text-slate-400 text-sm">
+                                <Text className="text-ink-muted text-sm">
                                     {isEditing ? 'Update tank details' : 'Add a new storage tank'}
                                 </Text>
                             </View>
                             <Pressable
                                 onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center"
+                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             >
-                                <X size={16} color="#94a3b8" />
+                                <X size={16} color="#8b8b99" />
                             </Pressable>
                         </View>
 
@@ -238,33 +238,33 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                             showsVerticalScrollIndicator={false}
                         >
                             {/* Name Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Tank Name *
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
                                 placeholder="e.g. Tank 1"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={name}
                                 onChangeText={setName}
                                 autoFocus
                             />
 
                             {/* Station Picker */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Station *
                             </Text>
                             <Pressable
                                 onPress={() => setShowStationPicker(!showStationPicker)}
-                                className="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-2 flex-row justify-between items-center"
+                                className="bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center"
                             >
-                                <Text className={selectedStation ? 'text-white' : 'text-slate-500'}>
+                                <Text className={selectedStation ? 'text-ink' : 'text-ink-muted'}>
                                     {selectedStation?.name ?? 'Select a station'}
                                 </Text>
-                                <ChevronDown size={20} color="#64748b" />
+                                <ChevronDown size={20} color="#5c5c6b" />
                             </Pressable>
                             {showStationPicker ? (
-                                <View className="bg-slate-800 rounded-xl border border-slate-700 mb-4 max-h-40">
+                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
                                     <ScrollView nestedScrollEnabled>
                                         {stations.map((s) => (
                                             <Pressable
@@ -273,10 +273,10 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                                     setStationId(s.id);
                                                     setShowStationPicker(false);
                                                 }}
-                                                className={`p-3 border-b border-slate-700 ${stationId === s.id ? 'bg-blue-600/20' : ''
+                                                className={`p-3 border-b border-surface-border ${stationId === s.id ? 'bg-blue-600/20' : ''
                                                     }`}
                                             >
-                                                <Text className={stationId === s.id ? 'text-blue-400' : 'text-white'}>
+                                                <Text className={stationId === s.id ? 'text-blue-400' : 'text-ink'}>
                                                     {s.name}
                                                 </Text>
                                             </Pressable>
@@ -288,20 +288,20 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                             )}
 
                             {/* Product Picker */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Product *
                             </Text>
                             <Pressable
                                 onPress={() => setShowProductPicker(!showProductPicker)}
-                                className="bg-slate-800 p-4 rounded-xl border border-slate-700 mb-2 flex-row justify-between items-center"
+                                className="bg-surface p-4 rounded-xl border border-surface-border mb-2 flex-row justify-between items-center"
                             >
-                                <Text className={selectedProduct ? 'text-white' : 'text-slate-500'}>
+                                <Text className={selectedProduct ? 'text-ink' : 'text-ink-muted'}>
                                     {selectedProduct?.name ?? 'Select a product'}
                                 </Text>
-                                <ChevronDown size={20} color="#64748b" />
+                                <ChevronDown size={20} color="#5c5c6b" />
                             </Pressable>
                             {showProductPicker ? (
-                                <View className="bg-slate-800 rounded-xl border border-slate-700 mb-4 max-h-40">
+                                <View className="bg-surface rounded-xl border border-surface-border mb-4 max-h-40">
                                     <ScrollView nestedScrollEnabled>
                                         {products.map((p) => (
                                             <Pressable
@@ -310,10 +310,10 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                                     setProductId(p.id);
                                                     setShowProductPicker(false);
                                                 }}
-                                                className={`p-3 border-b border-slate-700 ${productId === p.id ? 'bg-blue-600/20' : ''
+                                                className={`p-3 border-b border-surface-border ${productId === p.id ? 'bg-blue-600/20' : ''
                                                     }`}
                                             >
-                                                <Text className={productId === p.id ? 'text-blue-400' : 'text-white'}>
+                                                <Text className={productId === p.id ? 'text-blue-400' : 'text-ink'}>
                                                     {p.name}
                                                 </Text>
                                             </Pressable>
@@ -325,26 +325,26 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                             )}
 
                             {/* Capacity Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Capacity (Liters) *
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
                                 placeholder="e.g. 10000"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 keyboardType="numeric"
                                 value={capacityLiters}
                                 onChangeText={setCapacityLiters}
                             />
 
                             {/* Current Volume Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Current Volume (Liters)
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-blue-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-blue-500 mb-4"
                                 placeholder="0"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 keyboardType="numeric"
                                 value={currentVolume}
                                 onChangeText={setCurrentVolume}
@@ -353,34 +353,34 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                             {/* Calibration Chart Section */}
                             <Pressable
                                 onPress={() => setShowCalibrationChart(!showCalibrationChart)}
-                                className="flex-row items-center justify-between bg-slate-800 p-4 rounded-xl border border-slate-700 mb-4"
+                                className="flex-row items-center justify-between bg-surface p-4 rounded-xl border border-surface-border mb-4"
                             >
                                 <View>
-                                    <Text className="text-white font-medium">Calibration Chart</Text>
-                                    <Text className="text-slate-500 text-xs">
+                                    <Text className="text-ink font-medium">Calibration Chart</Text>
+                                    <Text className="text-ink-muted text-xs">
                                         {calibrationEntries.length > 0
                                             ? `${calibrationEntries.length} entries`
                                             : 'Optional - Map mm to liters'}
                                     </Text>
                                 </View>
                                 {showCalibrationChart ? (
-                                    <ChevronUp size={20} color="#64748b" />
+                                    <ChevronUp size={20} color="#5c5c6b" />
                                 ) : (
-                                    <ChevronDown size={20} color="#64748b" />
+                                    <ChevronDown size={20} color="#5c5c6b" />
                                 )}
                             </Pressable>
 
                             {showCalibrationChart ? (
-                                <View className="bg-slate-800/50 rounded-xl border border-slate-700 p-4 mb-4">
+                                <View className="bg-surface-sunken rounded-xl border border-surface-border p-4 mb-4">
                                     {/* Column Headers */}
                                     <View className="flex-row mb-3">
                                         <View className="flex-1 mr-2">
-                                            <Text className="text-slate-400 text-xs font-bold uppercase">
+                                            <Text className="text-ink-muted text-xs font-bold uppercase">
                                                 Depth (mm)
                                             </Text>
                                         </View>
                                         <View className="flex-1 mr-8">
-                                            <Text className="text-slate-400 text-xs font-bold uppercase">
+                                            <Text className="text-ink-muted text-xs font-bold uppercase">
                                                 Volume (L)
                                             </Text>
                                         </View>
@@ -390,26 +390,26 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                     {calibrationEntries.map((entry, index) => (
                                         <View key={index} className="flex-row items-center mb-2">
                                             <TextInput
-                                                className="flex-1 bg-slate-700 text-white p-3 rounded-lg border border-slate-600 mr-2"
+                                                className="flex-1 bg-surface-border text-ink p-3 rounded-lg border border-surface-border mr-2"
                                                 placeholder="0"
-                                                placeholderTextColor="#475569"
+                                                placeholderTextColor="#5c5c6b"
                                                 keyboardType="numeric"
                                                 value={entry.mm}
                                                 onChangeText={(value) => updateCalibrationEntry(index, 'mm', value)}
                                             />
                                             <TextInput
-                                                className="flex-1 bg-slate-700 text-white p-3 rounded-lg border border-slate-600 mr-2"
+                                                className="flex-1 bg-surface-border text-ink p-3 rounded-lg border border-surface-border mr-2"
                                                 placeholder="0"
-                                                placeholderTextColor="#475569"
+                                                placeholderTextColor="#5c5c6b"
                                                 keyboardType="numeric"
                                                 value={entry.liters}
                                                 onChangeText={(value) => updateCalibrationEntry(index, 'liters', value)}
                                             />
                                             <Pressable
                                                 onPress={() => removeCalibrationEntry(index)}
-                                                className="p-2 bg-red-500/20 rounded-lg"
+                                                className="p-2 bg-accent-subtle rounded-lg"
                                             >
-                                                <Trash2 size={16} color="#ef4444" />
+                                                <Trash2 size={16} color="#bf0a30" />
                                             </Pressable>
                                         </View>
                                     ))}
@@ -417,24 +417,24 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
                                     {/* Add Entry Button */}
                                     <Pressable
                                         onPress={addCalibrationEntry}
-                                        className="flex-row items-center justify-center py-3 mt-2 bg-slate-700 rounded-lg active:opacity-80"
+                                        className="flex-row items-center justify-center py-3 mt-2 bg-surface-border rounded-lg active:opacity-80"
                                     >
-                                        <Plus size={16} color="#94a3b8" />
-                                        <Text className="text-slate-400 font-medium ml-2">Add Entry</Text>
+                                        <Plus size={16} color="#8b8b99" />
+                                        <Text className="text-ink-muted font-medium ml-2">Add Entry</Text>
                                     </Pressable>
                                 </View>
                             ) : null}
                         </ScrollView>
 
                         {/* Footer */}
-                        <View className="p-6 border-t border-slate-800 bg-slate-900 pb-10">
+                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
                                 className={`rounded-xl py-4 items-center ${isPending ? 'bg-blue-600/50' : 'bg-blue-600'
                                     }`}
                                 onPress={handleSubmit}
                                 disabled={isPending}
                             >
-                                <Text className="text-white font-bold text-lg">
+                                <Text className="text-ink font-bold text-lg">
                                     {isPending ? 'Saving...' : isEditing ? 'Update Tank' : 'Create Tank'}
                                 </Text>
                             </Pressable>

@@ -63,7 +63,7 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
                             style={styles.closeButton}
                             activeOpacity={0.7}
                         >
-                            <X size={20} color="#94a3b8" />
+                            <X size={20} color="#8b8b99" />
                         </TouchableOpacity>
                     </View>
 
@@ -112,7 +112,7 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
                                 {/* Amount Card */}
                                 <View style={styles.amountCard}>
                                     <View style={styles.row}>
-                                        <CreditCard size={20} color="#10b981" />
+                                        <CreditCard size={20} color="#046c4e" />
                                         <Text style={styles.amountLabel}>
                                             TRANSACTION AMOUNT
                                         </Text>
@@ -123,7 +123,7 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
                                 {/* Customer Information */}
                                 <View style={[styles.card, { marginBottom: 16 }]}>
                                     <View style={styles.sectionHeader}>
-                                        <User size={18} color="#64748b" />
+                                        <User size={18} color="#5c5c6b" />
                                         <Text style={styles.sectionTitle}>
                                             Customer Information
                                         </Text>
@@ -139,7 +139,7 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
                                 {/* Transaction Details */}
                                 <View style={[styles.card, { marginBottom: 16 }]}>
                                     <View style={styles.sectionHeader}>
-                                        <FileText size={18} color="#64748b" />
+                                        <FileText size={18} color="#5c5c6b" />
                                         <Text style={styles.sectionTitle}>
                                             Transaction Details
                                         </Text>
@@ -154,7 +154,7 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
                                         <View style={[styles.innerCard, { marginBottom: 12 }]}>
                                             <Text style={styles.fieldLabel}>Date & Time</Text>
                                             <View style={styles.row}>
-                                                <Calendar size={14} color="#64748b" />
+                                                <Calendar size={14} color="#5c5c6b" />
                                                 <Text style={[styles.fieldValueSmall, { marginLeft: 8 }]}>{formattedDate}</Text>
                                             </View>
                                         </View>
@@ -163,7 +163,7 @@ export const CreditSaleDetailModal = memo(function CreditSaleDetailModal({
                                             <View style={[styles.innerCard, { marginBottom: 12 }]}>
                                                 <Text style={styles.fieldLabel}>Vehicle Registration</Text>
                                                 <View style={styles.row}>
-                                                    <Car size={14} color="#64748b" />
+                                                    <Car size={14} color="#5c5c6b" />
                                                     <Text style={[styles.fieldValueBold, { marginLeft: 8 }]}>
                                                         {creditSale.vehicle_reg}
                                                     </Text>
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         marginTop: 96,
-        backgroundColor: '#0f172a',
+        backgroundColor: '#ffffff',
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
     },
@@ -213,15 +213,15 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         paddingVertical: 16,
         borderBottomWidth: 1,
-        borderBottomColor: '#1e293b',
+        borderBottomColor: '#e6e6ee',
     },
     headerTitle: {
-        color: '#ffffff',
+        color: '#12121a',
         fontSize: 20,
         fontWeight: 'bold',
     },
     closeButton: {
-        backgroundColor: '#1e293b',
+        backgroundColor: '#f7f7fa',
         padding: 8,
         borderRadius: 9999,
     },
@@ -230,17 +230,17 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
     },
     card: {
-        backgroundColor: 'rgba(30,41,59,0.5)',
+        backgroundColor: '#f7f7fa',
         borderRadius: 16,
         padding: 20,
     },
     innerCard: {
-        backgroundColor: 'rgba(15,23,42,0.5)',
+        backgroundColor: '#ffffff',
         borderRadius: 12,
         padding: 16,
     },
     skeleton: {
-        backgroundColor: 'rgba(51,65,85,0.5)',
+        backgroundColor: '#e6e6ee',
         borderRadius: 4,
     },
     amountCard: {
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     amountLabel: {
-        color: '#34d399',
+        color: '#046c4e',
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 8,
@@ -273,19 +273,19 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     sectionTitle: {
-        color: '#94a3b8',
+        color: '#5c5c6b',
         fontSize: 12,
         fontWeight: '600',
         marginLeft: 8,
         textTransform: 'uppercase',
     },
     fieldLabel: {
-        color: '#64748b',
+        color: '#5c5c6b',
         fontSize: 11,
         marginBottom: 4,
     },
     fieldValue: {
-        color: '#ffffff',
+        color: '#12121a',
         fontSize: 16,
         fontWeight: '600',
     },
@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
         fontFamily: 'monospace',
     },
     notesText: {
-        color: '#cbd5e1',
+        color: '#e6e6ee',
         fontSize: 14,
         lineHeight: 20,
     },
@@ -315,6 +315,6 @@ const styles = StyleSheet.create({
         paddingVertical: 80,
     },
     emptyText: {
-        color: '#94a3b8',
+        color: '#8b8b99',
     },
 });

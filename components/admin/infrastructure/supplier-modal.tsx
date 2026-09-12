@@ -100,27 +100,27 @@ export function SupplierModal({ visible, onClose, supplier }: SupplierModalProps
                     className="flex-1 justify-end"
                     keyboardVerticalOffset={0}
                 >
-                    <View className="bg-slate-900 rounded-t-3xl border-t border-slate-700 h-[85%] flex overflow-hidden">
+                    <View className="bg-surface-sunken rounded-t-3xl border-t border-surface-border h-[85%] flex overflow-hidden">
                         {/* Handle Bar */}
                         <View className="items-center pt-2 pb-4">
-                            <View className="w-12 h-1 bg-slate-700 rounded-full" />
+                            <View className="w-12 h-1 bg-surface-border rounded-full" />
                         </View>
 
                         {/* Header */}
-                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-slate-800">
+                        <View className="px-6 pb-6 flex-row items-center justify-between border-b border-surface-border">
                             <View>
-                                <Text className="text-white text-2xl font-bold">
+                                <Text className="text-ink text-2xl font-bold">
                                     {isEditing ? 'Edit Supplier' : 'New Supplier'}
                                 </Text>
-                                <Text className="text-slate-400 text-sm">
+                                <Text className="text-ink-muted text-sm">
                                     {isEditing ? 'Update supplier details' : 'Add a new fuel supplier'}
                                 </Text>
                             </View>
                             <Pressable
                                 onPress={onClose}
-                                className="w-10 h-10 rounded-full bg-slate-800 items-center justify-center"
+                                className="w-10 h-10 rounded-full bg-surface items-center justify-center"
                             >
-                                <X size={16} color="#94a3b8" />
+                                <X size={16} color="#8b8b99" />
                             </Pressable>
                         </View>
 
@@ -132,26 +132,26 @@ export function SupplierModal({ visible, onClose, supplier }: SupplierModalProps
                             showsVerticalScrollIndicator={false}
                         >
                             {/* Name Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Supplier Name *
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-sky-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-sky-500 mb-4"
                                 placeholder="e.g. Total Energies"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={name}
                                 onChangeText={setName}
                                 autoFocus
                             />
 
                             {/* Email Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Email (Optional)
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-sky-500 mb-4"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-sky-500 mb-4"
                                 placeholder="e.g. supplier@example.com"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={email}
                                 onChangeText={setEmail}
                                 keyboardType="email-address"
@@ -159,13 +159,13 @@ export function SupplierModal({ visible, onClose, supplier }: SupplierModalProps
                             />
 
                             {/* Phone Input */}
-                            <Text className="text-slate-400 text-xs font-bold uppercase mb-2 ml-1">
+                            <Text className="text-ink-muted text-xs font-bold uppercase mb-2 ml-1">
                                 Phone (Optional)
                             </Text>
                             <TextInput
-                                className="bg-slate-800 text-white p-4 rounded-xl border border-slate-700 focus:border-sky-500 mb-6"
+                                className="bg-surface text-ink p-4 rounded-xl border border-surface-border focus:border-sky-500 mb-6"
                                 placeholder="e.g. +254 712 345 678"
-                                placeholderTextColor="#475569"
+                                placeholderTextColor="#5c5c6b"
                                 value={phone}
                                 onChangeText={setPhone}
                                 keyboardType="phone-pad"
@@ -173,13 +173,13 @@ export function SupplierModal({ visible, onClose, supplier }: SupplierModalProps
                         </ScrollView>
 
                         {/* Footer */}
-                        <View className="p-6 border-t border-slate-800 bg-slate-900 pb-10">
+                        <View className="p-6 border-t border-surface-border bg-surface-sunken pb-10">
                             <Pressable
                                 className={`rounded-xl py-4 items-center ${isPending ? 'bg-sky-600/50' : 'bg-sky-600'}`}
                                 onPress={handleSubmit}
                                 disabled={isPending}
                             >
-                                <Text className="text-white font-bold text-lg">
+                                <Text className="text-ink font-bold text-lg">
                                     {isPending ? 'Saving...' : isEditing ? 'Update Supplier' : 'Create Supplier'}
                                 </Text>
                             </Pressable>

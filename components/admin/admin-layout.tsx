@@ -9,7 +9,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
     return (
-        <View className="flex-1 flex-row bg-slate-900">
+        <View className="flex-1 flex-row bg-surface-sunken">
             <AdminSidebar />
             <View className="flex-1 flex-col h-full">
                 <Header />

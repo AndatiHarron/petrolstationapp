@@ -16,12 +16,12 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#0f172a",
+          "backgroundColor": "#ffffff",
           "image": "./assets/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "dark": {
-            "backgroundColor": "#0f172a",
+            "backgroundColor": "#ffffff",
             "image": "./assets/splash.png"
           }
         }
@@ -29,11 +29,11 @@
     ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "backgroundColor": "#0f172a",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#ffffff",
     "androidStatusBar": {
-      "barStyle": "light-content",
-      "backgroundColor": "#0f172a"
+      "barStyle": "dark-content",
+      "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
