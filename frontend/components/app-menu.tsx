@@ -25,6 +25,7 @@ import {
 } from 'lucide-react-native';
 import { useRoles, type AppRole } from '@/hooks/useRoles';
 import { Avatar } from '@/components/avatar';
+import { LogoutButton } from '@/components/logout-button';
 
 const PANEL_WIDTH = Math.min(Math.round(Dimensions.get('window').width * 0.84), 336);
 const OPEN_MS = 240;
@@ -37,6 +38,11 @@ interface Destination {
     Icon: typeof LayoutDashboard;
     /** Roles allowed to see it. Omit for everyone signed in. */
     roles?: AppRole[];
+    /**
+     * Roles that already reach this screen from the bottom tab bar. Listing it
+     * in the drawer as well is duplication, so it is hidden for those roles.
+     */
+    bottomTabFor?: AppRole[];
 }
 
 /**
@@ -48,18 +54,18 @@ interface Destination {
  * would refuse.
  */
 const DESTINATIONS: Destination[] = [
-    { href: '/admin', label: 'Dashboard', hint: 'Stock, prices and recent activity', Icon: LayoutDashboard, roles: ['admin', 'super-admin'] },
-    { href: '/admin/finance', label: 'Finance', hint: 'Shifts, credit sales and creditors', Icon: Banknote, roles: ['admin', 'super-admin'] },
-    { href: '/admin/reports', label: 'Reports', hint: 'End of day, monthly, credit, VAT', Icon: FileText, roles: ['admin', 'super-admin'] },
+    { href: '/admin', label: 'Dashboard', hint: 'Stock, prices and recent activity', Icon: LayoutDashboard, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
+    { href: '/admin/finance', label: 'Finance', hint: 'Shifts, credit sales and creditors', Icon: Banknote, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
+    { href: '/admin/reports', label: 'Reports', hint: 'End of day, monthly, credit, VAT', Icon: FileText, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
     { href: '/admin/inventory', label: 'Stock', hint: 'Fuel deliveries and tank levels', Icon: Package, roles: ['admin', 'super-admin'] },
     { href: '/admin/requests', label: 'Edit requests', hint: 'Approve corrections to locked shifts', Icon: ClipboardList, roles: ['admin', 'super-admin'] },
     { href: '/admin/infrastructure', label: 'Setup', hint: 'Stations, tanks, pumps and products', Icon: Building2, roles: ['admin', 'super-admin'] },
     { href: '/admin/system', label: 'System', hint: 'Users, roles and the activity log', Icon: Settings, roles: ['admin', 'super-admin'] },
     { href: '/super-admin', label: 'Organizations', hint: 'Tenants and their administrators', Icon: Users, roles: ['super-admin'] },
-    { href: '/station-manager', label: 'My shift', hint: 'Open, run and close a shift', Icon: LayoutDashboard, roles: ['manager'] },
-    { href: '/station-manager/shifts', label: 'Shift history', hint: 'Past shifts and their variance', Icon: FileText, roles: ['manager'] },
-    { href: '/station-manager/liftings', label: 'Deliveries', hint: 'Record fuel received', Icon: Package, roles: ['manager'] },
-    { href: '/station-manager/customers', label: 'Customers', hint: 'Credit account holders', Icon: Users, roles: ['manager'] },
+    { href: '/station-manager', label: 'My shift', hint: 'Open, run and close a shift', Icon: LayoutDashboard, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/station-manager/shifts', label: 'Shift history', hint: 'Past shifts and their variance', Icon: FileText, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/station-manager/liftings', label: 'Deliveries', hint: 'Record fuel received', Icon: Package, roles: ['manager'], bottomTabFor: ['manager'] },
+    { href: '/station-manager/customers', label: 'Customers', hint: 'Credit account holders', Icon: Users, roles: ['manager'], bottomTabFor: ['manager'] },
 ];
 
 /** The menu trigger in the top bar. The avatar lives inside the drawer. */
@@ -134,9 +140,12 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
 
     if (!mounted) return null;
 
-    const available = DESTINATIONS.filter(
-        (destination) => !destination.roles || destination.roles.some((role) => roles.includes(role))
-    );
+    const available = DESTINATIONS.filter((destination) => {
+        const allowed = !destination.roles || destination.roles.some((role) => roles.includes(role));
+        const alreadyATab = destination.bottomTabFor?.some((role) => roles.includes(role)) ?? false;
+
+        return allowed && !alreadyATab;
+    });
 
     return (
         <Modal transparent visible animationType="none" statusBarTranslucent onRequestClose={onClose}>
@@ -185,8 +194,10 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
 
                     <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}>
                         {available.length === 0 ? (
-                            <View className="items-center px-5 py-10">
-                                <Text className="text-ink-muted text-sm">Nothing available yet</Text>
+                            <View className="items-center px-5 py-8">
+                                <Text className="text-ink-muted text-center text-xs">
+                                    Every screen you can reach is on the bar below.
+                                </Text>
                             </View>
                         ) : (
                             available.map((destination) => {
@@ -224,6 +235,10 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                             })
                         )}
                     </ScrollView>
+
+                    <View className="flex-row items-center gap-3 border-t border-surface-border px-4 py-3">
+                        <LogoutButton />
+                    </View>
                 </Animated.View>
 
                 {/* Tapping the exposed page closes the drawer. */}

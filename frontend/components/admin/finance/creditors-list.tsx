@@ -102,17 +102,32 @@ export const CreditorsList = memo(function CreditorsList() {
 
     return (
         <View className="mb-6">
-            <View className="flex-row items-center justify-between mb-4">
+            <View className="mb-4 gap-2">
                 <View className="flex-row items-center gap-2">
                     <Text className="text-ink text-xl font-bold">Creditors</Text>
                     {outstandingCreditors.length > 0 && (
-                        <View className="bg-amber-500/20 px-2 py-0.5 rounded-full">
-                            <Text className="text-amber-400 text-xs font-bold">{outstandingCreditors.length}</Text>
+                        <View className="bg-amber-50 px-2 py-0.5 rounded-full">
+                            <Text className="text-amber-700 text-xs font-bold">{outstandingCreditors.length}</Text>
                         </View>
                     )}
                 </View>
+
+                {/* Its own row: sharing one with the title gave a large total
+                    nowhere to go, so it overflowed the card. */}
                 {outstandingCreditors.length > 0 && (
-                    <Text className="text-amber-400 text-sm font-semibold">Total owed: {formattedTotal}</Text>
+                    <View className="flex-row items-baseline justify-between gap-3 rounded-lg bg-amber-50 px-3 py-2">
+                        <Text className="text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+                            Total owed
+                        </Text>
+                        <Text
+                            className="text-amber-700 shrink font-mono text-sm font-bold"
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                        >
+                            {formattedTotal}
+                        </Text>
+                    </View>
                 )}
             </View>
             <FlatList
