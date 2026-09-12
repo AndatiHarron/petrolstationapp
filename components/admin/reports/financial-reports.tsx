@@ -312,12 +312,12 @@ interface FinancialReportsProps {
 
 export function FinancialReports({ filters, onSelectCustomer }: FinancialReportsProps) {
     return (
-        <View>
+        <View className="gap-3">
             {/* Section header. The period is stated here so a screenshot of the
                 report is never ambiguous about what it covers. */}
-            <View className="mb-3 mt-2">
-                <Text className="text-ink font-bold text-lg">Financial Reports</Text>
-                <Text className="text-ink-muted text-xs">
+            <View className="mb-2 mt-1">
+                <Text className="text-ink text-[15px] font-bold">Financial</Text>
+                <Text className="text-ink-faint text-[11px]">
                     Revenue, taxes &amp; receivables &middot; {formatPeriod(filters)}
                 </Text>
             </View>

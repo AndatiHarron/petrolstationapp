@@ -1,51 +1,65 @@
 import React, { useCallback } from 'react';
-import { View, Text, FlatList, Pressable } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Building2, Cylinder, Fuel } from 'lucide-react-native';
 import { useTanksIndex } from '../../../features/api/tank/tank';
 import { useProductsIndex } from '../../../features/api/product/product';
 import { useStationsIndex } from '../../../features/api/station/station';
 import type { TanksIndex200, ProductsIndex200, StationsIndex200 } from '@/features/api/model';
+import { Section } from './section';
 
 type TabType = 'stations' | 'products' | 'tanks';
 
-interface StatItem {
+const ICONS: Record<TabType, typeof Building2> = {
+    stations: Building2,
+    products: Fuel,
+    tanks: Cylinder,
+};
+
+function StatTile({
+    id,
+    title,
+    value,
+    subtitle,
+    loading,
+    onPress,
+}: {
     id: TabType;
     title: string;
     value: string;
     subtitle: string;
-}
-
-// Skeleton loader for a single stat card
-function StatCardSkeleton() {
-    return (
-        <View className="flex-1 min-w-[160px] bg-surface-sunken border border-surface-border rounded-xl p-4">
-            <View className="h-3 w-16 bg-surface-border rounded mb-3 animate-pulse" />
-            <View className="h-7 w-12 bg-surface-border rounded mb-2 animate-pulse" />
-            <View className="h-2 w-10 bg-surface-border rounded animate-pulse" />
-        </View>
-    );
-}
-
-// Card component for consistent styling with navigation
-function StatCard({ title, value, subtitle, onPress }: {
-    title: string;
-    value: string;
-    subtitle?: string;
-    onPress?: () => void;
+    loading?: boolean;
+    onPress: () => void;
 }) {
+    const Icon = ICONS[id];
+
     return (
         <Pressable
             onPress={onPress}
-            className="flex-1 min-w-[160px] bg-surface border border-surface-border rounded-xl p-4 active:opacity-80"
+            disabled={loading}
+            accessibilityRole="button"
+            accessibilityLabel={`${value} ${title}`}
+            // Equal thirds rather than a scrolling row: three counts fit a phone
+            // and scrolling for the third was needless work.
+            className="flex-1 items-center gap-1.5 rounded-xl bg-surface-sunken px-2 py-3 active:opacity-70"
         >
-            <Text className="text-ink-faint text-xs font-semibold uppercase tracking-wider mb-2">{title}</Text>
-            <Text className="text-2xl font-bold text-brand">{value}</Text>
-            {subtitle ? <Text className="text-ink-muted text-xs mt-1">{subtitle}</Text> : null}
+            <Icon size={16} color="#040273" />
+
+            {loading ? (
+                <View className="h-6 w-8 rounded bg-surface-border" />
+            ) : (
+                <Text className="text-ink text-xl font-bold">{value}</Text>
+            )}
+
+            <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-wider">
+                {title}
+            </Text>
+            <Text className="text-ink-faint text-[10px]">{subtitle}</Text>
         </Pressable>
     );
 }
 
-export function QuickStats() {
+export function QuickStats({ index = 0 }: { index?: number }) {
     const router = useRouter();
     const { data: tanksResponse, isLoading: isTanksLoading } = useTanksIndex();
     const { data: productsResponse, isLoading: isProductsLoading } = useProductsIndex();
@@ -53,49 +67,41 @@ export function QuickStats() {
 
     const isLoading = isTanksLoading || isProductsLoading || isStationsLoading;
 
-    // Extract data safely with proper types
     const tanks = (tanksResponse as TanksIndex200 | undefined)?.data ?? [];
     const products = (productsResponse as ProductsIndex200 | undefined)?.data ?? [];
     const stations = (stationsResponse as StationsIndex200 | undefined)?.data ?? [];
 
-    const navigateToInfrastructure = useCallback((tab: TabType) => {
-        router.push({
-            pathname: '/admin/infrastructure',
-            params: { tab },
-        });
-    }, [router]);
+    const goToInfrastructure = useCallback(
+        (tab: TabType) => {
+            router.push({ pathname: '/admin/infrastructure', params: { tab } });
+        },
+        [router]
+    );
 
-    if (isLoading) {
-        return (
-            <View className="flex-row gap-3 mb-6">
-                <StatCardSkeleton />
-                <StatCardSkeleton />
-                <StatCardSkeleton />
-            </View>
-        );
-    }
-
-    const statsData: StatItem[] = [
-        { id: 'stations', title: "Stations", value: String(stations.length), subtitle: "Active" },
-        { id: 'products', title: "Products", value: String(products.length), subtitle: "Types" },
-        { id: 'tanks', title: "Tanks", value: String(tanks.length), subtitle: "Total" },
+    const stats: { id: TabType; title: string; value: string; subtitle: string }[] = [
+        { id: 'stations', title: 'Stations', value: String(stations.length), subtitle: 'active' },
+        { id: 'products', title: 'Products', value: String(products.length), subtitle: 'types' },
+        { id: 'tanks', title: 'Tanks', value: String(tanks.length), subtitle: 'total' },
     ];
 
     return (
-        <FlatList
-            data={statsData}
-            renderItem={({ item }) => (
-                <StatCard
-                    title={item.title}
-                    value={item.value}
-                    subtitle={item.subtitle}
-                    onPress={() => navigateToInfrastructure(item.id)}
-                />
-            )}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="flex-row gap-3 mb-6"
-        />
+        <Section
+            title="Infrastructure"
+            subtitle="Tap to manage"
+            actionLabel="Setup"
+            onAction={() => router.push('/admin/infrastructure')}
+            index={index}
+        >
+            <View className="flex-row gap-2">
+                {stats.map((stat) => (
+                    <StatTile
+                        key={stat.id}
+                        {...stat}
+                        loading={isLoading}
+                        onPress={() => goToInfrastructure(stat.id)}
+                    />
+                ))}
+            </View>
+        </Section>
     );
 }

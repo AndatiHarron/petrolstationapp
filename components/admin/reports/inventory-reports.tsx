@@ -245,11 +245,11 @@ function VarianceTrendChart({ filters }: { filters: ReportFilters }) {
 // ─── Main Export ──────────────────────────────────────────────────
 export function InventoryReports({ filters }: { filters: ReportFilters }) {
     return (
-        <View>
+        <View className="gap-3">
             {/* Section header */}
-            <View className="mb-3 mt-2">
-                <Text className="text-ink font-bold text-lg">Inventory Reports</Text>
-                <Text className="text-ink-muted text-xs">Stock &amp; cash variance &middot; {formatPeriod(filters)}</Text>
+            <View className="mb-2 mt-1">
+                <Text className="text-ink text-[15px] font-bold">Inventory</Text>
+                <Text className="text-ink-faint text-[11px]">Stock &amp; cash variance &middot; {formatPeriod(filters)}</Text>
             </View>
 
             <VarianceTrendChart filters={filters} />
