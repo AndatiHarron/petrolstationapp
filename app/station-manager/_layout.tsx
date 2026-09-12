@@ -2,10 +2,13 @@ import { Tabs } from 'expo-router';
 import { LayoutDashboard, Users, Droplets, Clock } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '../../components/error-boundary';
 import { TopBar } from '@/components/top-bar';
 
 export default function StationManagerLayout() {
+    const insets = useSafeAreaInsets();
+
     return (
         <ErrorBoundary label="Station Manager">
             <StatusBar style="dark" backgroundColor="#ffffff" />
@@ -15,9 +18,12 @@ export default function StationManagerLayout() {
                     tabBarStyle: {
                         backgroundColor: '#ffffff',
                         borderTopColor: '#e6e6ee',
-                        height: 60,
+                        // Clear Android's on-screen navigation buttons. The bar sat
+                        // underneath them because a fixed height overrode React
+                        // Navigation's safe-area handling.
+                        height: 58 + insets.bottom,
                         paddingTop: 6,
-                        paddingBottom: 8,
+                        paddingBottom: Math.max(insets.bottom, 10),
                     },
                     tabBarLabelStyle: {
                         fontSize: 11,

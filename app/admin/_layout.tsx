@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { LayoutDashboard, Banknote, FileText } from 'lucide-react-native';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '@/components/top-bar';
 
 /**
@@ -15,6 +16,8 @@ import { TopBar } from '@/components/top-bar';
  * removing the route, so the menu and any deep link still reach them.
  */
 export default function AdminLayout() {
+    const insets = useSafeAreaInsets();
+
     return (
         <>
             <StatusBar style="dark" backgroundColor="#ffffff" />
@@ -24,9 +27,12 @@ export default function AdminLayout() {
                     tabBarStyle: {
                         backgroundColor: '#ffffff',
                         borderTopColor: '#e6e6ee',
-                        height: 60,
+                        // Clear Android's on-screen navigation buttons. The bar sat
+                        // underneath them because a fixed height overrode React
+                        // Navigation's safe-area handling.
+                        height: 58 + insets.bottom,
                         paddingTop: 6,
-                        paddingBottom: 8,
+                        paddingBottom: Math.max(insets.bottom, 10),
                     },
                     // Three tabs leave room for a readable label.
                     tabBarLabelStyle: {
