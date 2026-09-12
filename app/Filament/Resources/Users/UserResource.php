@@ -5,11 +5,9 @@ namespace App\Filament\Resources\Users;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\Pages\ManageUsers;
 use App\Models\User;
 use BackedEnum;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -20,6 +18,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
@@ -29,6 +28,7 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Settings';
 
     protected static ?string $recordTitleAttribute = 'user';
@@ -41,7 +41,7 @@ class UserResource extends Resource
             return $query->withoutGlobalScopes();
         }
 
-        if(auth()->hasUser()) {
+        if (auth()->hasUser()) {
             $query->where('organization_id', auth()->user()->organization_id);
         }
 
@@ -97,8 +97,8 @@ class UserResource extends Resource
                         })
                         ->searchable()
                         ->preload()
-                        ->visible(fn (Get $get) => !empty($get('roles')))
-                        ->helperText('Required for Managers to filter their dashboard')
+                        ->visible(fn (Get $get) => ! empty($get('roles')))
+                        ->helperText('Required for Managers to filter their dashboard'),
                 ])->columns(1),
             ]);
     }
@@ -112,19 +112,32 @@ class UserResource extends Resource
                 TextColumn::make('email')->searchable(),
                 TextColumn::make('roles.name')
                     ->badge()
-                    ->color(fn (string $state):string => match($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'admin' => 'danger',
                         'manager' => 'info',
                         default => 'gray'
                     }),
                 TextColumn::make('organization.name')
-                    ->label("Organization")
+                    ->label('Organization')
                     ->placeholder('Global Access'),
                 TextColumn::make('station.name')
                     ->label('Station')
-                    ->placeholder('Global Access')
-            ])->recordActions([
-                EditAction::make()
+                    ->placeholder('Global Access'),
+            ])
+            ->filters([
+                SelectFilter::make('roles')
+                    ->relationship('roles', 'name')
+                    ->label('Role')
+                    ->multiple()
+                    ->preload(),
+
+                SelectFilter::make('station')
+                    ->relationship('station', 'name')
+                    ->searchable()
+                    ->preload(),
+            ])
+            ->recordActions([
+                EditAction::make(),
             ]);
     }
 
@@ -133,7 +146,7 @@ class UserResource extends Resource
         return [
             'index' => ListUsers::route('/'),
             'create' => CreateUser::route('/create'),
-            'edit' => EditUser::route('/{record}/edit')
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

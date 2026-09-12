@@ -5,8 +5,6 @@ namespace App\Filament\Resources\Tanks;
 use App\Filament\Resources\Tanks\Pages\CreateTank;
 use App\Filament\Resources\Tanks\Pages\EditTank;
 use App\Filament\Resources\Tanks\Pages\ListTanks;
-use App\Filament\Resources\Tanks\Schemas\TankForm;
-use App\Filament\Resources\Tanks\Tables\TanksTable;
 use App\Models\Tank;
 use BackedEnum;
 use Filament\Actions\EditAction;
@@ -14,20 +12,23 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
-use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 class TankResource extends Resource
 {
     protected static ?string $model = Tank::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
-    protected static string|null|\UnitEnum $navigationGroup = "Infrastructure";
+
+    protected static string|null|\UnitEnum $navigationGroup = 'Infrastructure';
 
     protected static ?string $recordTitleAttribute = 'tank';
 
@@ -37,14 +38,12 @@ class TankResource extends Resource
             Section::make('Details')
                 ->schema([
                     Select::make('station_id')
-                        ->relationship('station', 'name', fn (Builder $query) =>
-                        $query->where('organization_id', auth()->user()->organization_id)
+                        ->relationship('station', 'name', fn (Builder $query) => $query->where('organization_id', auth()->user()->organization_id)
                         )
                         ->required(),
 
                     Select::make('product_id')
-                        ->relationship('product', 'name', fn (Builder $query) =>
-                        $query->where('organization_id', auth()->user()->organization_id)
+                        ->relationship('product', 'name', fn (Builder $query) => $query->where('organization_id', auth()->user()->organization_id)
                         )
                         ->required(),
 
@@ -70,21 +69,21 @@ class TankResource extends Resource
             Section::make('Calibration Chart')
                 ->description('Map dip levels (mm) to volume (liters) for accurate stock calculation')
                 ->schema([
-                   Repeater::make('calibration_chart')
-                    ->schema([
-                        TextInput::make('mm')
-                            ->required()
-                            ->numeric()
-                            ->label('Dip (mm)'),
+                    Repeater::make('calibration_chart')
+                        ->schema([
+                            TextInput::make('mm')
+                                ->required()
+                                ->numeric()
+                                ->label('Dip (mm)'),
 
-                        TextInput::make('liters')
-                            ->required()
-                            ->numeric()
-                            ->label('Volume (L)')
-                    ])
-                    ->columns(2)
-                    ->defaultItems(2)
-                    ->collapsible()
+                            TextInput::make('liters')
+                                ->required()
+                                ->numeric()
+                                ->label('Volume (L)'),
+                        ])
+                        ->columns(2)
+                        ->defaultItems(2)
+                        ->collapsible(),
                 ]),
         ]);
     }
@@ -98,8 +97,28 @@ class TankResource extends Resource
             TextColumn::make('current_volume')->suffix(' L'),
             TextColumn::make('capacity_liters')->label('Capacity')->suffix(' L'),
         ])
+            ->filters([
+                SelectFilter::make('station')
+                    ->relationship('station', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                SelectFilter::make('product')
+                    ->relationship('product', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                // Refill planning: anything at or below 30% of capacity.
+                Filter::make('low_stock')
+                    ->label('Low stock')
+                    ->query(fn ($query) => $query->whereColumn(
+                        'current_volume',
+                        '<=',
+                        DB::raw('capacity_liters * 0.3')
+                    )),
+            ])
             ->recordActions([
-                EditAction::make()
+                EditAction::make(),
             ]);
     }
 
