@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CreditorController;
 use App\Http\Controllers\Api\V1\CreditSaleController;
+use App\Http\Controllers\Api\V1\CreditSettlementController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\EditRequestController;
 use App\Http\Controllers\Api\V1\LiftingController;
@@ -67,6 +68,12 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     // Credit Sales: index, create and show
     Route::apiResource('credit-sales', CreditSaleController::class)
         ->only(['index', 'store', 'show']);
+
+    // Clearing customer credit: a manager records the payment, an admin approves.
+    Route::apiResource('credit-settlements', CreditSettlementController::class)
+        ->only(['index', 'store', 'show']);
+    Route::post('/credit-settlements/{creditSettlement}/approve', [CreditSettlementController::class, 'approve']);
+    Route::post('/credit-settlements/{creditSettlement}/reject', [CreditSettlementController::class, 'reject']);
 
     // Creditors (Suppliers)
     Route::apiResource('creditors', CreditorController::class);
