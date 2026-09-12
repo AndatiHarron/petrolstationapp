@@ -7,13 +7,18 @@ import {
     reportVarianceTrend,
 } from '@/features/api/report/report';
 import type {
+    CreditReport,
     CustomerStatement,
     DebtAgingReport,
+    EndOfDayReport,
+    MonthlyReport,
     PeriodPresetId,
     ProfitAndLossReport,
     ReportFilters,
     TaxSummaryReport,
+    UserReport,
     VarianceTrendReport,
+    VatReport,
 } from './types';
 
 export * from './types';
@@ -72,7 +77,7 @@ export function resolvePeriod(preset: PeriodPresetId): { start_date: string; end
 }
 
 /** Drop empty keys so they don't reach the API as `?station_id=`. */
-function clean(filters: ReportFilters): Record<string, string> {
+function clean<T extends object>(filters: T): Record<string, string> {
     return Object.fromEntries(
         Object.entries(filters).filter(([, value]) => value !== undefined && value !== null && value !== '')
     ) as Record<string, string>;
@@ -146,4 +151,47 @@ export function useCustomerStatement(customerId: string | null, filters: ReportF
             );
         },
     });
+}
+
+// ─── Composite report hooks ───────────────────────────────────────
+
+function compositeQuery<T>(slug: string, params: Record<string, string>) {
+    return {
+        queryKey: ['report', slug, params] as const,
+        queryFn: () => {
+            const query = new URLSearchParams(params).toString();
+            return customInstance<T>(`/v1/reports/${slug}${query ? `?${query}` : ''}`, {
+                method: 'GET',
+            });
+        },
+    };
+}
+
+/** One calendar day, every shift on it combined. */
+export function useEndOfDay(date: string, stationId?: string) {
+    return useQuery(
+        compositeQuery<EndOfDayReport>('end-of-day', clean({ date, station_id: stationId }))
+    );
+}
+
+export function useMonthlyReport(month: number, year: number, stationId?: string) {
+    return useQuery(
+        compositeQuery<MonthlyReport>('monthly', {
+            month: String(month),
+            year: String(year),
+            ...(stationId ? { station_id: stationId } : {}),
+        })
+    );
+}
+
+export function useCreditReport(filters: ReportFilters) {
+    return useQuery(compositeQuery<CreditReport>('credit', clean(filters)));
+}
+
+export function useUserReport(filters: ReportFilters & { user_id?: string }) {
+    return useQuery(compositeQuery<UserReport>('users', clean(filters)));
+}
+
+export function useVatReport(filters: ReportFilters) {
+    return useQuery(compositeQuery<VatReport>('vat', clean(filters)));
 }

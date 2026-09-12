@@ -120,3 +120,145 @@ export type PeriodPresetId =
     | 'last_90'
     | 'this_year'
     | 'custom';
+
+// ─── Composite reports ────────────────────────────────────────────
+
+export interface ShiftTotals {
+    shift_count: number;
+    liters_sold: number;
+    expected_cash: number;
+    collected_cash: number;
+    cash_variance: number;
+    stock_variance_liters: number;
+    tax_collected: number;
+}
+
+export interface PaymentSplit {
+    cash: number;
+    mpesa: number;
+    credit: number;
+}
+
+export interface EndOfDayReport {
+    data: {
+        date: string;
+        station: string;
+        totals: ShiftTotals;
+        payments: PaymentSplit;
+        shifts: {
+            shift_number: string | null;
+            station_name: string | null;
+            attendant: string | null;
+            started_at: string | null;
+            locked_at: string | null;
+            status: string;
+            liters_sold: number;
+            expected_cash: number;
+            collected_cash: number;
+            cash_variance: number;
+            stock_variance_liters: number;
+        }[];
+        credit_sales: { customer_name: string | null; vehicle_reg: string | null; amount: number }[];
+        credit_total: number;
+    };
+}
+
+export interface MonthlyReport {
+    data: {
+        month: string;
+        start_date: string;
+        end_date: string;
+        station: string;
+        totals: ShiftTotals;
+        payments: PaymentSplit;
+        purchases: {
+            lifting_count: number;
+            liters_received: number;
+            total_cost: number;
+            tax_paid: number;
+        };
+        gross_margin: number;
+        net_vat: number;
+        days_traded: number;
+        daily: {
+            date: string;
+            shift_count: number;
+            liters_sold: number;
+            expected_cash: number;
+            collected_cash: number;
+            cash_variance: number;
+        }[];
+    };
+}
+
+export interface CreditReport {
+    data: {
+        start_date: string;
+        end_date: string;
+        station: string;
+        customers: {
+            customer_id: string;
+            customer_name: string;
+            phone: string | null;
+            credit_limit: number;
+            current_balance: number;
+            available_credit: number;
+            utilisation_pct: number | null;
+            over_limit: boolean;
+            opening_balance: number;
+            period_charges: number;
+            period_sale_count: number;
+            invoiced: number;
+        }[];
+        totals: {
+            customer_count: number;
+            period_charges: number;
+            outstanding: number;
+            invoiced: number;
+            over_limit_count: number;
+        };
+    };
+}
+
+export interface UserReport {
+    data: {
+        start_date: string;
+        end_date: string;
+        station: string;
+        users: {
+            user_id: string;
+            user_name: string;
+            shift_count: number;
+            liters_sold: number;
+            expected_cash: number;
+            collected_cash: number;
+            cash_variance: number;
+            stock_variance_liters: number;
+            avg_variance_per_shift: number;
+        }[];
+        totals: { user_count: number; shift_count: number; cash_variance: number };
+    };
+}
+
+export interface VatReport {
+    data: {
+        start_date: string;
+        end_date: string;
+        station: string;
+        totals: {
+            tax_collected: number;
+            tax_paid: number;
+            net_tax: number;
+            payable: boolean;
+            taxable_sales: number;
+            taxable_purchases: number;
+        };
+        periods: {
+            period: string;
+            label: string;
+            tax_collected: number;
+            tax_paid: number;
+            net_tax: number;
+        }[];
+    };
+}
