@@ -12,7 +12,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Telescope is a debugging tool: it writes rows on every request and serves
+        // a browsable history UI. Registering it only outside production keeps it out
+        // of the deployed app entirely, rather than relying on a config flag alone.
+        if (! $this->app->environment('production')) {
+            $this->app->register(TelescopeServiceProvider::class);
+        }
     }
 
     /**

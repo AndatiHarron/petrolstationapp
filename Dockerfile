@@ -1,10 +1,8 @@
-# Use a stable PHP version (8.5 does not exist yet)
 FROM php:8.5.1-fpm
 
 LABEL authors="jjmbe"
 
-# 1. Install system dependencies
-# Added libzip-dev and libicu-dev which were causing your build failure
+# 1. System dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -18,30 +16,37 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# 2. Install PHP extensions
-# Configured intl and added 'zip' and 'intl' to the install list
+# 2. PHP extensions
 RUN docker-php-ext-configure intl \
     && docker-php-ext-install pdo_pgsql pgsql mbstring exif pcntl bcmath gd zip intl
 
-# 3. Get latest Composer
+# 3. Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 4. Set working directory
 WORKDIR /var/www
 
-# 5. Copy application files
+# 4. Install dependencies first, so a code-only change doesn't re-resolve packages.
+#    Scripts are skipped here because artisan needs the full source tree.
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction
+
+# 5. Application source
 COPY . /var/www
 
-# 6. Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative
 
-# 7. Set permissions (Added chmod to ensure write access)
+# 6. Permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
     && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# 8. Expose Port
+# 7. Entrypoint
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE 80
 
-# 9. Start Application
-# Note: For high-traffic production, consider using Nginx+FPM or Octane instead of 'serve'
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=80
+# Hosting platforms health-check GET /up, which bootstrap/app.php already serves.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD curl -fsS "http://127.0.0.1:${PORT:-80}/up" || exit 1
+
+ENTRYPOINT ["docker-entrypoint.sh"]

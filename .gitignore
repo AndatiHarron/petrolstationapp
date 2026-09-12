@@ -31,3 +31,9 @@ Homestead.json
 .env.production
 .phpactor.json
 auth.json
+
+# Local SQLite databases — never commit real data
+*.sqlite
+*.sqlite-journal
+*.sqlite-shm
+*.sqlite-wal

@@ -17,19 +17,20 @@ class SuperAdminSeeder extends Seeder
     public function run(): void
     {
         $email = config('services.super_admin.email');
-        $rawPassword = config('services.super_admin.password') ?? Str::random(16);
+        $configuredPassword = config('services.super_admin.password');
+        $rawPassword = $configuredPassword ?? Str::random(16);
 
         $org = Organization::firstOrCreate(
             ['name' => 'Octane Hq'],
             [
                 'slug' => 'octane-hq',
-                'status' => 'active'
+                'status' => 'active',
             ]
         );
 
         $role = Role::firstOrCreate([
             'name' => 'super-admin',
-            'guard_name' => 'web'
+            'guard_name' => 'web',
         ]);
 
         $user = User::updateOrCreate(
@@ -46,10 +47,13 @@ class SuperAdminSeeder extends Seeder
 
         $this->command->info('--------------------------------------');
         $this->command->info('✅ Super Admin Configured');
-        $this->command->info('   Email:    ' . $email);
+        $this->command->info('   Email:    '.$email);
 
-        if (!env('SUPER_ADMIN_PASSWORD')) {
-            $this->command->warn('   Password: ' . $rawPassword . ' (Generated Randomly - SAVE THIS!)');
+        // Read from config, not env(): once `config:cache` has run — which it does on
+        // every deploy — env() returns null, and this branch would print the real
+        // configured password into the deployment log.
+        if ($configuredPassword === null) {
+            $this->command->warn('   Password: '.$rawPassword.' (Generated Randomly - SAVE THIS!)');
         } else {
             $this->command->info('   Password: [Hidden] (Set via Environment Variable)');
         }
