@@ -104,7 +104,11 @@ export function DateRangePicker({ visible, start, end, onApply, onClose }: DateR
         return { value, isStart, isEnd, inside, isToday: value === iso(today.getFullYear(), today.getMonth(), today.getDate()) };
     };
 
-    const complete = !!from && !!to;
+    // One date is a valid range: that day, start to end. The server takes the
+    // range from the start of the first day to the end of the last, so a single
+    // tap reports a full 24 hours rather than nothing at all.
+    const rangeEnd = to ?? from;
+    const complete = !!from;
 
     return (
         <Modal transparent visible animationType="slide" statusBarTranslucent onRequestClose={onClose}>
@@ -114,9 +118,13 @@ export function DateRangePicker({ visible, start, end, onApply, onClose }: DateR
                 <View className="rounded-t-3xl border-t border-surface-border bg-surface pb-8">
                     <View className="flex-row items-center justify-between gap-3 border-b border-surface-border px-5 py-4">
                         <View className="min-w-0 flex-1">
-                            <Text className="text-ink text-base font-bold">Choose dates</Text>
-                            <Text className="text-ink-muted text-xs" numberOfLines={1}>
-                                {from && to ? displayRange(from, to) : from ? `${displayDate(from)} - ...` : 'Tap a start and an end date'}
+                            <Text className="text-ink text-[17px] font-bold">Choose dates</Text>
+                            <Text className="text-ink-muted text-[11.5px]" numberOfLines={1}>
+                                {from && to
+                                    ? `${displayRange(from, to)} · full days`
+                                    : from
+                                      ? `${displayDate(from)} · tap an end date, or apply for this day`
+                                      : 'Tap a day, or a start and an end'}
                             </Text>
                         </View>
                         <Pressable
@@ -212,28 +220,29 @@ export function DateRangePicker({ visible, start, end, onApply, onClose }: DateR
                         </View>
                     </ScrollView>
 
-                    <View className="flex-row gap-2 px-4 pt-3">
+                    {/* Two buttons of equal height, the way every other sheet in
+                        the app ends: secondary on the left, primary on the right,
+                        and the chosen range reported above rather than crammed
+                        into the button's label. */}
+                    <View className="mt-1 flex-row items-center gap-2.5 border-t border-surface-border px-5 pt-3.5">
                         <Pressable
-                            onPress={() => {
-                                setFrom(undefined);
-                                setTo(undefined);
-                            }}
+                            onPress={onClose}
                             accessibilityRole="button"
-                            className="rounded-full border border-surface-border bg-surface px-4 py-2 active:bg-surface-sunken"
+                            className="h-12 flex-1 items-center justify-center rounded-xl border border-surface-border bg-surface-sunken active:opacity-70"
                         >
-                            <Text className="text-ink-muted text-[11px] font-semibold">Clear</Text>
+                            <Text className="text-ink text-sm font-bold">Cancel</Text>
                         </Pressable>
 
                         <Pressable
-                            onPress={() => complete && onApply(from as string, to as string)}
+                            onPress={() => complete && onApply(from as string, rangeEnd as string)}
                             disabled={!complete}
                             accessibilityRole="button"
-                            className={`flex-1 items-center rounded-full bg-brand py-2.5 ${
-                                complete ? 'active:opacity-80' : 'opacity-50'
+                            className={`h-12 flex-1 items-center justify-center rounded-xl bg-brand ${
+                                complete ? 'active:opacity-85' : 'opacity-40'
                             }`}
                         >
-                            <Text className="text-white text-[12px] font-bold">
-                                {complete ? `Apply ${displayRange(from, to)}` : 'Pick an end date'}
+                            <Text className="text-[13px] font-bold uppercase tracking-wider text-white">
+                                Apply
                             </Text>
                         </Pressable>
                     </View>

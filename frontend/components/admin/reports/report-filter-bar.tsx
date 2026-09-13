@@ -4,13 +4,7 @@ import { Building2, CalendarRange, Check, X } from 'lucide-react-native';
 import { useStationsIndex } from '@/features/api/station/station';
 import { DateRangePicker, displayRange } from '@/components/date-range-picker';
 import type { StationsIndex200 } from '@/features/api/model';
-import {
-    PERIOD_PRESETS,
-    formatPeriod,
-    resolvePeriod,
-    type PeriodPresetId,
-    type ReportFilters,
-} from '@/features/reports';
+import { type ReportFilters } from '@/features/reports';
 
 interface ReportFilterBarProps {
     filters: ReportFilters;
@@ -23,27 +17,25 @@ interface ReportFilterBarProps {
  * The one filter row above the report cards. Period and station are held by the
  * screen and passed to every report, so they all move together rather than each
  * card carrying its own controls.
+ *
+ * The period is a date range and nothing else. The row of presets that used to
+ * sit here — this month, last 30 days, this year and the rest — guessed at the
+ * boundaries people actually report on; picking the two dates says exactly what
+ * is wanted, and the server takes the range from the start of the first day to
+ * the end of the last, so every day in it counts as a full 24 hours.
  */
 export function ReportFilterBar({
     filters,
     onChange,
     showStationFilter = true,
 }: ReportFilterBarProps) {
-    const [periodOpen, setPeriodOpen] = useState(false);
     const [rangeOpen, setRangeOpen] = useState(false);
     const [stationOpen, setStationOpen] = useState(false);
-    const [activePreset, setActivePreset] = useState<PeriodPresetId>('this_month');
 
     const { data: stationsResponse } = useStationsIndex();
     const stations = (stationsResponse as unknown as StationsIndex200 | undefined)?.data ?? [];
 
     const selectedStation = stations.find((station) => station.id === filters.station_id);
-
-    const applyPreset = (preset: PeriodPresetId) => {
-        setActivePreset(preset);
-        onChange({ ...filters, ...resolvePeriod(preset) });
-        setPeriodOpen(false);
-    };
 
     const applyStation = (stationId?: string) => {
         onChange({ ...filters, station_id: stationId });
@@ -88,75 +80,15 @@ export function ReportFilterBar({
                 )}
             </View>
 
-            {/* Quick presets, so the common cases need no sheet at all. */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row gap-2">
-                    <Pressable
-                        onPress={() => setRangeOpen(true)}
-                        accessibilityRole="button"
-                        className={`rounded-full border px-2.5 py-1 ${
-                            activePreset === 'custom'
-                                ? 'border-brand bg-brand'
-                                : 'border-surface-border bg-surface active:bg-surface-sunken'
-                        }`}
-                    >
-                        <Text
-                            className={`text-[10px] font-semibold ${
-                                activePreset === 'custom' ? 'text-white' : 'text-ink-muted'
-                            }`}
-                        >
-                            Custom
-                        </Text>
-                    </Pressable>
-
-                    {PERIOD_PRESETS.map((preset) => {
-                        const active = activePreset === preset.id;
-                        return (
-                            <Pressable
-                                key={preset.id}
-                                onPress={() => applyPreset(preset.id)}
-                                accessibilityRole="button"
-                                className={`rounded-full border px-2.5 py-1 ${
-                                    active
-                                        ? 'border-brand bg-brand'
-                                        : 'border-surface-border bg-surface active:bg-surface-sunken'
-                                }`}
-                            >
-                                <Text
-                                    className={`text-[10px] font-semibold ${
-                                        active ? 'text-white' : 'text-ink-muted'
-                                    }`}
-                                >
-                                    {preset.label}
-                                </Text>
-                            </Pressable>
-                        );
-                    })}
-                </View>
-            </ScrollView>
-
             <DateRangePicker
                 visible={rangeOpen}
                 start={filters.start_date}
                 end={filters.end_date}
                 onClose={() => setRangeOpen(false)}
                 onApply={(start, end) => {
-                    setActivePreset('custom');
                     onChange({ ...filters, start_date: start, end_date: end });
                     setRangeOpen(false);
                 }}
-            />
-
-            <PickerSheet
-                visible={periodOpen}
-                title="Reporting period"
-                onClose={() => setPeriodOpen(false)}
-                options={PERIOD_PRESETS.map((preset) => ({
-                    id: preset.id,
-                    label: preset.label,
-                    selected: activePreset === preset.id,
-                }))}
-                onSelect={(id) => applyPreset(id as PeriodPresetId)}
             />
 
             <PickerSheet
