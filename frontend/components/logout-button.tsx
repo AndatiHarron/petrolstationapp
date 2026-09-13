@@ -46,7 +46,6 @@ export function LogoutButton({ compact = false }: LogoutButtonProps) {
                 visible={visible}
                 onClose={() => setVisible(false)}
                 onConfirm={() => {
-                    console.log('LOGOUT: confirm tapped');
                     setVisible(false);
                     logout();
                 }}

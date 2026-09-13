@@ -29,7 +29,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         });
     },
     logout: async () => {
-        console.log('LOGOUT: invoked');
 
         // Clear in-memory token first so no in-flight request re-authenticates.
         setApiAuthToken(null);
@@ -41,7 +40,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         // so they unmount and the router returns to the auth group by itself.
         queryClient.clear();
         set({ token: null, isLoading: false });
-        console.log('LOGOUT: token cleared');
 
         // Best-effort persistence cleanup; never block the UI on it.
         SecureStore.deleteItemAsync('auth_token').catch(() => {

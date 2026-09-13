@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Petrol Management System",
+    "name": "Petrol Integrity",
     "slug": "petrol-management-system",
     "version": "1.0.0",
     "web": {
@@ -13,6 +13,13 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "Petrol Integrity uses the camera to photograph pump meters as evidence when a shift is closed.",
+          "photosPermission": "Petrol Integrity needs access to your photos so a saved meter photo can be attached as evidence."
+        }
+      ],
       [
         "expo-splash-screen",
         {

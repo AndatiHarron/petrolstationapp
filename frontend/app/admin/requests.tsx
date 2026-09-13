@@ -198,9 +198,26 @@ export default function AdminRequestsScreen() {
         setRefreshing(false);
     }, [refetch]);
 
-    // Parse JSON data safely
-    const parseData = (jsonString: string) => {
-        try { return JSON.parse(jsonString); } catch { return null; }
+    /**
+     * The before/after payload of an edit request.
+     *
+     * The model casts these columns to `array`, so the API sends them already
+     * decoded. This used to run JSON.parse over them, which throws on an object
+     * — so it always caught and returned null, and the diff below silently
+     * rendered nothing. A string is still accepted in case the shape changes.
+     */
+    const parseData = (value: unknown): Record<string, unknown> | null => {
+        if (value === null || value === undefined) return null;
+
+        if (typeof value === 'string') {
+            try {
+                return JSON.parse(value);
+            } catch {
+                return null;
+            }
+        }
+
+        return typeof value === 'object' ? (value as Record<string, unknown>) : null;
     };
 
     const filterButtons: { label: string; value: FilterStatus }[] = [

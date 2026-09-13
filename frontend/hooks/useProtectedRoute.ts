@@ -45,17 +45,14 @@ export function useProtectedRoute() {
 
                     if (roles.includes('manager')) {
                         if (segments[0] !== 'station-manager') {
-                            console.log('DEBUG: Redirecting to station-manager');
                             router.replace('/station-manager');
                         }
                     } else if (roles.includes('super-admin')) {
                         if (segments[0] !== 'super-admin') {
-                            console.log('DEBUG: Redirecting to super-admin');
                             router.replace('/super-admin');
                         }
                     } else if (roles.includes('admin')) {
                         if (segments[0] !== 'admin') {
-                            console.log('DEBUG: Redirecting to admin');
                             router.replace('/admin');
                         }
                     } else {

@@ -37,3 +37,14 @@ auth.json
 *.sqlite-journal
 *.sqlite-shm
 *.sqlite-wal
+
+# PhpStorm project files: machine-specific, and dataSources.xml records the
+# local database connection. The .cursor, .junie and .ai directories stay
+# tracked — those are the project's committed tooling config, not IDE state.
+/.idea
+
+# Composer's own installer, which does not belong in the repo.
+composer.phar
+
+# Sample API payloads used while building Postman collections.
+postman_*.csv

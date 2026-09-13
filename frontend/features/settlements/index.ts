@@ -79,7 +79,7 @@ export function useRecordSettlement() {
             customInstance<{ data: Settlement }>('/v1/credit-settlements', {
                 method: 'POST',
                 data: input,
-            } as never),
+            }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: KEY });
             queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
@@ -113,7 +113,7 @@ export function useRejectSettlement() {
             customInstance<{ data: Settlement }>(`/v1/credit-settlements/${id}/reject`, {
                 method: 'POST',
                 data: { reason },
-            } as never),
+            }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: KEY });
             queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
@@ -174,7 +174,7 @@ export function useRecordSupplierPayment() {
             customInstance<{ data: SupplierSettlement }>('/v1/supplier-settlements', {
                 method: 'POST',
                 data: input,
-            } as never),
+            }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: SUPPLIER_KEY });
             queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });
@@ -209,7 +209,7 @@ export function useRejectSupplierPayment() {
             customInstance<{ data: SupplierSettlement }>(`/v1/supplier-settlements/${id}/reject`, {
                 method: 'POST',
                 data: { reason },
-            } as never),
+            }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: SUPPLIER_KEY });
             queryClient.invalidateQueries({ queryKey: APPROVALS_KEY });

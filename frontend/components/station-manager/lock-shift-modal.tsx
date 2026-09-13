@@ -126,6 +126,14 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
     const handleSubmit = async () => {
         if (isSubmitting) return;
 
+        // The sheet can be submitted before the closing data has loaded, or
+        // after it failed to; reading .nozzles off null would crash the screen
+        // at the moment a shift is being locked.
+        if (!closingData) {
+            Alert.alert('Not ready', 'Shift data is still loading. Try again in a moment.');
+            return;
+        }
+
         // Validate closing readings >= opening readings
         const invalidReadings = closingData.nozzles.filter(nozzle => {
             const closing = Number(meterReadings[nozzle.nozzle_id]);

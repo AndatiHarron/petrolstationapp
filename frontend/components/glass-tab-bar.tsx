@@ -1,26 +1,23 @@
 import React from 'react';
-import { View, StyleSheet, Platform, useWindowDimensions, type ViewStyle } from 'react-native';
+import { View, StyleSheet, Platform, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
-import MaskedView from '@react-native-masked-view/masked-view';
-import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets, type EdgeInsets } from 'react-native-safe-area-context';
 
 /**
- * The floating glass bottom bar, with a notch cut out of its top edge.
+ * The floating glass bottom bar.
  *
  * The bar detaches from the screen edge, rounds its corners and lets the page
  * scroll underneath it through a blur, with a wash of the brand navy so it
  * belongs to this app rather than looking like stock frosted chrome.
  *
- * The notch is a real hole, not a decoration painted on top: the glass is
- * rendered through a mask whose shape is an SVG outline with a semicircle
- * subtracted from the top edge, so the page shows through the notch exactly as
- * it does beside the bar. Faking it with an overlaid circle cannot work here —
- * the bar is translucent, so any disc laid over it reads as a lighter patch
- * rather than as an opening.
+ * Layer order matters. The blur must sit at the bottom of the stack so it has
+ * the page behind it to sample; a solid fallback underneath would leave it
+ * blurring nothing but its own backing. The tints go on top of the blur.
  */
 
-// Sized to its contents: 9 + icon 20 + 2 + line 14 + 6 = 51, the rest slack.
+// Sized to its contents: 9 + icon 20 + 1 + line 12 + 6 = 48. At 54 the items
+// did not fit and rendered past the bar's bounds, which is what put the icons
+// and labels outside the glass — a tab bar does not clip its children.
 const BAR_HEIGHT = 60;
 const SIDE_INSET = 14;
 const RADIUS = 22;
@@ -30,9 +27,6 @@ export const TAB_ICON_SIZE = 20;
 
 /** The gap between the top of the bar and the last row of a page. */
 const BREATHING_ROOM = 20;
-
-/** The semicircle taken out of the top edge, centred. */
-const NOTCH_RADIUS = 21;
 
 /**
  * How much room a scrolling screen must leave so its last row clears the bar.
@@ -56,81 +50,64 @@ const GLASS_WHITE = Platform.OS === 'ios' ? 'rgba(255,255,255,0.14)' : 'rgba(255
 const BLUR_INTENSITY = Platform.OS === 'ios' ? 80 : 75;
 const BRAND_TINGE = 'rgba(4,2,115,0.09)';
 const EDGE_LIGHT = 'rgba(255,255,255,0.90)';
-const EDGE_SHADE = 'rgba(4,2,115,0.18)';
+const EDGE_SHADE = 'rgba(4,2,115,0.16)';
 
-/**
- * The bar's outline: a rounded rectangle whose top edge dips into a semicircle
- * at the centre.
- *
- * Travelling clockwise, so the outer corners take sweep-flag 1 while the notch
- * takes 0 — which, going left to right with y pointing down, is the direction
- * that curves the arc downward into the bar instead of bulging it out.
- */
-function barOutline(width: number, height: number): string {
-    const centre = width / 2;
-
-    return [
-        `M ${RADIUS},0`,
-        `L ${centre - NOTCH_RADIUS},0`,
-        `A ${NOTCH_RADIUS},${NOTCH_RADIUS} 0 0 0 ${centre + NOTCH_RADIUS},0`,
-        `L ${width - RADIUS},0`,
-        `A ${RADIUS},${RADIUS} 0 0 1 ${width},${RADIUS}`,
-        `L ${width},${height - RADIUS}`,
-        `A ${RADIUS},${RADIUS} 0 0 1 ${width - RADIUS},${height}`,
-        `L ${RADIUS},${height}`,
-        `A ${RADIUS},${RADIUS} 0 0 1 0,${height - RADIUS}`,
-        `L 0,${RADIUS}`,
-        `A ${RADIUS},${RADIUS} 0 0 1 ${RADIUS},0`,
-        'Z',
-    ].join(' ');
-}
-
-/** Just the top run and the notch, for the lit edge. */
-function topEdge(width: number): string {
-    const centre = width / 2;
-
-    return [
-        `M ${RADIUS},0`,
-        `L ${centre - NOTCH_RADIUS},0`,
-        `A ${NOTCH_RADIUS},${NOTCH_RADIUS} 0 0 0 ${centre + NOTCH_RADIUS},0`,
-        `L ${width - RADIUS},0`,
-    ].join(' ');
-}
+/** The U-shaped dip in the top edge. */
+const NOTCH_WIDTH = 46;
+const NOTCH_DEPTH = 9;
 
 export function GlassTabBarBackground() {
-    const { width } = useWindowDimensions();
-
-    const barWidth = Math.max(width - SIDE_INSET * 2, 1);
-    const outline = barOutline(barWidth, BAR_HEIGHT);
-    const size = { width: barWidth, height: BAR_HEIGHT };
-
     return (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-            <MaskedView
-                style={size}
-                maskElement={
-                    <Svg width={barWidth} height={BAR_HEIGHT}>
-                        <Path d={outline} fill="#000000" />
-                    </Svg>
-                }
-            >
-                <BlurView
-                    intensity={BLUR_INTENSITY}
-                    tint="light"
-                    experimentalBlurMethod="dimezisBlurView"
-                    style={StyleSheet.absoluteFill}
-                />
-                <View style={[StyleSheet.absoluteFill, { backgroundColor: GLASS_WHITE }]} />
-                <View style={[StyleSheet.absoluteFill, { backgroundColor: BRAND_TINGE }]} />
-            </MaskedView>
+        <View style={[StyleSheet.absoluteFill, { borderRadius: RADIUS, overflow: 'hidden' }]}>
+            <BlurView
+                intensity={BLUR_INTENSITY}
+                tint="light"
+                experimentalBlurMethod="dimezisBlurView"
+                style={StyleSheet.absoluteFill}
+            />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: GLASS_WHITE }]} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: BRAND_TINGE }]} />
 
-            {/* The edges, drawn over the masked glass: a navy hairline all the
-                way round for definition, and a brighter run along the top and
-                through the notch, the way glass catches light on its lip. */}
-            <Svg width={barWidth} height={BAR_HEIGHT} style={StyleSheet.absoluteFill}>
-                <Path d={outline} fill="none" stroke={EDGE_SHADE} strokeWidth={1} />
-                <Path d={topEdge(barWidth)} fill="none" stroke={EDGE_LIGHT} strokeWidth={1.5} />
-            </Svg>
+            {/* A lit top edge and a navy hairline border — what reads as glass
+                is mostly the edges, not the fill. */}
+            <View
+                style={{
+                    ...StyleSheet.absoluteFillObject,
+                    borderRadius: RADIUS,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    borderColor: EDGE_SHADE,
+                }}
+            />
+            {/* The lit top edge, drawn as two runs with a U-shaped dip between
+                them: the line drops into a half-round and comes back up, which
+                is the notch. Bottom radii on a bordered box give the curve
+                without reaching for SVG, and the flex row keeps it centred at
+                any width. */}
+            <View
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: RADIUS * 0.6,
+                    right: RADIUS * 0.6,
+                    flexDirection: 'row',
+                    alignItems: 'flex-start',
+                }}
+            >
+                <View style={{ flex: 1, height: 1, backgroundColor: EDGE_LIGHT }} />
+                <View
+                    style={{
+                        width: NOTCH_WIDTH,
+                        height: NOTCH_DEPTH,
+                        borderBottomLeftRadius: NOTCH_WIDTH / 2,
+                        borderBottomRightRadius: NOTCH_WIDTH / 2,
+                        borderLeftWidth: 1,
+                        borderRightWidth: 1,
+                        borderBottomWidth: 1,
+                        borderColor: EDGE_LIGHT,
+                    }}
+                />
+                <View style={{ flex: 1, height: 1, backgroundColor: EDGE_LIGHT }} />
+            </View>
         </View>
     );
 }
@@ -171,15 +148,17 @@ export function glassTabBarStyle(insets: EdgeInsets): ViewStyle {
 /**
  * Labels.
  *
- * lineHeight is a comfortable 1.4× the font size. Set any tighter and Android
- * clips the line box, which is what cut the top off "Dashboard"; leave it out
- * altogether and the platform picks a box that is tight for the same reason.
+ * An explicit lineHeight, because without one the descender on a "Dashboard"
+ * was clipped at the bottom of its line box. The size drops to 10 so the
+ * longest label — Offloading, across four tabs on a narrow phone — fits whole
+ * rather than ending in an ellipsis, and the item padding goes so each label
+ * gets the full width of its tab.
  */
 export const glassTabBarLabelStyle = {
     fontSize: 10,
-    lineHeight: 14,
+    lineHeight: 12,
     fontWeight: '600' as const,
-    marginTop: 2,
+    marginTop: 1,
     paddingHorizontal: 0,
 };
 

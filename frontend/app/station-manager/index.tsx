@@ -4,7 +4,6 @@ import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityFeed } from '../../components/station-manager/activity-feed';
-import { CreditSaleModal } from '../../components/station-manager/credit-sale-modal';
 import { CustomersSection } from '../../components/station-manager/customers-section';
 import { ProductsSection } from '../../components/station-manager/products-section';
 import { ShiftSection } from '../../components/station-manager/shift-section';
@@ -14,7 +13,6 @@ import { useTabBarClearance } from '@/components/glass-tab-bar';
 export default function StationManagerDashboard() {
     const tabBarClearance = useTabBarClearance();
 
-    const [creditModalVisible, setCreditModalVisible] = useState(false);
     const [isShiftActive, setIsShiftActive] = useState(false);
 
     const handleShiftChange = useCallback((active: boolean) => {
@@ -43,11 +41,6 @@ export default function StationManagerDashboard() {
                     </View>
                 </ScrollView>
             </SafeAreaView>
-
-            <CreditSaleModal
-                visible={creditModalVisible}
-                onClose={() => setCreditModalVisible(false)}
-            />
         </View>
     );
 }

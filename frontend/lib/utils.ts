@@ -15,15 +15,23 @@ export const formatReading = (value: string | number | null | undefined): string
     return Number.isFinite(numeric) ? READING_FORMAT.format(numeric) : String(value);
 };
 
+/**
+ * Flattens a form field's validation errors into one line.
+ *
+ * The filter used to narrow to `string | number`, which made the branch that
+ * reads `.message` unreachable — and that is the branch Zod's errors actually
+ * take, since they arrive as objects. Narrowing only away from null keeps all
+ * three shapes reachable.
+ */
 export const getErrorMessage = (errors: unknown[], isTouched: boolean, isSubmitted: boolean): string => {
     if ((!isTouched && !isSubmitted) || !errors || errors.length === 0) return '';
-    
+
     return errors
-      .filter((error): error is string | number => error != null && error !== '')
+      .filter((error) => error != null && error !== '')
       .map((error) => {
         if (typeof error === 'string' || typeof error === 'number') return String(error);
-        if (error && typeof error === 'object' && 'message' in error) {
-          return String(error.message);
+        if (error !== null && typeof error === 'object' && 'message' in error) {
+          return String((error as { message: unknown }).message);
         }
         return String(error);
       })

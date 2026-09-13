@@ -30,7 +30,6 @@ export const LoginForm = () => {
       },
       onError: (error) => {
         const message = getApiErrorMessage(error);
-        console.log(error.message);
         toast.error('Login failed', {
           description: message,
         });

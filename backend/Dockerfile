@@ -1,6 +1,7 @@
-FROM php:8.5.1-fpm
-
-LABEL authors="jjmbe"
+# php:8.5.1-fpm was never published — the build failed at this line with
+# "manifest unknown". The 8.5 tag tracks the current patch release, so security
+# fixes arrive with a rebuild rather than needing this line edited.
+FROM php:8.5-fpm
 
 # 1. System dependencies
 RUN apt-get update && apt-get install -y \

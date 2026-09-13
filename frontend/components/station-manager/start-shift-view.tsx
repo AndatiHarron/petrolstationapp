@@ -45,7 +45,6 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
             },
             onError: (error) => {
                 const message = getApiErrorMessage(error);
-                console.log(error, message)
                 toast.error('Lock shift failed', {
                     description: message,
                 });
