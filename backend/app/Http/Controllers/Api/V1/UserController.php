@@ -17,7 +17,20 @@ class UserController extends Controller
     {
         Gate::authorize('viewAny', User::class);
 
-        $users = User::with(['organization', 'station'])->latest()->paginate(20);
+        // The organization scope already limits this to the caller's tenant.
+        // The platform owner's account is held out on top of that: it belongs
+        // to an organization like any other row, so without this it would show
+        // up to an administrator of that one organization.
+        $users = User::with(['organization', 'station'])
+            ->unless(
+                $request->user()?->hasRole('super-admin'),
+                fn ($query) => $query->whereDoesntHave(
+                    'roles',
+                    fn ($roles) => $roles->where('name', 'super-admin')
+                )
+            )
+            ->latest()
+            ->paginate(20);
 
         return UserResource::collection($users);
     }

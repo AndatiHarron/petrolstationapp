@@ -45,7 +45,12 @@ class UserResource extends Resource
             $query->where('organization_id', auth()->user()->organization_id);
         }
 
-        return $query;
+        // Held out of every tenant's list, including that of the organization
+        // the owner's own account nominally belongs to.
+        return $query->whereDoesntHave(
+            'roles',
+            fn ($roles) => $roles->where('name', 'super-admin')
+        );
     }
 
     public static function form(Form|Schema $schema): Schema
