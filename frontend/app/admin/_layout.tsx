@@ -4,6 +4,11 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '@/components/top-bar';
+import {
+    GlassTabBarBackground,
+    glassTabBarLabelStyle,
+    glassTabBarStyle,
+} from '@/components/glass-tab-bar';
 
 /**
  * Three tabs, not seven.
@@ -24,22 +29,12 @@ export default function AdminLayout() {
             <Tabs
                 screenOptions={{
                     header: ({ options }) => <TopBar title={options.title ?? 'Admin'} />,
-                    tabBarStyle: {
-                        backgroundColor: '#ffffff',
-                        borderTopColor: '#e6e6ee',
-                        // Clear Android's on-screen navigation buttons. The bar sat
-                        // underneath them because a fixed height overrode React
-                        // Navigation's safe-area handling.
-                        height: 58 + insets.bottom,
-                        paddingTop: 6,
-                        paddingBottom: Math.max(insets.bottom, 10),
-                    },
+                    // Floating glass: the bar sits clear of Android's on-screen
+                    // navigation buttons and the page scrolls under it.
+                    tabBarStyle: glassTabBarStyle(insets),
+                    tabBarBackground: () => <GlassTabBarBackground />,
                     // Three tabs leave room for a readable label.
-                    tabBarLabelStyle: {
-                        fontSize: 11,
-                        fontWeight: '600',
-                        marginTop: 2,
-                    },
+                    tabBarLabelStyle: glassTabBarLabelStyle,
                     tabBarActiveTintColor: '#040273',
                     tabBarInactiveTintColor: '#8b8b99',
                 }}

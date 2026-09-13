@@ -22,6 +22,7 @@ import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
 import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
+import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
 
 // Utility to format date as YYYY-MM-DD
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
@@ -343,7 +344,7 @@ export default function LiftingsScreen() {
                                 />
                             ) : null
                         )}
-                        contentContainerStyle={{ paddingBottom: 20 }}
+                        contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
                     />
                 )}
             </View>

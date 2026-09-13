@@ -14,6 +14,7 @@ import { PaginationControls } from '../../components/pagination-controls';
 import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
 import { RecordPaymentModal } from '../../components/station-manager/record-payment-modal';
+import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
 
 // Custom fetch function for paginated customers
 const fetchCustomers = async (page: number): Promise<CustomersIndex200> => {
@@ -306,7 +307,7 @@ export default function CustomersScreen() {
                                 />
                             ) : null
                         )}
-                        contentContainerStyle={{ paddingBottom: 20 }}
+                        contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
                     />
                 )}
             </View>

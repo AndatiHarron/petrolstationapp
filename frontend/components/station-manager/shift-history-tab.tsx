@@ -39,6 +39,7 @@ import {
     getEditRequestsIndexQueryKey,
     useEditRequestsStore,
 } from '@/features/api/edit-request/edit-request';
+import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
 
 // ── Memoised list item (list-performance-item-memo) ──
 const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress: (item: ShiftResource) => void }) => {
@@ -283,7 +284,7 @@ export function ShiftHistoryTab() {
                                 />
                             ) : null
                         )}
-                        contentContainerStyle={{ paddingBottom: 20 }}
+                        contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
                     />
                 )}
             </View>

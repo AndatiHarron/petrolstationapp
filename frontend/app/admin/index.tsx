@@ -14,6 +14,7 @@ import { InventoryReports } from '../../components/admin/reports/inventory-repor
 import { ReportFilterBar } from '../../components/admin/reports/report-filter-bar';
 import { CustomerStatementModal } from '../../components/admin/reports/customer-statement-modal';
 import { resolvePeriod, type ReportFilters } from '@/features/reports';
+import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
 
 export default function AdminDashboard() {
     const queryClient = useQueryClient();
@@ -47,7 +48,7 @@ export default function AdminDashboard() {
                     contentContainerStyle={{
                         paddingHorizontal: 16,
                         paddingTop: 16,
-                        paddingBottom: 44,
+                        paddingBottom: TAB_BAR_CLEARANCE,
                         gap: 12,
                     }}
                     showsVerticalScrollIndicator={false}

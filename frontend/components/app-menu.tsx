@@ -8,7 +8,10 @@ import {
     Animated,
     Dimensions,
     Easing,
+    Platform,
+    StyleSheet,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter, usePathname } from 'expo-router';
 import {
@@ -41,6 +44,23 @@ const ON_BRAND = {
     chip: 'rgba(255,255,255,0.16)',
     hairline: 'rgba(255,255,255,0.18)',
     subdued: 'rgba(255,255,255,0.72)',
+};
+
+/**
+ * The frosted panel.
+ *
+ * Android's blur is weaker — and inside a native Modal it cannot sample the
+ * window behind it at all — so the white wash does most of the work there and
+ * the page still shows through it. iOS gets a thinner wash over a real blur.
+ * Either way the navy tinge keeps the glass tied to the brand rather than
+ * reading as generic frosted chrome.
+ */
+const GLASS = {
+    white: Platform.OS === 'ios' ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.88)',
+    tinge: 'rgba(4,2,115,0.05)',
+    header: Platform.OS === 'ios' ? 'rgba(4,2,115,0.86)' : 'rgba(4,2,115,0.94)',
+    footer: 'rgba(247,247,250,0.72)',
+    scrim: 'rgba(4,2,115,0.32)',
 };
 
 interface Destination {
@@ -184,11 +204,25 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                             },
                         ],
                     }}
-                    className="h-full bg-surface"
+                    className="h-full"
                 >
+                    {/* Glass, painted behind the panel's content. The blur is
+                        the bottom layer so it has the page to sample. */}
+                    <BlurView
+                        intensity={Platform.OS === 'ios' ? 45 : 30}
+                        tint="light"
+                        experimentalBlurMethod="dimezisBlurView"
+                        style={StyleSheet.absoluteFill}
+                    />
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: GLASS.white }]} />
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: GLASS.tinge }]} />
+
                     {/* The identity block carries the brand colour, so the drawer
                         opens with who you are rather than a white strip. */}
-                    <View style={{ paddingTop: insets.top + 16 }} className="bg-brand px-5 pb-5">
+                    <View
+                        style={{ paddingTop: insets.top + 16, backgroundColor: GLASS.header }}
+                        className="px-5 pb-5"
+                    >
                         <View className="flex-row items-start justify-between gap-3">
                             <Avatar name={name} size={48} inverted />
                             <Pressable
@@ -322,8 +356,8 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                     </ScrollView>
 
                     <View
-                        style={{ paddingBottom: insets.bottom + 12 }}
-                        className="flex-row items-center gap-3 border-t border-surface-border bg-surface-sunken px-4 pt-3"
+                        style={{ paddingBottom: insets.bottom + 12, backgroundColor: GLASS.footer }}
+                        className="flex-row items-center gap-3 border-t border-surface-border px-4 pt-3"
                     >
                         <View className="min-w-0 flex-1">
                             <Text className="text-ink text-[11px] font-bold">
@@ -337,15 +371,23 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                     </View>
                 </Animated.View>
 
-                {/* Tapping the exposed page closes the drawer. */}
+                {/* Tapping the exposed page closes the drawer. The scrim is navy
+                    rather than black so the whole overlay reads as one material. */}
                 <Animated.View
                     style={{
                         flex: 1,
                         opacity: slide.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }),
                     }}
                 >
+                    <BlurView
+                        intensity={Platform.OS === 'ios' ? 12 : 8}
+                        tint="dark"
+                        experimentalBlurMethod="dimezisBlurView"
+                        style={StyleSheet.absoluteFill}
+                    />
                     <Pressable
-                        className="h-full w-full bg-black/40"
+                        style={{ backgroundColor: GLASS.scrim }}
+                        className="h-full w-full"
                         onPress={onClose}
                         accessibilityLabel="Close menu"
                     />

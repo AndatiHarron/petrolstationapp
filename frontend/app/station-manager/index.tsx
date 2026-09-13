@@ -9,6 +9,7 @@ import { CustomersSection } from '../../components/station-manager/customers-sec
 import { ProductsSection } from '../../components/station-manager/products-section';
 import { ShiftSection } from '../../components/station-manager/shift-section';
 import { TanksSection } from '../../components/station-manager/tanks-section';
+import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
 
 export default function StationManagerDashboard() {
     const [creditModalVisible, setCreditModalVisible] = useState(false);
@@ -25,7 +26,7 @@ export default function StationManagerDashboard() {
                 <ScrollView
                     className="flex-1"
                     contentContainerClassName="px-4"
-                    contentContainerStyle={{ paddingBottom: 40 }}
+                    contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Shift Section with header - fetches its own data */}
