@@ -30,6 +30,7 @@ import {
 import { Button } from '@/components/button';
 import { downloadAndShareInvoice } from '@/lib/invoice-download';
 import { fetchEvidenceAsDataUri } from '@/lib/evidence-image';
+import type { ReadingWithEvidence } from '@/lib/evidence-url';
 import { downloadAndShareEvidence } from '@/lib/evidence-download';
 import type { MeterReading } from '@/features/api/model';
 
@@ -44,7 +45,6 @@ const LITER_INTEGER_FORMATTER = new Intl.NumberFormat('en-US', { maximumFraction
 type EvidenceDisplayItem = {
     id: string;
     nozzleName: string;
-    evidencePath: string;
     uri: string;
 };
 
@@ -193,13 +193,14 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
     const readingsWithEvidence = useMemo(() => {
         const readings = shift?.readings ?? [];
         return readings.filter(
-            (r): r is MeterReading & { nozzle?: { name?: string } } => !!r.evidence_path,
+            (r): r is ReadingWithEvidence & { nozzle?: { name?: string } } =>
+                !!(r as ReadingWithEvidence).evidence_url,
         );
     }, [shift?.readings]);
 
     const evidenceFetchKey = useMemo(() => {
         return readingsWithEvidence
-            .map((r) => `${r.id}:${r.evidence_path ?? ''}:${r.nozzle_id}`)
+            .map((r) => `${r.id}:${r.nozzle_id}`)
             .join('|');
     }, [readingsWithEvidence]);
 
@@ -220,8 +221,7 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
         (async () => {
             const resolved = await Promise.all(
                 readingsWithEvidence.map(async (r) => {
-                    if (!r.evidence_path) return null;
-                    const uri = await fetchEvidenceAsDataUri(r.evidence_path);
+                    const uri = await fetchEvidenceAsDataUri(r);
                     if (!uri) return null;
                     const nozzleName =
                         (r as MeterReading & { nozzle?: { name?: string } }).nozzle?.name ??
@@ -229,7 +229,6 @@ export const ShiftDetailModal = memo(function ShiftDetailModal({
                     return {
                         id: r.id,
                         nozzleName,
-                        evidencePath: r.evidence_path,
                         uri,
                     } satisfies EvidenceDisplayItem;
                 }),

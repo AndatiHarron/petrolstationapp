@@ -12,6 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Behind a hosting platform's load balancer, TLS is terminated before
+        // the request reaches PHP — so without this Laravel sees plain HTTP.
+        // It would then generate http:// URLs and, with
+        // SESSION_SECURE_COOKIE=true, decline to send the session cookie back,
+        // which shows up as an endless redirect loop on the /admin login.
+        // The proxy is the platform's own and its address is not fixed, hence '*'.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'organization.active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
         ]);

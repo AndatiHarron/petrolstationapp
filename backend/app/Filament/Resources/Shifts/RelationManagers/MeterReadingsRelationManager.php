@@ -39,9 +39,11 @@ class MeterReadingsRelationManager extends RelationManager
                 TextColumn::make('nozzle.name')
                     ->label('Nozzle'),
 
-                ImageColumn::make('evidence_path')
+                // The model's signed link, rather than a path resolved against
+                // a hardcoded local disk — which showed broken images as soon
+                // as evidence moved to object storage.
+                ImageColumn::make('evidence_url')
                 ->label('Proof')
-                ->disk('public')
                 ->circular(),
 
                 TextColumn::make('opening_reading'),

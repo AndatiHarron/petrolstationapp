@@ -33,21 +33,38 @@ class SuperAdminSeeder extends Seeder
             'guard_name' => 'web',
         ]);
 
-        $user = User::updateOrCreate(
-            ['email' => $email],
-            [
-                'name' => 'System Administrator',
-                'password' => Hash::make($rawPassword),
-                'organization_id' => $org->id,
-                'station_id' => null,
-                'email_verified_at' => now(),
-            ]);
+        $existing = User::withoutGlobalScopes()->where('email', $email)->first();
 
+        // The password is set only when the account is created. This runs on
+        // every deploy, and resetting the password each time would undo any
+        // change made since — silently locking the owner out of their own
+        // system with a value from an old environment variable.
+        $user = $existing ?? new User(['email' => $email]);
+
+        $user->fill([
+            'name' => $existing?->name ?? 'System Administrator',
+            'organization_id' => $org->id,
+            'station_id' => null,
+            'email_verified_at' => $existing?->email_verified_at ?? now(),
+        ]);
+
+        if (! $existing) {
+            $user->password = Hash::make($rawPassword);
+        }
+
+        $user->save();
         $user->assignRole($role);
 
         $this->command->info('--------------------------------------');
-        $this->command->info('✅ Super Admin Configured');
+        $this->command->info($existing ? '✅ Super Admin Present' : '✅ Super Admin Created');
         $this->command->info('   Email:    '.$email);
+
+        if ($existing) {
+            $this->command->info('   Password: [unchanged]');
+            $this->command->info('--------------------------------------');
+
+            return;
+        }
 
         // Read from config, not env(): once `config:cache` has run — which it does on
         // every deploy — env() returns null, and this branch would print the real

@@ -18,6 +18,11 @@
         </include>
     </source>
     <php>
+        <!-- The AWS SDK the S3 filesystem driver needs is a large package, and
+             registering the service providers now exceeds PHP's stock 128M
+             during test bootstrap. Set here rather than in php.ini so the suite
+             runs the same way on a developer's machine and in CI. -->
+        <ini name="memory_limit" value="512M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

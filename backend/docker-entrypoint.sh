@@ -17,6 +17,24 @@ fi
 echo "==> Running migrations"
 php artisan migrate --force
 
+# Roles and permissions are not optional data — no account can be an admin, a
+# manager or an owner without them, so a database that has them missing is a
+# database nobody can log in to. The seeder is written to be safe to run again,
+# so this runs on every boot rather than being a step someone has to remember.
+echo "==> Seeding roles and permissions"
+php artisan db:seed --class=RolesAndPermissionsSeeder --force
+
+# The first owner, so a fresh deployment is reachable. Skipped unless both are
+# set, and the seeder never changes the password of an account that already
+# exists — so a redeploy cannot undo a password you have since changed.
+if [ -n "${SUPER_ADMIN_EMAIL}" ] && [ -n "${SUPER_ADMIN_PASSWORD}" ]; then
+  echo "==> Ensuring the platform owner account exists"
+  php artisan db:seed --class=SuperAdminSeeder --force
+else
+  echo "NOTE: SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD not set, so no owner" >&2
+  echo "      account is created. Set both to be able to sign in." >&2
+fi
+
 # Rebuild caches from the environment that is actually present at runtime.
 # Baking these into the image would freeze build-time config into the container.
 echo "==> Caching configuration, routes, views and events"

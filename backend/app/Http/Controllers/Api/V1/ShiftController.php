@@ -130,7 +130,12 @@ class ShiftController extends Controller
 
                 if ($request->hasFile("meters.{$index}.evidence")) {
                     $file = $request->file("meters.{$index}.evidence");
-                    $evidencePath = $file->store('meter-evidence', 'public');
+
+                    // The configured default disk, not a hardcoded 'public'.
+                    // Naming the local disk here meant FILESYSTEM_DISK was
+                    // ignored, so evidence went to the container's own
+                    // filesystem and was destroyed on the next deployment.
+                    $evidencePath = $file->store('meter-evidence');
                 }
 
                 $formattedMeters[] = [

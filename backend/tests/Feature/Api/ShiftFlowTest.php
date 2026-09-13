@@ -23,7 +23,12 @@ beforeEach(function () {
 });
 
 test('full shift lifecycle with perfect math and image evidence', function () {
-    Storage::fake('public');
+    // A disk that is deliberately not 'public'. The upload used to name that
+    // disk outright, so this asserted a hardcoded destination; pointing the
+    // default somewhere else proves FILESYSTEM_DISK is now honoured, which is
+    // what makes the photos survive a redeployment in production.
+    Storage::fake('evidence-store');
+    config()->set('filesystems.default', 'evidence-store');
 
     $user = User::where('email', 'manager@octane.com')->first();
     actingAs($user);
@@ -71,7 +76,10 @@ test('full shift lifecycle with perfect math and image evidence', function () {
     $evidencePath = $lockResponse->json('data.readings.0.evidence_path');
     expect($evidencePath)->not->toBeNull();
 
-    Storage::disk('public')->assertExists($evidencePath);
+    Storage::disk('evidence-store')->assertExists($evidencePath);
+
+    // And the reading comes back with a link rather than only a path.
+    expect($lockResponse->json('data.readings.0'))->toHaveKey('evidence_url');
 });
 
 test('detects theft variance', function () {

@@ -91,10 +91,16 @@ class ShiftReconciliationService
             $evidenceHash = null;
 
             if ($evidencePath) {
-                $fullPath = Storage::disk('public')->path($evidencePath);
+                // Read the bytes through the filesystem rather than resolving a
+                // path on disk. ->path() exists only on the local driver, so on
+                // object storage the previous version threw — and this check is
+                // the duplicate-photo integrity guard, so losing it would let a
+                // photo be reused across shifts. md5 of the same bytes gives the
+                // same hash md5_file did, so existing hashes still match.
+                $disk = Storage::disk();
 
-                if (file_exists($fullPath)) {
-                    $evidenceHash = md5_file($fullPath);
+                if ($disk->exists($evidencePath)) {
+                    $evidenceHash = md5($disk->get($evidencePath));
 
                     $is_duplicate = MeterReading::where('evidence_hash', $evidenceHash)
                         ->where('shift_id', '!=', $shift->id)
