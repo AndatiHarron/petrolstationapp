@@ -15,9 +15,14 @@ import { useSafeAreaInsets, type EdgeInsets } from 'react-native-safe-area-conte
  * blurring nothing but its own backing. The tints go on top of the blur.
  */
 
-const BAR_HEIGHT = 68;
+// Sized to its contents and nothing more: 6 + icon 20 + 1 + line 12 + 6 = 45,
+// with the remainder as slack so nothing clips.
+const BAR_HEIGHT = 54;
 const SIDE_INSET = 14;
-const RADIUS = 26;
+const RADIUS = 22;
+
+/** Icons, kept in step with the bar's height. */
+export const TAB_ICON_SIZE = 20;
 
 /** The gap between the top of the bar and the last row of a page. */
 const BREATHING_ROOM = 20;
@@ -45,6 +50,7 @@ const BLUR_INTENSITY = Platform.OS === 'ios' ? 70 : 65;
 const BRAND_TINGE = 'rgba(4,2,115,0.08)';
 const EDGE_LIGHT = 'rgba(255,255,255,0.85)';
 const EDGE_SHADE = 'rgba(4,2,115,0.14)';
+const NOTCH = 'rgba(4,2,115,0.22)';
 
 export function GlassTabBarBackground() {
     return (
@@ -68,6 +74,8 @@ export function GlassTabBarBackground() {
                     borderColor: EDGE_SHADE,
                 }}
             />
+            {/* The lit edge breaks either side of the notch rather than running
+                behind it, so the notch reads as part of the bar's lip. */}
             <View
                 style={{
                     position: 'absolute',
@@ -76,6 +84,20 @@ export function GlassTabBarBackground() {
                     right: RADIUS * 0.6,
                     height: 1,
                     backgroundColor: EDGE_LIGHT,
+                }}
+            />
+
+            {/* A small notch centred on the top edge — the one piece of detail
+                that stops a floating bar reading as a plain rounded slab. */}
+            <View
+                style={{
+                    position: 'absolute',
+                    top: 3,
+                    alignSelf: 'center',
+                    width: 34,
+                    height: 3,
+                    borderRadius: 2,
+                    backgroundColor: NOTCH,
                 }}
             />
         </View>
@@ -93,8 +115,9 @@ export function glassTabBarStyle(insets: EdgeInsets): ViewStyle {
         right: SIDE_INSET,
         bottom: Math.max(insets.bottom, 10),
         height: BAR_HEIGHT,
-        paddingTop: 9,
-        paddingBottom: 9,
+        // Asymmetric on purpose: the extra at the top is the notch's clearance.
+        paddingTop: 10,
+        paddingBottom: 5,
         borderRadius: RADIUS,
         borderTopWidth: 0,
         backgroundColor: 'transparent',
@@ -125,9 +148,9 @@ export function glassTabBarStyle(insets: EdgeInsets): ViewStyle {
  */
 export const glassTabBarLabelStyle = {
     fontSize: 10,
-    lineHeight: 14,
+    lineHeight: 12,
     fontWeight: '600' as const,
-    marginTop: 3,
+    marginTop: 1,
     paddingHorizontal: 0,
 };
 

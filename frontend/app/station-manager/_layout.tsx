@@ -10,6 +10,7 @@ import {
     glassTabBarItemStyle,
     glassTabBarLabelStyle,
     glassTabBarStyle,
+    TAB_ICON_SIZE,
 } from '@/components/glass-tab-bar';
 
 export default function StationManagerLayout() {
@@ -35,28 +36,28 @@ export default function StationManagerLayout() {
                     name="index"
                     options={{
                         title: 'Dashboard',
-                        tabBarIcon: ({ color }) => <LayoutDashboard size={22} color={color} />,
+                        tabBarIcon: ({ color }) => <LayoutDashboard size={TAB_ICON_SIZE} color={color} />,
                     }}
                 />
                 <Tabs.Screen
                     name="customers"
                     options={{
                         title: 'Customers',
-                        tabBarIcon: ({ color }) => <Users size={22} color={color} />,
+                        tabBarIcon: ({ color }) => <Users size={TAB_ICON_SIZE} color={color} />,
                     }}
                 />
                 <Tabs.Screen
                     name="liftings"
                     options={{
                         title: 'Offloading',
-                        tabBarIcon: ({ color }) => <Droplets size={22} color={color} />,
+                        tabBarIcon: ({ color }) => <Droplets size={TAB_ICON_SIZE} color={color} />,
                     }}
                 />
                 <Tabs.Screen
                     name="shifts"
                     options={{
                         title: 'Shifts',
-                        tabBarIcon: ({ color }) => <Clock size={22} color={color} />,
+                        tabBarIcon: ({ color }) => <Clock size={TAB_ICON_SIZE} color={color} />,
                     }}
                 />
             </Tabs>

@@ -89,7 +89,7 @@ const DESTINATIONS: Destination[] = [
     { href: '/admin', label: 'Dashboard', hint: 'Stock and prices', Icon: LayoutDashboard, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
     { href: '/admin/finance', label: 'Finance', hint: 'Shifts and credit', Icon: Banknote, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
     { href: '/admin/reports', label: 'Reports', hint: 'End of day, monthly', Icon: FileText, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
-    { href: '/admin/inventory', label: 'Stock', hint: 'Deliveries and tanks', Icon: Package, roles: ['admin', 'super-admin'] },
+    { href: '/admin/inventory', label: 'Stock', hint: 'Deliveries and tanks', Icon: Package, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
     { href: '/admin/requests', label: 'Edit requests', hint: 'Approve corrections', Icon: ClipboardList, roles: ['admin', 'super-admin'] },
     { href: '/admin/infrastructure', label: 'Setup', hint: 'Stations and pumps', Icon: Building2, roles: ['admin', 'super-admin'] },
     { href: '/admin/system', label: 'System', hint: 'Users and audit log', Icon: Settings, roles: ['admin', 'super-admin'] },
