@@ -6,6 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Image, InteractionManager, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, SlideInDown, SlideOutDown } from 'react-native-reanimated';
+import { formatReading } from '@/lib/utils';
 
 interface ClosingNozzle {
     id: string;
@@ -314,9 +315,24 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                                 ) : null}
                                 {closingData.nozzles.map((nozzle, index) => (
                                     <View key={`${nozzle.nozzle_id}-${index}`} className="mb-6 bg-surface-sunken p-4 rounded-xl border border-surface-border gap-3">
-                                        <View className="flex-row justify-between mb-1">
-                                            <Text className="text-ink font-bold">{nozzle.pump_name}</Text>
-                                            <Text className="text-ink-muted text-xs">Prev: {nozzle.opening_reading}</Text>
+                                        {/* The name takes what is left after the reading,
+                                            and truncates rather than pushing the figure
+                                            off the card. */}
+                                        <View className="mb-1 flex-row items-center justify-between gap-2">
+                                            <Text
+                                                className="text-ink min-w-0 flex-1 font-bold"
+                                                numberOfLines={1}
+                                            >
+                                                {nozzle.pump_name}
+                                            </Text>
+                                            <View className="shrink-0 rounded-full bg-surface px-2.5 py-1">
+                                                <Text
+                                                    className="text-ink-muted font-mono text-[10px] font-bold"
+                                                    numberOfLines={1}
+                                                >
+                                                    PREV {formatReading(nozzle.opening_reading)}
+                                                </Text>
+                                            </View>
                                         </View>
                                         <View className="flex-row items-center bg-surface-sunken border border-surface-border rounded-lg overflow-hidden h-12">
                                             <View className="pl-3 pr-2 h-full justify-center border-r border-surface-border bg-surface/30">
