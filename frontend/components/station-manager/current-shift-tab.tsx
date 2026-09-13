@@ -29,9 +29,11 @@ import {
     invalidateOnShiftLock,
     invalidateOnShiftStart,
 } from '@/lib/query-invalidations';
-import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 export function CurrentShiftTab() {
+    const tabBarClearance = useTabBarClearance();
+
     const queryClient = useQueryClient();
     const [lockModalVisible, setLockModalVisible] = React.useState(false);
 
@@ -106,7 +108,7 @@ export function CurrentShiftTab() {
         <>
             <ScrollView
                 className="flex-1"
-                contentContainerStyle={{ padding: 16, paddingBottom: TAB_BAR_CLEARANCE, gap: 16 }}
+                contentContainerStyle={{ padding: 16, paddingBottom: tabBarClearance, gap: 16 }}
                 showsVerticalScrollIndicator={false}
             >
                 <Text className="text-ink-muted text-sm">

@@ -14,7 +14,7 @@ import { PaginationControls } from '../../components/pagination-controls';
 import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
 import { RecordPaymentModal } from '../../components/station-manager/record-payment-modal';
-import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 // Custom fetch function for paginated customers
 const fetchCustomers = async (page: number): Promise<CustomersIndex200> => {
@@ -60,6 +60,8 @@ const CustomerItem = ({ item, onPress }: { item: CustomersIndex200['data'][numbe
 };
 
 export default function CustomersScreen() {
+    const tabBarClearance = useTabBarClearance();
+
     const queryClient = useQueryClient();
     const [page, setPage] = useState(1);
 
@@ -307,7 +309,7 @@ export default function CustomersScreen() {
                                 />
                             ) : null
                         )}
-                        contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
+                        contentContainerStyle={{ paddingBottom: tabBarClearance }}
                     />
                 )}
             </View>

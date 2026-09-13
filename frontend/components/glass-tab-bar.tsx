@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Platform, type ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
-import type { EdgeInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, type EdgeInsets } from 'react-native-safe-area-context';
 
 /**
  * The floating glass bottom bar.
@@ -19,18 +19,32 @@ const BAR_HEIGHT = 68;
 const SIDE_INSET = 14;
 const RADIUS = 26;
 
-/** How much room a scrolling screen must leave so its last row clears the bar. */
-export const TAB_BAR_CLEARANCE = BAR_HEIGHT + 26;
+/** The gap between the top of the bar and the last row of a page. */
+const BREATHING_ROOM = 20;
+
+/**
+ * How much room a scrolling screen must leave so its last row clears the bar.
+ *
+ * This has to be measured, not guessed. The bar floats *above* the safe-area
+ * inset, so its top edge is that inset plus its own height off the bottom of
+ * the screen — on a phone with three-button navigation that is around 116px,
+ * where a flat constant of 94 left the last card tucked under the glass.
+ */
+export function useTabBarClearance(): number {
+    const insets = useSafeAreaInsets();
+
+    return Math.max(insets.bottom, 10) + BAR_HEIGHT + BREATHING_ROOM;
+}
 
 // The wash is what you actually see; too much of it and the bar is just a white
 // rectangle with rounded corners. It is kept light enough that the page reads
 // through it, and the blur — turned up to compensate — keeps the text on it
 // legible against whatever scrolls past underneath.
-const GLASS_WHITE = Platform.OS === 'ios' ? 'rgba(255,255,255,0.34)' : 'rgba(255,255,255,0.52)';
-const BLUR_INTENSITY = Platform.OS === 'ios' ? 60 : 55;
-const BRAND_TINGE = 'rgba(4,2,115,0.07)';
-const EDGE_LIGHT = 'rgba(255,255,255,0.80)';
-const EDGE_SHADE = 'rgba(4,2,115,0.12)';
+const GLASS_WHITE = Platform.OS === 'ios' ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.40)';
+const BLUR_INTENSITY = Platform.OS === 'ios' ? 70 : 65;
+const BRAND_TINGE = 'rgba(4,2,115,0.08)';
+const EDGE_LIGHT = 'rgba(255,255,255,0.85)';
+const EDGE_SHADE = 'rgba(4,2,115,0.14)';
 
 export function GlassTabBarBackground() {
     return (

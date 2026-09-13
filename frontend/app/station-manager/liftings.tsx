@@ -22,7 +22,7 @@ import { Button } from '../../components/button';
 import { PaginationControls } from '../../components/pagination-controls';
 import { SkeletonCard } from '../../components/station-manager/skeleton-card';
 import { api } from '../../lib/axios';
-import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 // Utility to format date as YYYY-MM-DD
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
@@ -75,6 +75,8 @@ const LiftingItem = ({ item, onPress }: { item: LiftingResource; onPress: (item:
 };
 
 export default function LiftingsScreen() {
+    const tabBarClearance = useTabBarClearance();
+
     const queryClient = useQueryClient();
     const [page, setPage] = useState(1);
 
@@ -344,7 +346,7 @@ export default function LiftingsScreen() {
                                 />
                             ) : null
                         )}
-                        contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
+                        contentContainerStyle={{ paddingBottom: tabBarClearance }}
                     />
                 )}
             </View>

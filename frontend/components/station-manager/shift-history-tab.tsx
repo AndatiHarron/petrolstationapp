@@ -39,7 +39,7 @@ import {
     getEditRequestsIndexQueryKey,
     useEditRequestsStore,
 } from '@/features/api/edit-request/edit-request';
-import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 import { formatReading } from '@/lib/utils';
 
 // ── Memoised list item (list-performance-item-memo) ──
@@ -81,6 +81,8 @@ const ShiftHistoryItem = memo(({ item, onPress }: { item: ShiftResource; onPress
 
 // ── Main component ──
 export function ShiftHistoryTab() {
+    const tabBarClearance = useTabBarClearance();
+
     const queryClient = useQueryClient();
     // ---- Data ----
     const [historyPage, setHistoryPage] = useState(1);
@@ -285,7 +287,7 @@ export function ShiftHistoryTab() {
                                 />
                             ) : null
                         )}
-                        contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
+                        contentContainerStyle={{ paddingBottom: tabBarClearance }}
                     />
                 )}
             </View>

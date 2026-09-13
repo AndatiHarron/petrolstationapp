@@ -26,7 +26,7 @@ import {
 } from '@/features/reports';
 import { downloadReportPdf, type ReportSlug } from '@/lib/report-download';
 import { getApiErrorMessage } from '@/lib/api-error';
-import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 const REPORTS: { slug: ReportSlug; label: string; chip: string; blurb: string }[] = [
     { slug: 'end-of-day', label: 'End of day', chip: 'Day', blurb: 'All shifts on one day, combined' },
@@ -37,6 +37,8 @@ const REPORTS: { slug: ReportSlug; label: string; chip: string; blurb: string }[
 ];
 
 export default function AdminReports() {
+    const tabBarClearance = useTabBarClearance();
+
     const [active, setActive] = useState<ReportSlug>('end-of-day');
     const [filters, setFilters] = useState<ReportFilters>(() => resolvePeriod('this_month'));
     const [downloading, setDownloading] = useState(false);
@@ -89,7 +91,7 @@ export default function AdminReports() {
             <SafeAreaView className="flex-1" edges={['left', 'right']}>
                 <ScrollView
                     className="flex-1 px-4"
-                    contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
+                    contentContainerStyle={{ paddingBottom: tabBarClearance }}
                     showsVerticalScrollIndicator={false}
                     refreshControl={
                         <RefreshControl

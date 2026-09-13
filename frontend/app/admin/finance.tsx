@@ -8,9 +8,11 @@ import { CreditorsList } from '@/components/admin/finance/creditors-list';
 import { SupplierPayments } from '@/components/admin/finance/supplier-payments';
 import { CreditSaleDetailModal } from '@/components/admin/finance/credit-sale-detail-modal';
 import { ShiftDetailModal } from '@/components/admin/finance/shift-detail-modal';
-import { TAB_BAR_CLEARANCE } from '@/components/glass-tab-bar';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 export default function FinanceTab() {
+    const tabBarClearance = useTabBarClearance();
+
     const [selectedCreditSaleId, setSelectedCreditSaleId] = useState<string | null>(null);
     const [selectedShiftId, setSelectedShiftId] = useState<string | null>(null);
 
@@ -36,7 +38,7 @@ export default function FinanceTab() {
             <SafeAreaView className="flex-1" edges={['left', 'right']}>
                 <ScrollView
                     className="flex-1 px-4"
-                    contentContainerStyle={{ paddingBottom: TAB_BAR_CLEARANCE }}
+                    contentContainerStyle={{ paddingBottom: tabBarClearance }}
                     showsVerticalScrollIndicator={false}
                 >
                     <View className="mb-6 mt-4">
