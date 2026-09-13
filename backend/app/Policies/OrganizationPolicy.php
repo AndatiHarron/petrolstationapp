@@ -36,7 +36,7 @@ class OrganizationPolicy
      */
     public function update(User $user, Organization $organization): bool
     {
-        return false;
+        return $user->hasRole('super-admin');
     }
 
     /**
@@ -44,7 +44,7 @@ class OrganizationPolicy
      */
     public function delete(User $user, Organization $organization): bool
     {
-        return false;
+        return $user->hasRole('super-admin');
     }
 
     /**

@@ -64,7 +64,7 @@ Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
     Route::apiResource('tanks', TankController::class);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('nozzles', NozzleController::class);
-    Route::apiResource('organizations', OrganizationController::class)->only(['index', 'store', 'show']);
+    Route::apiResource('organizations', OrganizationController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::apiResource('users', UserController::class)->only(['index', 'store', 'show']);
 
     // Credit Sales: index, create and show

@@ -90,10 +90,13 @@ const DESTINATIONS: Destination[] = [
     { href: '/admin/finance', label: 'Finance', hint: 'Shifts and credit', Icon: Banknote, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
     { href: '/admin/reports', label: 'Reports', hint: 'End of day, monthly', Icon: FileText, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
     { href: '/admin/inventory', label: 'Stock', hint: 'Deliveries and tanks', Icon: Package, roles: ['admin', 'super-admin'], bottomTabFor: ['admin', 'super-admin'] },
-    { href: '/admin/requests', label: 'Edit requests', hint: 'Approve corrections', Icon: ClipboardList, roles: ['admin', 'super-admin'] },
-    { href: '/admin/infrastructure', label: 'Setup', hint: 'Stations and pumps', Icon: Building2, roles: ['admin', 'super-admin'] },
-    { href: '/admin/system', label: 'System', hint: 'Users and audit log', Icon: Settings, roles: ['admin', 'super-admin'] },
+    { href: '/admin/requests', label: 'Edit requests', hint: 'Approve corrections', Icon: ClipboardList, roles: ['admin'] },
+    { href: '/admin/infrastructure', label: 'Setup', hint: 'Stations and pumps', Icon: Building2, roles: ['admin'] },
+    { href: '/admin/system', label: 'System', hint: 'Users and audit log', Icon: Settings, roles: ['admin'] },
     { href: '/super-admin', label: 'Organizations', hint: 'Tenants and admins', Icon: Users, roles: ['super-admin'] },
+    // Edit requests, Setup and System are deliberately admin-only. They act on
+    // one tenant's records, and the organization scope leaves a platform owner
+    // unscoped — so those screens would show every tenant's rows at once.
     { href: '/station-manager', label: 'My shift', hint: 'Open, run and close', Icon: LayoutDashboard, roles: ['manager'], bottomTabFor: ['manager'] },
     { href: '/station-manager/shifts', label: 'Shift history', hint: 'Past shifts', Icon: FileText, roles: ['manager'], bottomTabFor: ['manager'] },
     { href: '/station-manager/liftings', label: 'Offloading', hint: 'Record fuel received', Icon: Package, roles: ['manager'], bottomTabFor: ['manager'] },

@@ -13,11 +13,9 @@ interface ProductModalProps {
     visible: boolean;
     onClose: () => void;
     product?: ProductResource; // If provided, we're editing
-    /** Offered only when editing, and only where the caller can delete. */
-    onDelete?: (id: string) => void;
 }
 
-export function ProductModal({ visible, onClose, product, onDelete }: ProductModalProps) {
+export function ProductModal({ visible, onClose, product }: ProductModalProps) {
     const queryClient = useQueryClient();
     const isEditing = Boolean(product);
 
@@ -110,8 +108,6 @@ export function ProductModal({ visible, onClose, product, onDelete }: ProductMod
             onSubmit={handleSubmit}
             submitLabel={isEditing ? 'Save product' : 'Create product'}
             isPending={isPending}
-            onDelete={isEditing && onDelete && product ? () => onDelete(product.id) : undefined}
-            deleteLabel="Delete product"
         >
             <TextField
                 label="Product name"
