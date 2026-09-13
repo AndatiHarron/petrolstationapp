@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Pressable, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Edit2, Plus, Trash2, type LucideIcon } from 'lucide-react-native';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 /**
  * One card system for every Setup section.
@@ -288,6 +289,9 @@ export function EntityList<T>({
     emptyTitle,
     emptyHint,
 }: EntityListProps<T>) {
+    // The floating tab bar overlays this screen, so the list has to end above it.
+    const tabBarClearance = useTabBarClearance();
+
     if (isLoading) {
         return (
             <View className="flex-1">
@@ -311,7 +315,7 @@ export function EntityList<T>({
                     renderItem={({ item }) => renderItem(item)}
                     keyExtractor={keyExtractor}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 28 }}
+                    contentContainerStyle={{ paddingBottom: tabBarClearance }}
                     refreshControl={
                         <RefreshControl
                             refreshing={isRefetching}

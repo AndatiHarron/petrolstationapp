@@ -4,6 +4,7 @@ import { FlashList } from '@shopify/flash-list';
 import { Ionicons } from '@expo/vector-icons';
 import type { LiftingResource, LiftingsIndex200Meta, LiftingsIndex200Links } from '@/features/api/model';
 import { PaginationControls } from '../../pagination-controls';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 // ─── Skeleton Loader ───────────────────────────────────────────────
 function LiftingSkeleton() {
@@ -88,6 +89,8 @@ export function LiftingsList({
     onPressItem,
     onPageChange,
 }: LiftingsListProps) {
+    const tabBarClearance = useTabBarClearance();
+
     if (isLoading) {
         return (
             <View className="px-4 pt-4">
@@ -126,7 +129,7 @@ export function LiftingsList({
                         />
                     ) : null
                 }
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom: tabBarClearance }}
             />
         </View>
     );

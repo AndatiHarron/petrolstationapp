@@ -6,6 +6,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuditLogIndex, useAuditLogShow } from '../../features/api/audit-log/audit-log';
 import type { AuditLogIndex200, AuditLogResource } from '@/features/api/model';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 
 // Skeleton loader for a single audit log row
@@ -84,6 +85,8 @@ const AuditLogItem = React.memo(({
 });
 
 export default function SystemTab() {
+
+    const tabBarClearance = useTabBarClearance();
 
     const { data: auditLogsResponse, isLoading, refetch } = useAuditLogIndex();
     const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
@@ -226,7 +229,7 @@ export default function SystemTab() {
                                     </Text>
                                 </View>
                             )}
-                            contentContainerStyle={{ paddingBottom: 20 }}
+                            contentContainerStyle={{ paddingBottom: tabBarClearance }}
                         />
                     )}
                 </View>

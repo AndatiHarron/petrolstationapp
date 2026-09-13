@@ -28,6 +28,7 @@ import type {
     EditRequestsIndex200,
     UpdateEditRequestRequest,
 } from '@/features/api/model';
+import { useTabBarClearance } from '@/components/glass-tab-bar';
 
 type FilterStatus = 'all' | 'pending' | 'approved' | 'rejected';
 
@@ -132,6 +133,8 @@ const DataDiff = ({ label, original, requested }: { label: string; original: any
 };
 
 export default function AdminRequestsScreen() {
+    const tabBarClearance = useTabBarClearance();
+
     const queryClient = useQueryClient();
     const [selectedRequest, setSelectedRequest] = useState<EditRequestResource | null>(null);
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
@@ -264,7 +267,7 @@ export default function AdminRequestsScreen() {
                                 </Text>
                             </View>
                         }
-                        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+                        contentContainerStyle={{ padding: 16, paddingBottom: tabBarClearance }}
                         refreshControl={
                             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#fff" />
                         }
