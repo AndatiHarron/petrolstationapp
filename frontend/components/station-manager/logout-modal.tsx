@@ -31,35 +31,40 @@ export function LogoutModal({ visible, onClose, onConfirm }: LogoutModalProps) {
             <View className="flex-1 justify-end bg-black/40">
                 <Pressable className="flex-1" onPress={onClose} accessibilityLabel="Dismiss" />
 
-                <View className="bg-surface rounded-t-3xl border-t border-surface-border p-8 pb-10">
-                    <View className="items-center mb-6">
-                        <View className="bg-accent-subtle w-16 h-16 rounded-full items-center justify-center mb-4">
-                            <Power size={32} color="#bf0a30" />
+                <View className="rounded-t-3xl border-t border-surface-border bg-surface px-5 pb-8 pt-6">
+                    <View className="mb-5 items-center">
+                        <View
+                            style={{ width: 44, height: 44, borderRadius: 15 }}
+                            className="mb-3 items-center justify-center bg-accent-subtle"
+                        >
+                            <Power size={20} color="#bf0a30" />
                         </View>
-                        <Text className="text-ink text-xl font-bold mb-2">Log Out?</Text>
-                        <Text className="text-ink-muted text-center leading-6 text-base px-4">
-                            Are you sure you want to end your session? You will be returned to the login screen.
+                        <Text className="text-ink text-[17px] font-bold">Log out?</Text>
+                        <Text className="text-ink-muted mt-1 text-center text-[12.5px] leading-[18px]">
+                            You will be returned to the login screen.
                         </Text>
                     </View>
 
-                    <View className="gap-3">
+                    <View className="gap-2.5">
                         <TouchableOpacity
                             onPress={onConfirm}
                             accessibilityRole="button"
                             accessibilityLabel="Confirm log out"
                             activeOpacity={0.8}
-                            className="w-full bg-accent py-4 rounded-2xl items-center"
+                            className="h-12 w-full items-center justify-center rounded-xl bg-accent"
                         >
-                            <Text className="text-white font-bold text-lg">Log Out</Text>
+                            <Text className="text-sm font-bold uppercase tracking-wider text-white">
+                                Log out
+                            </Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={onClose}
                             accessibilityRole="button"
                             activeOpacity={0.8}
-                            className="w-full bg-surface-sunken py-4 rounded-2xl items-center border border-surface-border"
+                            className="h-12 w-full items-center justify-center rounded-xl border border-surface-border bg-surface-sunken"
                         >
-                            <Text className="text-ink font-bold text-lg">Cancel</Text>
+                            <Text className="text-ink text-sm font-bold">Cancel</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

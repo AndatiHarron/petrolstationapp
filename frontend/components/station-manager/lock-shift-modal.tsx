@@ -278,15 +278,21 @@ export function LockShiftModal({ visible, onClose, onSubmit, activeShift }: Lock
                         className="bg-surface-sunken h-[92%] rounded-t-3xl border-t border-surface-border w-full flex overflow-hidden"
                     >
                     {/* Header */}
-                    <View className="px-6 py-4 border-b border-surface-border flex-row items-center justify-between bg-surface-sunken/90 z-10">
-                        <View>
-                            <Text className="text-ink text-xl font-bold">End Shift</Text>
-                            <Text className="text-ink-muted text-xs font-medium uppercase tracking-wider">
-                                Step {step} of 3: {step === 1 ? 'Meter Readings' : step === 2 ? 'Tank Dips' : 'Payments & Reconciliation'}
+                    <View className="z-10 flex-row items-center justify-between gap-3 border-b border-surface-border bg-surface-sunken/90 px-5 py-3.5">
+                        <View className="min-w-0 flex-1">
+                            <Text className="text-ink text-[17px] font-bold">End shift</Text>
+                            <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-widest" numberOfLines={1}>
+                                Step {step} of 3 · {step === 1 ? 'Meter readings' : step === 2 ? 'Tank dips' : 'Payments'}
                             </Text>
                         </View>
-                        <TouchableOpacity onPress={onClose} className="bg-surface p-2 rounded-full">
-                            <X size={20} color="#8b8b99" />
+                        <TouchableOpacity
+                            onPress={onClose}
+                            accessibilityRole="button"
+                            accessibilityLabel="Close"
+                            hitSlop={8}
+                            className="h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface active:opacity-60"
+                        >
+                            <X size={15} color="#5c5c6b" />
                         </TouchableOpacity>
                     </View>
 

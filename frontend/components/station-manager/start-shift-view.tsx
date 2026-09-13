@@ -73,60 +73,66 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
                 entering={FadeIn.duration(400)}
                 exiting={FadeOut.duration(200)}
                 layout={Layout.springify()}
-                className="bg-surface rounded-3xl p-6 mb-6 border border-surface-border w-full"
+                className="mb-4 w-full rounded-2xl border border-surface-border bg-surface p-4"
             >
-                <View className="flex-row items-center justify-between gap-3 mb-6">
+                <View className="mb-3 flex-row items-center justify-between gap-2">
                     {/* flex-1 + min-w-0 so a long station name ellipsises instead of
                         shoving the "Running" pill past the right edge of the card. */}
-                    <View className="flex-row items-center flex-1 min-w-0">
-                        <View className="bg-emerald-50 p-2.5 rounded-xl mr-3 shrink-0">
-                            <CircleCheck size={24} color="#059669" />
+                    <View className="min-w-0 flex-1 flex-row items-center gap-2.5">
+                        <View
+                            style={{ width: 36, height: 36, borderRadius: 12 }}
+                            className="shrink-0 items-center justify-center bg-emerald-50"
+                        >
+                            <CircleCheck size={17} color="#059669" />
                         </View>
-                        <View className="flex-1 min-w-0">
-                            <Text className="text-ink text-lg font-bold" numberOfLines={1}>Active Shift</Text>
-                            <Text className="text-ink-muted text-xs font-medium uppercase tracking-wider" numberOfLines={1}>
+                        <View className="min-w-0 flex-1">
+                            <Text className="text-ink text-[15px] font-bold" numberOfLines={1}>
+                                Active shift
+                            </Text>
+                            <Text className="text-ink-faint text-[10.5px]" numberOfLines={1}>
                                 {activeShift.station_name} • {new Date(activeShift.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </Text>
                         </View>
                     </View>
-                    <View className="bg-emerald-50 border border-emerald-600 px-3 py-1.5 rounded-full shrink-0">
-                        <Text className="text-emerald-700 text-xs font-bold uppercase tracking-wider">
+                    <View className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1">
+                        <Text className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
                             Running
                         </Text>
                     </View>
                 </View>
 
-                <View className="bg-surface-sunken rounded-xl p-4 border border-surface-border mb-6">
-                    <View className="flex-row justify-between items-center mb-2">
-                        <Text className="text-ink-muted text-xs font-medium uppercase">Shift ID</Text>
-                        <Text className="text-ink text-sm font-mono">{activeShift.id.slice(0, 8)}...</Text>
+                <View className="mb-3 gap-1.5 rounded-xl bg-surface-sunken px-3 py-2.5">
+                    <View className="flex-row items-center justify-between gap-2">
+                        <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-widest">
+                            Shift ID
+                        </Text>
+                        <Text className="text-ink shrink font-mono text-[11.5px]" numberOfLines={1}>
+                            {activeShift.id.slice(0, 8)}
+                        </Text>
                     </View>
-                    <View className="flex-row justify-between items-center">
-                        <Text className="text-ink-muted text-xs font-medium uppercase">Started</Text>
-                        <Text className="text-ink text-sm">{new Date(activeShift.started_at).toLocaleDateString()}</Text>
+                    <View className="flex-row items-center justify-between gap-2">
+                        <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-widest">
+                            Started
+                        </Text>
+                        <Text className="text-ink shrink text-[11.5px]" numberOfLines={1}>
+                            {new Date(activeShift.started_at).toLocaleDateString()}
+                        </Text>
                     </View>
                 </View>
 
                 <Pressable
                     onPress={() => setLockModalVisible(true)}
                     disabled={isLockShiftPending}
-                    className={`h-12 w-full flex-row items-center justify-center rounded-xl border border-accent/20 bg-accent-subtle active:bg-accent-subtle ${isLockShiftPending ? 'opacity-70' : ''}`}
+                    className={`h-12 w-full flex-row items-center justify-center gap-2 rounded-xl border border-accent/20 bg-accent-subtle active:opacity-70 ${isLockShiftPending ? 'opacity-70' : ''}`}
                 >
                     {isLockShiftPending ? (
-                        <>
-                            <ActivityIndicator size="small" color="#bf0a30" style={{ marginRight: 8 }} />
-                            <Text className="text-accent text-sm font-bold uppercase tracking-wider">
-                                Locking Shift...
-                            </Text>
-                        </>
+                        <ActivityIndicator size="small" color="#bf0a30" />
                     ) : (
-                        <>
-                            <CircleStop size={16} color="#bf0a30" style={{ marginRight: 8 }} />
-                            <Text className="text-accent text-sm font-bold uppercase tracking-wider">
-                                Stop & Lock Shift
-                            </Text>
-                        </>
+                        <CircleStop size={16} color="#bf0a30" />
                     )}
+                    <Text className="text-accent text-[13px] font-bold uppercase tracking-wider">
+                        {isLockShiftPending ? 'Locking shift' : 'Stop & lock shift'}
+                    </Text>
                 </Pressable>
 
                 <LockShiftModal
@@ -144,38 +150,29 @@ export function StartShiftView({ activeShift }: StartShiftViewProps) {
             entering={FadeIn.duration(400)}
             exiting={FadeOut.duration(200)}
             layout={Layout.springify()}
-            className="bg-surface rounded-3xl p-6 mb-6 border border-surface-border w-full items-center"
+            className="mb-4 w-full items-center rounded-2xl border border-surface-border bg-surface p-5"
         >
             <View
-                className="bg-brand-subtle p-6 rounded-full mb-6"
+                style={{ width: 52, height: 52, borderRadius: 18 }}
+                className="mb-3 items-center justify-center bg-brand-subtle"
             >
-                <Building2 size={48} color="#040273" />
+                <Building2 size={24} color="#040273" />
             </View>
 
-            <Text className="text-ink text-2xl font-black uppercase tracking-tight text-center mb-2">
-                No Active Shift
-            </Text>
-            <Text className="text-ink-muted text-sm text-center mb-6 font-medium max-w-[250px] leading-5">
-                Start a new shift to begin logging transactions and readings.
+            <Text className="text-ink text-[16px] font-bold">No active shift</Text>
+            <Text className="text-ink-muted mb-4 mt-1 max-w-[260px] text-center text-[12px] leading-[17px]">
+                Start one to begin logging readings and transactions.
             </Text>
 
             <Pressable
                 onPress={handleStart}
                 disabled={isCreateShiftPending}
-                className={`h-12 w-full flex-row items-center justify-center rounded-xl bg-brand active:opacity-80 ${isCreateShiftPending ? 'opacity-70' : ''}`}
+                className={`h-12 w-full flex-row items-center justify-center gap-2 rounded-xl bg-brand active:opacity-80 ${isCreateShiftPending ? 'opacity-70' : ''}`}
             >
-                {isCreateShiftPending ? (
-                    <Animated.View entering={FadeIn} className="flex-row items-center justify-center space-x-2 gap-2">
-                        <ActivityIndicator color="white" />
-                        <Text className="text-white text-lg font-bold uppercase tracking-wider">
-                            Starting Shift...
-                        </Text>
-                    </Animated.View>
-                ) : (
-                    <Text className="text-white text-lg font-bold uppercase tracking-wider">
-                        Start New Shift
-                    </Text>
-                )}
+                {isCreateShiftPending ? <ActivityIndicator size="small" color="#ffffff" /> : null}
+                <Text className="text-[13px] font-bold uppercase tracking-wider text-white">
+                    {isCreateShiftPending ? 'Starting shift' : 'Start new shift'}
+                </Text>
             </Pressable>
         </Animated.View>
     );
