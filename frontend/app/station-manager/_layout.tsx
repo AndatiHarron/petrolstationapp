@@ -7,6 +7,7 @@ import { ErrorBoundary } from '../../components/error-boundary';
 import { TopBar } from '@/components/top-bar';
 import {
     GlassTabBarBackground,
+    glassTabBarItemStyle,
     glassTabBarLabelStyle,
     glassTabBarStyle,
 } from '@/components/glass-tab-bar';
@@ -25,6 +26,7 @@ export default function StationManagerLayout() {
                     tabBarStyle: glassTabBarStyle(insets),
                     tabBarBackground: () => <GlassTabBarBackground />,
                     tabBarLabelStyle: glassTabBarLabelStyle,
+                    tabBarItemStyle: glassTabBarItemStyle,
                     tabBarActiveTintColor: '#040273',
                     tabBarInactiveTintColor: '#8b8b99',
                 }}

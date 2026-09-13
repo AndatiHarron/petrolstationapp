@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TopBar } from '@/components/top-bar';
 import {
     GlassTabBarBackground,
+    glassTabBarItemStyle,
     glassTabBarLabelStyle,
     glassTabBarStyle,
 } from '@/components/glass-tab-bar';
@@ -35,6 +36,7 @@ export default function AdminLayout() {
                     tabBarBackground: () => <GlassTabBarBackground />,
                     // Three tabs leave room for a readable label.
                     tabBarLabelStyle: glassTabBarLabelStyle,
+                    tabBarItemStyle: glassTabBarItemStyle,
                     tabBarActiveTintColor: '#040273',
                     tabBarInactiveTintColor: '#8b8b99',
                 }}

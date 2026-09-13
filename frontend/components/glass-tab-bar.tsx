@@ -15,26 +15,28 @@ import type { EdgeInsets } from 'react-native-safe-area-context';
  * blurring nothing but its own backing. The tints go on top of the blur.
  */
 
-const BAR_HEIGHT = 64;
+const BAR_HEIGHT = 68;
 const SIDE_INSET = 14;
 const RADIUS = 26;
 
 /** How much room a scrolling screen must leave so its last row clears the bar. */
 export const TAB_BAR_CLEARANCE = BAR_HEIGHT + 26;
 
-// Android's blur is weaker and, in Expo Go, can fall back to nothing at all, so
-// its white wash carries more of the work. iOS gets a thinner one and lets the
-// real blur show through.
-const GLASS_WHITE = Platform.OS === 'ios' ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.80)';
-const BRAND_TINGE = 'rgba(4,2,115,0.06)';
-const EDGE_LIGHT = 'rgba(255,255,255,0.70)';
-const EDGE_SHADE = 'rgba(4,2,115,0.10)';
+// The wash is what you actually see; too much of it and the bar is just a white
+// rectangle with rounded corners. It is kept light enough that the page reads
+// through it, and the blur — turned up to compensate — keeps the text on it
+// legible against whatever scrolls past underneath.
+const GLASS_WHITE = Platform.OS === 'ios' ? 'rgba(255,255,255,0.34)' : 'rgba(255,255,255,0.52)';
+const BLUR_INTENSITY = Platform.OS === 'ios' ? 60 : 55;
+const BRAND_TINGE = 'rgba(4,2,115,0.07)';
+const EDGE_LIGHT = 'rgba(255,255,255,0.80)';
+const EDGE_SHADE = 'rgba(4,2,115,0.12)';
 
 export function GlassTabBarBackground() {
     return (
         <View style={[StyleSheet.absoluteFill, { borderRadius: RADIUS, overflow: 'hidden' }]}>
             <BlurView
-                intensity={Platform.OS === 'ios' ? 40 : 30}
+                intensity={BLUR_INTENSITY}
                 tint="light"
                 experimentalBlurMethod="dimezisBlurView"
                 style={StyleSheet.absoluteFill}
@@ -77,8 +79,8 @@ export function glassTabBarStyle(insets: EdgeInsets): ViewStyle {
         right: SIDE_INSET,
         bottom: Math.max(insets.bottom, 10),
         height: BAR_HEIGHT,
-        paddingTop: 8,
-        paddingBottom: 8,
+        paddingTop: 9,
+        paddingBottom: 9,
         borderRadius: RADIUS,
         borderTopWidth: 0,
         backgroundColor: 'transparent',
@@ -98,8 +100,24 @@ export function glassTabBarStyle(insets: EdgeInsets): ViewStyle {
     };
 }
 
+/**
+ * Labels.
+ *
+ * An explicit lineHeight, because without one the descender on a "Dashboard"
+ * was clipped at the bottom of its line box. The size drops to 10 so the
+ * longest label — Offloading, across four tabs on a narrow phone — fits whole
+ * rather than ending in an ellipsis, and the item padding goes so each label
+ * gets the full width of its tab.
+ */
 export const glassTabBarLabelStyle = {
-    fontSize: 11,
+    fontSize: 10,
+    lineHeight: 14,
     fontWeight: '600' as const,
-    marginTop: 2,
+    marginTop: 3,
+    paddingHorizontal: 0,
+};
+
+export const glassTabBarItemStyle: ViewStyle = {
+    paddingHorizontal: 2,
+    paddingVertical: 0,
 };
