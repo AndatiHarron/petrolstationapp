@@ -81,6 +81,12 @@ class User extends Authenticatable implements FilamentUser
             return true;
         }
 
+        // A suspended tenant is shut out of the web panel as well as the API;
+        // otherwise suspension only half applies.
+        if ($this->organization && $this->organization->status !== 'active') {
+            return false;
+        }
+
         return $this->organization_id !== null && $this->hasAnyRole(['admin', 'manager']);
     }
 }

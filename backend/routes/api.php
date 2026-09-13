@@ -28,7 +28,27 @@ Route::post('/login', function (Request $request) {
     ]);
 
     if (Auth::attempt($credentials)) {
-        $token = Auth::user()->createToken('mobile_app')->plainTextToken;
+        $user = Auth::user();
+
+        // Refuse here rather than handing out a token that every subsequent
+        // request would reject: the person sees one clear reason instead of a
+        // dashboard that fails to load.
+        if (
+            ! $user->hasRole('super-admin')
+            && $user->organization
+            && $user->organization->status !== 'active'
+        ) {
+            Auth::guard('web')->logout();
+
+            return response()->json([
+                // A flag the client can branch on, so it never has to match
+                // on the wording of the message.
+                'error' => 'organization_suspended',
+                'message' => 'This organization has been suspended. Contact your provider.',
+            ], 403);
+        }
+
+        $token = $user->createToken('mobile_app')->plainTextToken;
 
         return response()->json(
             ['token' => $token]
@@ -38,7 +58,7 @@ Route::post('/login', function (Request $request) {
     return response()->json(['message' => 'Invalid credentials.'], 401);
 });
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum', 'organization.active'])->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
         return new UserResource($request->user());
     });

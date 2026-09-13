@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import * as SecureStore from 'expo-secure-store';
+import { toast } from 'sonner-native';
 import { queryClient } from '@/lib/queryClient';
-import { setApiAuthToken } from '@/lib/axios';
+import { setApiAuthToken, setSessionRejectedHandler } from '@/lib/axios';
 
 interface AuthState {
     token: string | null;
@@ -10,6 +11,8 @@ interface AuthState {
     // Actions
     login: (token: string) => Promise<void>;
     logout: () => Promise<void>;
+    /** Sign out because the server stopped honouring this session. */
+    endSession: (reason: string) => Promise<void>;
     checkSession: () => Promise<void>;
 }
 
@@ -45,6 +48,13 @@ export const useAuthStore = create<AuthState>((set) => ({
             // ignore persistence errors
         });
     },
+    endSession: async (reason) => {
+        // Say why before the authenticated screens unmount, or the person is
+        // returned to the login form with no explanation.
+        toast.error('Signed out', { description: reason });
+
+        await useAuthStore.getState().logout();
+    },
     checkSession: async () => {
         try {
             const token = await SecureStore.getItemAsync('auth_token');
@@ -62,3 +72,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         }
     },
 }));
+
+// The interceptor cannot import this store — the store imports the client for
+// its token — so the dependency is inverted with a registered handler.
+setSessionRejectedHandler((reason) => {
+    if (useAuthStore.getState().token) {
+        void useAuthStore.getState().endSession(reason);
+    }
+});

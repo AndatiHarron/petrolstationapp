@@ -13,6 +13,18 @@ export function getApiAuthToken() {
   return inMemoryAuthToken;
 }
 
+/**
+ * What to do when the server says this session may no longer be used.
+ *
+ * The auth store registers itself here rather than being imported, which would
+ * make a cycle — the store already imports this module for the token.
+ */
+let onSessionRejected: ((reason: string) => void) | null = null;
+
+export function setSessionRejectedHandler(handler: ((reason: string) => void) | null) {
+  onSessionRejected = handler;
+}
+
 export const api = axios.create({
   baseURL: BASE_URL,
   headers: {
@@ -32,6 +44,33 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
+
+/**
+ * End the session when the server has stopped honouring it.
+ *
+ * 401 means the token is no longer valid. A 403 is normally just "not allowed
+ * to do that" and must not sign anyone out — except when the whole tenant has
+ * been suspended, which the server marks with a flag so this does not have to
+ * match on prose. Without this, suspending a tenant left anyone already signed
+ * in looking at screens that silently failed to load.
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const data = error?.response?.data;
+
+    const tenantSuspended = status === 403 && data?.error === 'organization_suspended';
+
+    if (inMemoryAuthToken && (status === 401 || tenantSuspended)) {
+      onSessionRejected?.(
+        data?.message ?? 'Your session has ended. Please sign in again.'
+      );
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 /**
  * The options a call may pass to the mutator.
