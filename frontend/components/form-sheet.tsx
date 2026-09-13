@@ -39,6 +39,13 @@ interface FormSheetProps {
     onSubmit: () => void;
     submitLabel: string;
     isPending?: boolean;
+    /**
+     * Deleting the record being edited. Shown only when given, so a create
+     * sheet never offers it — and it sits below the save button as a quiet
+     * text action rather than a second button of equal weight.
+     */
+    onDelete?: () => void;
+    deleteLabel?: string;
     children: React.ReactNode;
 }
 
@@ -50,6 +57,8 @@ export function FormSheet({
     onSubmit,
     submitLabel,
     isPending = false,
+    onDelete,
+    deleteLabel = 'Delete',
     children,
 }: FormSheetProps) {
     if (!visible) return null;
@@ -115,6 +124,19 @@ export function FormSheet({
                                     {isPending ? 'Saving' : submitLabel}
                                 </Text>
                             </Pressable>
+
+                            {onDelete ? (
+                                <Pressable
+                                    onPress={onDelete}
+                                    disabled={isPending}
+                                    accessibilityRole="button"
+                                    className="mt-2 h-10 items-center justify-center rounded-xl active:bg-accent-subtle"
+                                >
+                                    <Text className="text-accent text-[12px] font-bold uppercase tracking-wider">
+                                        {deleteLabel}
+                                    </Text>
+                                </Pressable>
+                            ) : null}
                         </View>
                     </View>
                 </View>

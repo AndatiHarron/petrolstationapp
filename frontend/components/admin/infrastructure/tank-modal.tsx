@@ -28,9 +28,11 @@ interface TankModalProps {
     visible: boolean;
     onClose: () => void;
     tank?: TankResource; // If provided, we're editing
+    /** Offered only when editing, and only where the caller can delete. */
+    onDelete?: (id: string) => void;
 }
 
-export function TankModal({ visible, onClose, tank }: TankModalProps) {
+export function TankModal({ visible, onClose, tank, onDelete }: TankModalProps) {
     const queryClient = useQueryClient();
     const isEditing = Boolean(tank);
 
@@ -196,6 +198,8 @@ export function TankModal({ visible, onClose, tank }: TankModalProps) {
             onSubmit={handleSubmit}
             submitLabel={isEditing ? 'Save tank' : 'Create tank'}
             isPending={isPending}
+            onDelete={isEditing && onDelete && tank ? () => onDelete(tank.id) : undefined}
+            deleteLabel="Delete tank"
         >
             <TextField
                 label="Tank name"

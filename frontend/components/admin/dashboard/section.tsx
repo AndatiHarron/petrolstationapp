@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Pressable } from 'react-native';
+import { ChevronRight, Plus, type LucideIcon } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 interface SectionProps {
@@ -8,6 +9,9 @@ interface SectionProps {
     /** A short action on the right of the header, e.g. "See all". */
     actionLabel?: string;
     onAction?: () => void;
+    /** A plus button beside the header action, for creating a record here. */
+    onAdd?: () => void;
+    addLabel?: string;
     /** Stagger index — each section enters a beat after the one above it. */
     index?: number;
     /** Content that needs the card's full width, like a horizontal list. */
@@ -31,6 +35,8 @@ export function Section({
     subtitle,
     actionLabel,
     onAction,
+    onAdd,
+    addLabel = 'Add',
     index = 0,
     bleed = false,
     children,
@@ -66,16 +72,31 @@ export function Section({
                     ) : null}
                 </View>
 
-                {actionLabel && onAction ? (
-                    <Pressable
-                        onPress={onAction}
-                        accessibilityRole="button"
-                        hitSlop={8}
-                        className="shrink-0 rounded-full bg-brand-subtle px-2.5 py-1 active:opacity-70"
-                    >
-                        <Text className="text-brand text-[10px] font-bold">{actionLabel}</Text>
-                    </Pressable>
-                ) : null}
+                <View className="shrink-0 flex-row items-center gap-1.5">
+                    {actionLabel && onAction ? (
+                        <Pressable
+                            onPress={onAction}
+                            accessibilityRole="button"
+                            hitSlop={8}
+                            className="rounded-full bg-brand-subtle px-2.5 py-1 active:opacity-70"
+                        >
+                            <Text className="text-brand text-[10px] font-bold">{actionLabel}</Text>
+                        </Pressable>
+                    ) : null}
+
+                    {onAdd ? (
+                        <Pressable
+                            onPress={onAdd}
+                            accessibilityRole="button"
+                            accessibilityLabel={addLabel}
+                            hitSlop={8}
+                            style={{ width: 26, height: 26, borderRadius: 9 }}
+                            className="items-center justify-center bg-brand active:opacity-80"
+                        >
+                            <Plus size={14} color="#ffffff" />
+                        </Pressable>
+                    ) : null}
+                </View>
             </View>
 
             <View className={bleed ? 'pb-4' : 'px-4 pb-4'}>{children}</View>
@@ -128,41 +149,123 @@ export function Stat({
     );
 }
 
-/** Rows of label and value inside a section. */
-export function SectionRows({
-    rows,
-}: {
-    rows: { key: string; label: string; value: string; tone?: 'ink' | 'brand' | 'bad' }[];
-}) {
+const TONE_TEXT = {
+    ink: 'text-ink',
+    brand: 'text-brand',
+    bad: 'text-accent',
+    good: 'text-emerald-700',
+    warn: 'text-amber-700',
+} as const;
+
+export type RowTone = keyof typeof TONE_TEXT;
+
+export interface SectionRow {
+    key: string;
+    label: string;
+    value: string;
+    tone?: RowTone;
+    /** A second line under the label — a product name, a station. */
+    caption?: string;
+    /** A tinted 28px tile on the left. */
+    Icon?: LucideIcon;
+    /** 0-1. Draws a slim bar under the row, for a level or a proportion. */
+    fill?: number;
+    /** Makes the row pressable and gives it a chevron. */
+    onPress?: () => void;
+}
+
+/**
+ * One row shape for the whole dashboard.
+ *
+ * The screen had three: centred stat tiles, bespoke tank cards with their own
+ * badge colours and a 12px bar, and a plain label/value list. Everything routes
+ * through this now, so a level, a price and a count all read the same and a row
+ * that can be edited says so with a chevron.
+ */
+export function SectionRows({ rows }: { rows: SectionRow[] }) {
     return (
-        <View className="rounded-xl border border-surface-border">
-            {rows.map((row, index) => (
-                <View
-                    key={row.key}
-                    className={`flex-row items-baseline justify-between gap-3 px-3.5 py-2.5 ${
-                        index < rows.length - 1 ? 'border-b border-surface-border' : ''
-                    }`}
-                >
-                    <Text className="text-ink-muted shrink text-[13px]" numberOfLines={1}>
-                        {row.label}
-                    </Text>
-                    <Text
-                        className={`shrink-0 font-mono text-[13px] font-bold ${
-                            row.tone === 'bad'
-                                ? 'text-accent'
-                                : row.tone === 'brand'
-                                  ? 'text-brand'
-                                  : 'text-ink'
-                        }`}
-                        style={{ maxWidth: '55%' }}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.7}
+        <View className="overflow-hidden rounded-xl border border-surface-border">
+            {rows.map((row, index) => {
+                const Icon = row.Icon;
+                const tone = row.tone ?? 'ink';
+
+                const body = (
+                    <>
+                        <View className="flex-row items-center gap-2.5">
+                            {Icon ? (
+                                <View
+                                    style={{ width: 28, height: 28, borderRadius: 9 }}
+                                    className="shrink-0 items-center justify-center bg-brand-subtle"
+                                >
+                                    <Icon size={14} color="#040273" />
+                                </View>
+                            ) : null}
+
+                            <View className="min-w-0 flex-1">
+                                <Text className="text-ink text-[13px] font-semibold" numberOfLines={1}>
+                                    {row.label}
+                                </Text>
+                                {row.caption ? (
+                                    <Text className="text-ink-faint text-[10.5px]" numberOfLines={1}>
+                                        {row.caption}
+                                    </Text>
+                                ) : null}
+                            </View>
+
+                            <Text
+                                className={`shrink-0 font-mono text-[13px] font-bold ${TONE_TEXT[tone]}`}
+                                style={{ maxWidth: '46%' }}
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                minimumFontScale={0.7}
+                            >
+                                {row.value}
+                            </Text>
+
+                            {row.onPress ? (
+                                <ChevronRight size={14} color="#c9c9d8" />
+                            ) : null}
+                        </View>
+
+                        {row.fill !== undefined ? (
+                            <View className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                                <View
+                                    className={`h-full rounded-full ${
+                                        tone === 'bad'
+                                            ? 'bg-accent'
+                                            : tone === 'warn'
+                                              ? 'bg-amber-500'
+                                              : tone === 'good'
+                                                ? 'bg-emerald-500'
+                                                : 'bg-brand'
+                                    }`}
+                                    style={{ width: `${Math.max(Math.min(row.fill, 1), 0) * 100}%` }}
+                                />
+                            </View>
+                        ) : null}
+                    </>
+                );
+
+                const className = `px-3.5 py-2.5 ${
+                    index < rows.length - 1 ? 'border-b border-surface-border' : ''
+                }`;
+
+                return row.onPress ? (
+                    <Pressable
+                        key={row.key}
+                        onPress={row.onPress}
+                        accessibilityRole="button"
+                        accessibilityLabel={`${row.label}, ${row.value}`}
+                        className={`${className} active:bg-surface-sunken`}
                     >
-                        {row.value}
-                    </Text>
-                </View>
-            ))}
+                        {body}
+                    </Pressable>
+                ) : (
+                    <View key={row.key} className={className}>
+                        {body}
+                    </View>
+                );
+            })}
         </View>
     );
 }

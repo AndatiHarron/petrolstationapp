@@ -6,7 +6,7 @@ import { useTanksIndex } from '../../../features/api/tank/tank';
 import { useProductsIndex } from '../../../features/api/product/product';
 import { useStationsIndex } from '../../../features/api/station/station';
 import type { TanksIndex200, ProductsIndex200, StationsIndex200 } from '@/features/api/model';
-import { Section } from './section';
+import { Section, Stat } from './section';
 
 type TabType = 'stations' | 'products' | 'tanks';
 
@@ -16,6 +16,13 @@ const ICONS: Record<TabType, typeof Building2> = {
     tanks: Cylinder,
 };
 
+/**
+ * One count.
+ *
+ * Built on the dashboard's own Stat rather than a centred tile of its own, so
+ * the label, figure and caption sit at the same sizes as every other figure on
+ * the screen.
+ */
 function StatTile({
     id,
     title,
@@ -41,20 +48,20 @@ function StatTile({
             accessibilityLabel={`${value} ${title}`}
             // Equal thirds rather than a scrolling row: three counts fit a phone
             // and scrolling for the third was needless work.
-            className="flex-1 items-center gap-1.5 rounded-xl bg-surface-sunken px-2 py-3 active:opacity-70"
+            className="flex-1 gap-1.5 rounded-xl bg-surface-sunken px-3 py-3 active:opacity-70"
         >
-            <Icon size={16} color="#040273" />
+            <View
+                style={{ width: 26, height: 26, borderRadius: 9 }}
+                className="items-center justify-center bg-brand-subtle"
+            >
+                <Icon size={13} color="#040273" />
+            </View>
 
             {loading ? (
-                <View className="h-6 w-8 rounded bg-surface-border" />
+                <View className="h-5 w-8 rounded bg-surface-border" />
             ) : (
-                <Text className="text-ink text-xl font-bold">{value}</Text>
+                <Stat label={title} value={value} caption={subtitle} />
             )}
-
-            <Text className="text-ink-faint text-[10px] font-bold uppercase tracking-wider">
-                {title}
-            </Text>
-            <Text className="text-ink-faint text-[10px]">{subtitle}</Text>
         </Pressable>
     );
 }
