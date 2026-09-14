@@ -163,3 +163,25 @@ test('an approved edit request may restate an opening reading the chain check wo
     expect((float) $shift->meterReadings()->first()->opening_reading)->toBe($advanced - 500)
         ->and((float) $shift->meterReadings()->first()->volume_sold)->toBe(500.0);
 });
+
+test('a refused close leaves no orphaned photo in storage', function () {
+    // The photo is stored before reconciliation runs, so a close refused by the
+    // chain check would otherwise leave an object in the bucket that no row
+    // points at — and refusal is a normal event, not an exceptional one.
+    $nozzle = Nozzle::first();
+    closeShift()->assertOk();
+
+    $advanced = (float) $nozzle->fresh()->current_reading;
+    $before = Storage::disk('evidence-store')->files('meter-evidence');
+
+    $response = closeShift([
+        'opening_reading' => $advanced + 500,
+        'closing_reading' => $advanced + 600,
+        'evidence' => Illuminate\Http\UploadedFile::fake()->image('rejected.jpg'),
+    ]);
+
+    $response->assertStatus(500);
+    expect($response->json('error'))->toContain('INTEGRITY ERROR');
+
+    expect(Storage::disk('evidence-store')->files('meter-evidence'))->toBe($before);
+});

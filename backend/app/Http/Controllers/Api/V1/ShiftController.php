@@ -113,6 +113,28 @@ class ShiftController extends Controller
     }
 
     /**
+     * Remove photos uploaded for a close that was then refused.
+     *
+     * Best effort: a failure to tidy up must not replace the real reason the
+     * close was refused, which is what the person at the pump needs to see.
+     *
+     * @param  list<string>  $paths
+     */
+    private function discardUploads(array $paths): void
+    {
+        foreach ($paths as $path) {
+            try {
+                Storage::disk()->delete($path);
+            } catch (\Throwable $e) {
+                Log::warning('Could not remove orphaned meter evidence', [
+                    'path' => $path,
+                    'reason' => $e->getMessage(),
+                ]);
+            }
+        }
+    }
+
+    /**
      * Lock a Shift
      * * Submits final readings, evidence, and payments to close a shift.
      * Calculates variance immediately.
@@ -122,6 +144,12 @@ class ShiftController extends Controller
         if ($shift->started_by_user_id != Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
+
+        // Photos are stored before reconciliation runs, so anything already
+        // uploaded has to be removed if the close is then refused — otherwise
+        // every rejected attempt leaves an object in the bucket that no row
+        // points at, and the integrity checks make rejection a normal event.
+        $uploadedPaths = [];
 
         try {
             $formattedMeters = [];
@@ -151,11 +179,15 @@ class ShiftController extends Controller
                             'disk' => config('filesystems.default'),
                         ]);
 
+                        $this->discardUploads($uploadedPaths);
+
                         return response()->json([
                             'error' => 'evidence_upload_failed',
                             'message' => 'The meter photo could not be saved, so the shift was not closed. Check the connection and try again.',
                         ], 503);
                     }
+
+                    $uploadedPaths[] = $evidencePath;
                 }
 
                 $formattedMeters[] = [
@@ -194,6 +226,9 @@ class ShiftController extends Controller
             return new ShiftResource($updatedShift);
 
         } catch (\Exception $e) {
+            // The shift stays open, so the photos belong to nothing.
+            $this->discardUploads($uploadedPaths);
+
             Log::error('Shift Lock Error: '.$e->getMessage());
 
             return response()->json([
