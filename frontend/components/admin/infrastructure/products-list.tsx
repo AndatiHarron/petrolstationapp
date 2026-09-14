@@ -39,7 +39,7 @@ const ProductCard = memo(function ProductCard({
             </View>
 
             <MetaRow>
-                <Meta Icon={Percent} text={`VAT ${(product.vat_rate * 100).toFixed(0)}%`} />
+                <Meta Icon={Percent} text={`VAT ${Number(product.vat_rate)}%`} />
             </MetaRow>
         </EntityCard>
     );

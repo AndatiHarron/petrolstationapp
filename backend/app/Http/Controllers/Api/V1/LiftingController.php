@@ -57,11 +57,14 @@ class LiftingController extends Controller
             $data['organization_id'] = $station->organization_id;
         }
 
-        if (! isset($data['tax_paid']) || $data['tax_paid'] === null) {
-            $tank = Tank::with('product')->find($data['tank_id']);
-            $vatRate = (float) ($tank->product->vat_rate ?? 0);
-            $data['tax_paid'] = $this->taxService->calculateInputTax((float) $data['total_cost'], $vatRate);
-        }
+        // Always computed here, never taken from the request. Three different
+        // client-side versions of this sum existed, disagreeing about whether
+        // the rate was a percentage or a fraction and whether tax is extracted
+        // from a VAT-inclusive total or added to it — and because this used to
+        // defer to whatever the client sent, the wrong one won.
+        $tank = Tank::with('product')->find($data['tank_id']);
+        $vatRate = (float) ($tank->product->vat_rate ?? 0);
+        $data['tax_paid'] = $this->taxService->calculateInputTax((float) $data['total_cost'], $vatRate);
 
         $lifting = Lifting::create($data);
 

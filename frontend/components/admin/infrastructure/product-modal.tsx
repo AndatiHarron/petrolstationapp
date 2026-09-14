@@ -28,7 +28,11 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
         if (visible && product) {
             setName(product.name);
             setCurrentPrice(String(product.current_price));
-            setVatRate(String((product.vat_rate * 100).toFixed(0)));
+            // Stored as the percentage it was captured as — 16, 8, 0 — which
+            // is the figure the tax calculation uses. It used to be divided
+            // by 100 on the way in and multiplied by 100 on the way out, so
+            // the form looked right while the database held 0.16.
+            setVatRate(String(product.vat_rate));
         } else if (visible) {
             setName('');
             setCurrentPrice('');
@@ -84,14 +88,14 @@ export function ProductModal({ visible, onClose, product }: ProductModalProps) {
             const updateData: UpdateProductRequest = {
                 name: name.trim(),
                 current_price: priceNum,
-                vat_rate: vatNum / 100,
+                vat_rate: vatNum,
             };
             updateMutation.mutate({ product: product.id, data: updateData });
         } else {
             const storeData: StoreProductRequest = {
                 name: name.trim(),
                 current_price: priceNum,
-                vat_rate: vatNum / 100,
+                vat_rate: vatNum,
             };
             storeMutation.mutate({ data: storeData });
         }

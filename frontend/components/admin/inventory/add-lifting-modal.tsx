@@ -59,14 +59,6 @@ export function AddLiftingModal({
 
     const handleTankChange = (tankId: string) => {
         setSelectedTankId(tankId);
-        // Recalculate tax with new tank's VAT rate
-        const selectedTank = tanks.find(t => t.id === tankId);
-        const vatRate = selectedTank?.product_vat_rate || 0;
-        const totalCost = formData.total_cost || 0;
-        setFormData(prev => ({
-            ...prev,
-            tax_paid: totalCost * (vatRate),
-        }));
     };
 
     const handleVolumeOrPriceChange = (field: 'volume_liters' | 'buying_price_per_liter', value: string) => {
@@ -79,7 +71,6 @@ export function AddLiftingModal({
 
         const selectedTank = tanks.find(t => t.id === selectedTankId);
         const vatRate = selectedTank?.product_vat_rate || 0;
-        updated.tax_paid = totalCost * (vatRate);
 
         setFormData(updated);
     };
@@ -112,7 +103,6 @@ export function AddLiftingModal({
             volume_liters: formData.volume_liters,
             buying_price_per_liter: formData.buying_price_per_liter,
             total_cost: formData.total_cost || formData.volume_liters * formData.buying_price_per_liter,
-            tax_paid: formData.tax_paid || null,
             supplier_id: selectedSupplierId || undefined,
             is_credit: isCredit,
         });
@@ -267,15 +257,6 @@ export function AddLiftingModal({
                             </View>
                         </View>
 
-                        {/* Tax Paid (Auto-calculated) */}
-                        <View className="mb-5">
-                            <Text className="text-ink-muted text-xs font-bold uppercase tracking-widest mb-2">Tax Paid (Auto-calculated)</Text>
-                            <View className="bg-surface border border-surface-border rounded-xl p-4">
-                                <Text className="text-orange-400 font-mono font-bold text-lg">
-                                    KES {(formData.tax_paid || 0).toLocaleString()}
-                                </Text>
-                            </View>
-                        </View>
 
                         {/* Supplier Selector */}
                         <View className="mb-5">

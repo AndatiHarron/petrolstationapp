@@ -23,7 +23,10 @@ use Illuminate\Support\Collection;
  */
 class ReportBuilder
 {
-    public function __construct(protected string $organizationId) {}
+    // No organization is passed in: every model queried here carries the
+    // BelongsToOrganization scope, which limits a tenant to its own rows and
+    // exempts the platform owner. Passing one in overrode that.
+    public function __construct() {}
 
     /**
      * Every shift that overlaps a window, optionally narrowed to one station or
@@ -32,7 +35,6 @@ class ReportBuilder
     protected function shifts(Carbon $start, Carbon $end, ?string $stationId = null, ?string $userId = null): Builder
     {
         return Shift::query()
-            ->where('organization_id', $this->organizationId)
             ->whereBetween('started_at', [$start, $end])
             ->when($stationId, fn (Builder $q, string $id) => $q->where('station_id', $id))
             ->when($userId, fn (Builder $q, string $id) => $q->where('started_by_user_id', $id));
@@ -41,7 +43,6 @@ class ReportBuilder
     protected function liftings(Carbon $start, Carbon $end, ?string $stationId = null): Builder
     {
         return Lifting::query()
-            ->where('organization_id', $this->organizationId)
             ->whereBetween('lifting_date', [$start->toDateString(), $end->toDateString()])
             ->when($stationId, fn (Builder $q, string $id) => $q->where('station_id', $id));
     }
@@ -217,7 +218,6 @@ class ReportBuilder
     public function credit(Carbon $start, Carbon $end, ?string $stationId = null, ?string $customerId = null): array
     {
         $customers = Customer::query()
-            ->where('organization_id', $this->organizationId)
             ->when($customerId, fn (Builder $q, string $id) => $q->whereKey($id))
             ->orderBy('name')
             ->get();
@@ -421,7 +421,6 @@ class ReportBuilder
     public function stations(): Collection
     {
         return Station::query()
-            ->where('organization_id', $this->organizationId)
             ->orderBy('name')
             ->get();
     }

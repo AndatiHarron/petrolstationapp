@@ -194,10 +194,6 @@ export default function LiftingsScreen() {
         const totalCost = vol * price;
         updated.total_cost = totalCost;
 
-        // Calculate tax based on selected tank's VAT rate
-        const selectedTank = tanks.find(t => t.id === selectedTankId);
-        const vatRate = selectedTank?.product_vat_rate || 0;
-        updated.tax_paid = totalCost * (vatRate);
 
         setNewItem(updated);
     };
@@ -212,7 +208,6 @@ export default function LiftingsScreen() {
         const totalCost = newItem.total_cost || 0;
         setNewItem(prev => ({
             ...prev,
-            tax_paid: totalCost * (vatRate / 100)
         }));
     };
 
@@ -269,7 +264,6 @@ export default function LiftingsScreen() {
             volume_liters: newItem.volume_liters,
             buying_price_per_liter: newItem.buying_price_per_liter,
             total_cost: newItem.total_cost || (newItem.volume_liters * newItem.buying_price_per_liter),
-            tax_paid: newItem.tax_paid || null,
             supplier_id: selectedSupplierId || undefined,
             is_credit: newItem.is_credit || false,
         };
@@ -449,14 +443,6 @@ export default function LiftingsScreen() {
                                 </View>
                             </View>
 
-                            <View className="mb-4">
-                                <Text className="text-ink-muted text-sm font-medium mb-1">Tax Paid (Auto-calculated)</Text>
-                                <View className="bg-surface border border-surface-border rounded-xl p-4">
-                                    <Text className="text-orange-400 font-mono font-bold text-lg">
-                                        KES {(newItem.tax_paid || 0).toLocaleString()}
-                                    </Text>
-                                </View>
-                            </View>
 
                             {/* Supplier Selector */}
                             <View className="mb-4">

@@ -28,7 +28,6 @@ class ReportController extends Controller
         $asOf = $request->endDate();
 
         $customers = Customer::query()
-            ->where('organization_id', Auth::user()->organization_id)
             ->where('current_balance', '>', 0)
             ->when($request->customerId(), fn (Builder $query, string $id) => $query->whereKey($id))
             ->orderBy('name')
@@ -104,12 +103,10 @@ class ReportController extends Controller
         // date, rather than by row creation time — a shift entered late would
         // otherwise land in the wrong reporting period.
         $shifts = Shift::query()
-            ->where('organization_id', Auth::user()->organization_id)
             ->whereBetween('started_at', [$start, $end])
             ->when($stationId, fn (Builder $query, string $id) => $query->where('station_id', $id));
 
         $liftings = Lifting::query()
-            ->where('organization_id', Auth::user()->organization_id)
             ->whereBetween('lifting_date', [$start->toDateString(), $end->toDateString()])
             ->when($stationId, fn (Builder $query, string $id) => $query->where('station_id', $id));
 
@@ -142,13 +139,11 @@ class ReportController extends Controller
         $stationId = $request->stationId();
 
         $collected = (float) Shift::query()
-            ->where('organization_id', Auth::user()->organization_id)
             ->whereBetween('started_at', [$start, $end])
             ->when($stationId, fn (Builder $query, string $id) => $query->where('station_id', $id))
             ->sum('total_tax_collected');
 
         $paid = (float) Lifting::query()
-            ->where('organization_id', Auth::user()->organization_id)
             ->whereBetween('lifting_date', [$start->toDateString(), $end->toDateString()])
             ->when($stationId, fn (Builder $query, string $id) => $query->where('station_id', $id))
             ->sum('tax_paid');
@@ -181,7 +176,6 @@ class ReportController extends Controller
         }
 
         $variances = Shift::query()
-            ->where('organization_id', Auth::user()->organization_id)
             ->whereBetween('started_at', [$start, $end])
             ->when(
                 $request->stationId(),
@@ -368,7 +362,7 @@ class ReportController extends Controller
 
     private function builder(): ReportBuilder
     {
-        return new ReportBuilder(Auth::user()->organization_id);
+        return new ReportBuilder();
     }
 
     private function periodLabel(ReportFilterRequest $request): string

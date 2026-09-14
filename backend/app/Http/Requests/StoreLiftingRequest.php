@@ -49,7 +49,6 @@ class StoreLiftingRequest extends FormRequest
             'buying_price_per_liter' => 'required|numeric|min:0',
             // Total cost is usually calculated, but if provided manually, validate it
             'total_cost' => 'required|numeric|min:0',
-            'tax_paid' => 'nullable|numeric|min:0',
             'supplier_name' => 'nullable|string|max:255',
             'supplier_id' => [
                 Rule::requiredIf(fn () => $this->boolean('is_credit') === true),
