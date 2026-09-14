@@ -32,7 +32,7 @@ class StationPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 
     /**
@@ -40,7 +40,7 @@ class StationPolicy
      */
     public function update(User $user, $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 
     /**
@@ -48,6 +48,6 @@ class StationPolicy
      */
     public function delete(User $user, $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 }

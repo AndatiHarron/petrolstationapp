@@ -95,3 +95,25 @@ test('the owner still sees every account, including their own', function () {
 
     expect($emails)->toContain('owner@example.test');
 });
+
+test('the platform owner can manage stations, not only see them', function () {
+    // Every other policy admits the owner alongside a tenant admin; this one
+    // named 'admin' alone, so the owner could list stations and manage the
+    // products, tanks and nozzles inside them but never add a station.
+    $owner = makeOwner();
+
+    expect($owner->can('viewAny', App\Models\Station::class))->toBeTrue()
+        ->and($owner->can('create', App\Models\Station::class))->toBeTrue();
+
+    $station = App\Models\Station::withoutGlobalScopes()->firstOrFail();
+
+    expect($owner->can('update', $station))->toBeTrue()
+        ->and($owner->can('delete', $station))->toBeTrue();
+});
+
+test('a manager still cannot manage stations', function () {
+    $manager = User::role('manager')->firstOrFail();
+
+    expect($manager->can('create', App\Models\Station::class))->toBeFalse()
+        ->and($manager->can('viewAny', App\Models\Station::class))->toBeFalse();
+});
