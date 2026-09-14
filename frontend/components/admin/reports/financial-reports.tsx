@@ -19,6 +19,12 @@ import { ChartCard } from './chart-card';
 
 const CHART_WIDTH = Dimensions.get('window').width - 64;
 
+// The hole is a little wider than the ring needs, because the net figure sits
+// inside it. 84px across takes "KES 3,925.93" at a readable size; the previous
+// 76px did not, and the text wrapped.
+const DONUT_INNER_RADIUS = 42;
+const DONUT_RADIUS = 58;
+
 // ─── Color Palette ────────────────────────────────────────────────
 const COLORS = {
     sales: '#040273',
@@ -151,15 +157,38 @@ function TaxSummaryChart({ filters }: { filters: ReportFilters }) {
                     <PieChart
                         data={pieData}
                         donut
-                        innerRadius={38}
-                        radius={56}
+                        innerRadius={DONUT_INNER_RADIUS}
+                        radius={DONUT_RADIUS}
                         innerCircleColor="#ffffff"
                         centerLabelComponent={() => (
-                            <View style={{ alignItems: 'center' }}>
-                                <Text className="text-ink-faint text-[8px] font-bold uppercase">
+                            // Sized to the hole itself and centred on both
+                            // axes. Left to size itself, the wrapper took the
+                            // width of its text, and a value wider than the
+                            // hole — "KES 3,925.93" is wider than 76px — wrapped
+                            // onto a second line, which is what pushed it off
+                            // centre. It now shrinks to fit instead of wrapping.
+                            <View
+                                style={{
+                                    width: DONUT_INNER_RADIUS * 2,
+                                    height: DONUT_INNER_RADIUS * 2,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    paddingHorizontal: 4,
+                                }}
+                            >
+                                <Text
+                                    className="text-ink-faint font-bold uppercase"
+                                    style={{ fontSize: 8, lineHeight: 11 }}
+                                >
                                     Net
                                 </Text>
-                                <Text className="text-ink text-[11px] font-bold">
+                                <Text
+                                    className="text-ink font-bold"
+                                    style={{ fontSize: 11, lineHeight: 15 }}
+                                    numberOfLines={1}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.6}
+                                >
                                     {formatCurrency(taxData?.net_tax ?? 0)}
                                 </Text>
                             </View>
