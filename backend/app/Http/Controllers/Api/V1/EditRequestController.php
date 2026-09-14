@@ -223,7 +223,10 @@ class EditRequestController extends Controller
             $shift->dipReadings()->delete();
 
             $service = app(ShiftReconciliationService::class);
-            $service->reconcile($shift, $formattedMeters, $formattedDips, $paymentsToUse);
+            // Flagged as an approved correction: it is allowed to restate an
+            // opening reading that no longer matches the nozzle, which is the
+            // whole point of the edit-request workflow.
+            $service->reconcile($shift, $formattedMeters, $formattedDips, $paymentsToUse, true);
 
             $shift->refresh();
 

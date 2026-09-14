@@ -160,6 +160,12 @@ class ShiftController extends Controller
 
                 $formattedMeters[] = [
                     'nozzle_id' => $meterData['nozzle_id'],
+                    // Forwarded so it can be checked against the reading the
+                    // last shift closed on. This was collected from the person
+                    // at the pump, validated, and then dropped here, so a
+                    // mismatch between what is on the pump and what the system
+                    // believes could never be detected.
+                    'opening_reading' => $meterData['opening_reading'] ?? null,
                     'closing_reading' => $meterData['closing_reading'],
                     'evidence_path' => $evidencePath,
                     'gps_coordinates' => json_decode($meterData['gps_coordinates'] ?? '{}', true),

@@ -18,13 +18,20 @@ class ShiftReconciliationService
     public function __construct(protected TaxService $taxService) {}
 
     /**
+     * @param  bool  $isApprovedCorrection  Set when an admin-approved edit request
+     *                                      is being re-applied. Such a correction
+     *                                      exists precisely to restate readings,
+     *                                      so it is allowed to supply an opening
+     *                                      figure that no longer matches the
+     *                                      nozzle — which a shift close is not.
+     *
      * @throws Throwable
      */
-    public function reconcile(Shift $shift, array $meterData, array $dipData, array $payments)
+    public function reconcile(Shift $shift, array $meterData, array $dipData, array $payments, bool $isApprovedCorrection = false)
     {
-        return DB::transaction(function () use ($shift, $meterData, $dipData, $payments) {
+        return DB::transaction(function () use ($shift, $meterData, $dipData, $payments, $isApprovedCorrection) {
             // Process Meter Readings (Calculate Expected Cash)
-            $financials = $this->processMeters($shift, $meterData);
+            $financials = $this->processMeters($shift, $meterData, $isApprovedCorrection);
 
             // Process Payments
             $totalCollected = $this->savePayments($shift, $payments);
@@ -49,7 +56,7 @@ class ShiftReconciliationService
         });
     }
 
-    protected function processMeters(Shift $shift, array $meters)
+    protected function processMeters(Shift $shift, array $meters, bool $isApprovedCorrection = false)
     {
         $totalExpected = 0;
         $totalVolume = 0;
@@ -59,7 +66,7 @@ class ShiftReconciliationService
         foreach ($meters as $meter) {
             $nozzle = Nozzle::with(['tank.product'])->find($meter['nozzle_id']);
 
-            $opening = (float) ($meter['opening_reading'] ?? $nozzle->current_reading);
+            $opening = $this->resolveOpeningReading($nozzle, $meter, $isApprovedCorrection);
             $closing = (float) $meter['closing_reading'];
 
             $digits = (int) ($nozzle->digits ?? 7);
@@ -149,6 +156,54 @@ class ShiftReconciliationService
         ];
     }
 
+    /**
+     * The opening reading of a shift has to be the closing reading of the one
+     * before it. That unbroken chain is what makes a meter trail worth having:
+     * if a shift may open on any figure, litres can be moved between shifts at
+     * will and no variance will ever show it.
+     *
+     * So the stored reading wins, and a submitted figure that disagrees with it
+     * is refused rather than silently ignored. The exception is a nozzle that
+     * has never been used, where there is nothing to chain to and the figure on
+     * the pump establishes the baseline.
+     */
+    protected function resolveOpeningReading(Nozzle $nozzle, array $meter, bool $isApprovedCorrection = false): float
+    {
+        $stored = (float) ($nozzle->current_reading ?? 0);
+        $submitted = isset($meter['opening_reading']) && $meter['opening_reading'] !== null
+            ? (float) $meter['opening_reading']
+            : null;
+
+        // An approved edit request is the sanctioned way to restate a reading,
+        // reviewed by an admin and recorded in the audit log, so it sets the
+        // figure rather than being checked against the current one.
+        if ($isApprovedCorrection && $submitted !== null) {
+            return $submitted;
+        }
+
+        // Nothing recorded yet: whatever is on the pump becomes the baseline.
+        if ($stored <= 0) {
+            return $submitted ?? 0.0;
+        }
+
+        if ($submitted === null) {
+            return $stored;
+        }
+
+        // A tenth of a litre of slack, because the figure arrives as a decimal
+        // string and an exact float comparison would reject equal values.
+        if (abs($submitted - $stored) > 0.1) {
+            throw new \Exception(
+                "INTEGRITY ERROR on Nozzle [{$nozzle->name}]: the opening reading entered ({$submitted}) "
+                ."does not match the {$stored} this nozzle closed on at the end of the last shift. "
+                .'Re-check the figure on the pump; if the pump really reads differently, an admin must '
+                .'correct the nozzle before this shift can be closed.'
+            );
+        }
+
+        return $stored;
+    }
+
     protected function processDips(Shift $shift, array $dips, array $salesByTank)
     {
         $netVariance = 0;
@@ -156,12 +211,17 @@ class ShiftReconciliationService
         foreach ($dips as $dip) {
             $tank = Tank::findOrFail($dip['tank_id']);
 
-            $currentVolume = $this->calculateTankVolume($tank, $dip['dip_mm']);
+            // Without a calibration chart a depth cannot be turned into a
+            // volume at all. It used to come back as zero litres, which is
+            // indistinguishable from a measured empty tank and produced a
+            // variance equal to the whole shift's sales — a loss that was
+            // never real. Record the depth, claim no volume, and let the
+            // variance stay silent until the chart is entered.
+            $canConvert = ! empty($tank->calibration_chart);
 
-            $soldFromTank = $salesByTank[$tank->id] ?? 0;
-            $expectedVolume = $tank->current_volume - $soldFromTank;
-
-            $variance = $currentVolume - $expectedVolume;
+            $currentVolume = $canConvert
+                ? $this->calculateTankVolume($tank, $dip['dip_mm'])
+                : null;
 
             DipReading::create([
                 'id' => (string) Str::uuid(),
@@ -172,12 +232,22 @@ class ShiftReconciliationService
                 'volume_liters' => $currentVolume,
             ]);
 
+            if (! $canConvert) {
+                // The depth is still worth keeping as the raw observation.
+                $tank->update(['current_dip_mm' => $dip['dip_mm']]);
+
+                continue;
+            }
+
+            $soldFromTank = $salesByTank[$tank->id] ?? 0;
+            $expectedVolume = $tank->current_volume - $soldFromTank;
+
             $tank->update([
                 'current_volume' => $currentVolume,
                 'current_dip_mm' => $dip['dip_mm'],
             ]);
 
-            $netVariance += $variance;
+            $netVariance += $currentVolume - $expectedVolume;
         }
 
         return [
