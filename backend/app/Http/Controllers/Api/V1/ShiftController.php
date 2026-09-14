@@ -136,6 +136,26 @@ class ShiftController extends Controller
                     // ignored, so evidence went to the container's own
                     // filesystem and was destroyed on the next deployment.
                     $evidencePath = $file->store('meter-evidence');
+
+                    // The disk runs with throw => false, so a failed upload
+                    // returns false instead of raising. Accepting that would
+                    // lock the shift with no photo and no record that one was
+                    // meant to be there — the reading would look as though
+                    // evidence was never offered. Refuse instead: the person
+                    // closing the shift is still standing at the pump and can
+                    // retry, which is the only moment the photo can be retaken.
+                    if ($evidencePath === false) {
+                        Log::error('Meter evidence upload failed', [
+                            'shift_id' => $shift->id,
+                            'nozzle_id' => $meterData['nozzle_id'] ?? null,
+                            'disk' => config('filesystems.default'),
+                        ]);
+
+                        return response()->json([
+                            'error' => 'evidence_upload_failed',
+                            'message' => 'The meter photo could not be saved, so the shift was not closed. Check the connection and try again.',
+                        ], 503);
+                    }
                 }
 
                 $formattedMeters[] = [
