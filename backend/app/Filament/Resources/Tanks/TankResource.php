@@ -6,11 +6,17 @@ use App\Filament\Resources\Tanks\Pages\CreateTank;
 use App\Filament\Resources\Tanks\Pages\EditTank;
 use App\Filament\Resources\Tanks\Pages\ListTanks;
 use App\Models\Tank;
+use App\Support\CalibrationChart;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -69,6 +75,31 @@ class TankResource extends Resource
             Section::make('Calibration Chart')
                 ->description('Map dip levels (mm) to volume (liters) for accurate stock calculation')
                 ->schema([
+                    // A certificate runs to a hundred rows or more, and adding
+                    // them one at a time is why a tank ends up with no chart —
+                    // and with no chart no stock variance can be calculated.
+                    Textarea::make('calibration_paste')
+                        ->label('Paste the calibration certificate')
+                        ->helperText('Two columns, dip then litres, one row per line. Tabs, commas or spaces all work, so it can be pasted straight from a spreadsheet or a PDF. Units, headings and blank lines are ignored.')
+                        ->rows(6)
+                        ->dehydrated(false),
+
+                    Actions::make([
+                        Action::make('convertCalibrationPaste')
+                            ->label('Convert to rows')
+                            ->icon(Heroicon::OutlinedArrowDownOnSquare)
+                            ->action(function (Get $get, Set $set): void {
+                                $rows = CalibrationChart::parse($get('calibration_paste'));
+
+                                if ($rows === []) {
+                                    return;
+                                }
+
+                                $set('calibration_chart', $rows);
+                                $set('calibration_paste', null);
+                            }),
+                    ])->key('calibrationPaste'),
+
                     Repeater::make('calibration_chart')
                         ->schema([
                             TextInput::make('mm')
