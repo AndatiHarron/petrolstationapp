@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AgreementController;
 use App\Http\Controllers\Api\V1\ApprovalController;
 use App\Http\Controllers\Api\V1\AuditLogController;
 use App\Http\Controllers\Api\V1\CreditorController;
@@ -58,10 +59,16 @@ Route::post('/login', function (Request $request) {
     return response()->json(['message' => 'Invalid credentials.'], 401);
 });
 
-Route::middleware(['auth:sanctum', 'organization.active'])->prefix('v1')->group(function () {
+Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted'])->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
         return new UserResource($request->user());
     });
+
+    // Reachable before the terms are accepted — see EnsureAgreementAccepted.
+    Route::get('/agreement', [AgreementController::class, 'show']);
+    Route::post('/agreement/accept', [AgreementController::class, 'accept']);
+    Route::post('/agreement/decline', [AgreementController::class, 'decline']);
+    Route::get('/agreement/acceptances', [AgreementController::class, 'index']);
 
     Route::get('/shifts', [ShiftController::class, 'index']);
     Route::get('/shifts/current', [ShiftController::class, 'current']);

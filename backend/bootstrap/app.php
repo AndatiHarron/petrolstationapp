@@ -22,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'organization.active' => \App\Http\Middleware\EnsureOrganizationIsActive::class,
+            'agreement.accepted' => \App\Http\Middleware\EnsureAgreementAccepted::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

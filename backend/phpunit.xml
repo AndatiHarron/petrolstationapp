@@ -23,6 +23,7 @@
              during test bootstrap. Set here rather than in php.ini so the suite
              runs the same way on a developer's machine and in CI. -->
         <ini name="memory_limit" value="512M"/>
+        <env name="AGREEMENT_ENFORCE" value="false"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
