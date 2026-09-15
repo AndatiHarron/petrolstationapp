@@ -53,5 +53,14 @@ if [ "${FILESYSTEM_DISK:-local}" = "local" ] || [ "${FILESYSTEM_DISK}" = "public
   echo "         redeploy. Set FILESYSTEM_DISK=s3 for production." >&2
 fi
 
+# The scheduler has to be running for anything scheduled to happen, and there
+# is no cron in this container. Run it alongside the web server rather than as
+# a second paid service: it wakes once a minute, does nothing most of the time,
+# and its only current job is the nightly database snapshot.
+#
+# Backgrounded deliberately — if it exits, the web server must keep serving.
+echo "==> Starting the scheduler"
+php artisan schedule:work >&2 &
+
 echo "==> Serving on 0.0.0.0:${PORT}"
 exec php artisan serve --host=0.0.0.0 --port="${PORT}"
