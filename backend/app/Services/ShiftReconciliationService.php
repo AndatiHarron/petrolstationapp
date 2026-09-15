@@ -305,17 +305,6 @@ class ShiftReconciliationService
         return $total;
     }
 
-    private function calculateVolume(float $open, float $close, int $digits): float
-    {
-        if ($close >= $open) {
-            return $close - $open;
-        }
-
-        $maxVal = pow(10, $digits);
-
-        return ($maxVal - $open) + $close;
-    }
-
     private function calculateTankVolume(Tank $tank, float $mm): float
     {
         $chart = $tank->calibration_chart;
