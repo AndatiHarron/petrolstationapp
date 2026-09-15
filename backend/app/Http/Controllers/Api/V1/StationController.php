@@ -31,8 +31,16 @@ class StationController extends Controller
     {
         Gate::authorize('create', Station::class);
 
-        // organization_id is autofilled by the BelongsToOrganization trait
-        $station = Station::create($request->validated());
+        $data = $request->validated();
+
+        // Only the platform owner may name an organization other than their
+        // own; for anyone else the trait fills in theirs, and an attempt to
+        // send one is ignored rather than honoured.
+        if (! $request->user()->hasRole('super-admin')) {
+            unset($data['organization_id']);
+        }
+
+        $station = Station::create($data);
 
         return new StationResource($station);
     }
