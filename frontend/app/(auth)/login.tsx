@@ -22,24 +22,31 @@ export default function LoginScreen() {
             contentContainerStyle={{
               flexGrow: 1,
               paddingHorizontal: 20,
-              paddingTop: 24,
-              paddingBottom: 28,
+              paddingTop: 16,
+              paddingBottom: 12,
             }}
             keyboardShouldPersistTaps="handled"
             contentInsetAdjustmentBehavior="automatic"
             showsVerticalScrollIndicator={false}
           >
-            <View className="flex-1 justify-center gap-7">
+            {/* The mark and the card are centred together; the credit sits
+                outside that group so it settles at the foot of the screen.
+                It used to be the third item in a justify-center stack with a
+                28px gap, which both spread the middle out and pushed the whole
+                page past the viewport on a shorter phone — which is why it
+                scrolled when there is nothing to scroll to. */}
+            <View className="flex-1 justify-center gap-5">
               <Animated.View
                 entering={FadeInDown.duration(650).springify()}
-                className="items-center gap-3"
+                className="items-center gap-2.5"
               >
-                {/* The wordmark, at the file's own 2078x757 ratio and capped
-                    rather than pinned to fixed pixels, so it scales with the
-                    screen. accessibilityLabel carries the name the text said. */}
+                {/* Square box for a square mark. It was shaped 2078x757 from
+                    the previous wide wordmark, so contentFit letterboxed the
+                    image rather than distorting it — rendering the logo at
+                    about a third of the width it was given. */}
                 <Image
                   source={require('../../assets/logo.png')}
-                  style={{ width: '100%', maxWidth: 230, aspectRatio: 2078 / 757 }}
+                  style={{ width: 84, height: 84, borderRadius: 20 }}
                   contentFit="contain"
                   transition={200}
                   accessible
@@ -47,7 +54,7 @@ export default function LoginScreen() {
                   accessibilityLabel="Nozzle"
                 />
 
-                <Text className="text-ink-faint max-w-[260px] text-center text-[11px] leading-4">
+                <Text className="text-ink-faint max-w-[250px] text-center text-[11px] leading-4">
                   Shift integrity, inventory and station operations in one place.
                 </Text>
               </Animated.View>
@@ -63,7 +70,7 @@ export default function LoginScreen() {
                   elevation: 2,
                 }}
               >
-                <View className="mb-5 gap-1">
+                <View className="mb-4 gap-0.5">
                   <Text className="text-ink text-xl font-bold">Sign in</Text>
                   <Text className="text-ink-muted text-xs">
                     Use the account issued for your station.
@@ -72,18 +79,18 @@ export default function LoginScreen() {
 
                 <LoginForm />
               </Animated.View>
-
-              <Animated.View
-                entering={FadeInDown.delay(300).duration(650).springify()}
-                className="items-center gap-1"
-              >
-                {/* A credit, not a headline: small, at the foot of the page. */}
-                <Text className="text-[11px] font-semibold" style={{ color: '#bf0a30' }}>
-                  Powered by Ginto Energies
-                </Text>
-                <Text className="text-ink-faint text-[10px]">System v1.0.0</Text>
-              </Animated.View>
             </View>
+
+            <Animated.View
+              entering={FadeInDown.delay(300).duration(650).springify()}
+              className="items-center gap-0.5 pt-4"
+            >
+              {/* A credit, not a headline: small, at the foot of the page. */}
+              <Text className="text-[11px] font-semibold" style={{ color: '#bf0a30' }}>
+                Powered by Ginto Energies
+              </Text>
+              <Text className="text-ink-faint text-[10px]">System v1.0.0</Text>
+            </Animated.View>
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
