@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Petrol Integrity",
+    "name": "Nozzle",
     "slug": "petrol-management-system",
     "version": "1.0.0",
     "web": {
@@ -16,8 +16,8 @@
       [
         "expo-image-picker",
         {
-          "cameraPermission": "Petrol Integrity uses the camera to photograph pump meters as evidence when a shift is closed.",
-          "photosPermission": "Petrol Integrity needs access to your photos so a saved meter photo can be attached as evidence."
+          "cameraPermission": "Nozzle uses the camera to photograph pump meters as evidence when a shift is closed.",
+          "photosPermission": "Nozzle needs access to your photos so a saved meter photo can be attached as evidence."
         }
       ],
       [

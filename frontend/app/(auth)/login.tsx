@@ -44,7 +44,7 @@ export default function LoginScreen() {
                   transition={200}
                   accessible
                   accessibilityRole="image"
-                  accessibilityLabel="Petrol Integrity"
+                  accessibilityLabel="Nozzle"
                 />
 
                 <Text className="text-ink-faint max-w-[260px] text-center text-[11px] leading-4">

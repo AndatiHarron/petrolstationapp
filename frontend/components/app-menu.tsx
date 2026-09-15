@@ -364,7 +364,7 @@ function AppDrawer({ visible, onClose }: { visible: boolean; onClose: () => void
                     >
                         <View className="min-w-0 flex-1">
                             <Text className="text-ink text-[11px] font-bold">
-                                Petrol Integrity
+                                Nozzle
                             </Text>
                             <Text className="text-ink-faint text-[10px]" numberOfLines={1}>
                                 Signed in on this device
