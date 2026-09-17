@@ -32,6 +32,19 @@ return [
     // owner is not bound by terms they are the one offering.
     'required_roles' => ['admin'],
 
+    // Who an administrator who declines should talk to. Served to the client
+    // rather than hardcoded in the app so the contact can change without
+    // shipping a new build — the person reading it is, by definition, locked
+    // out and cannot be reached any other way through the System.
+    'distributor' => [
+        'name' => env('AGREEMENT_DISTRIBUTOR_NAME', 'Ginto Energies'),
+        'contact' => env('AGREEMENT_DISTRIBUTOR_CONTACT', 'harronandati@gmail.com'),
+    ],
+
+    'decline_title' => 'You cannot use the System',
+
+    'decline_message' => 'You have selected "I do not agree". Acceptance of this Agreement is a condition of access, so the System cannot be used without it. Your decision has been recorded and you have been signed out. If you believe you should have access, or if you were asked to accept terms you are not authorised to accept, contact your application distributor.',
+
     'title' => 'Administrator Agreement and Terms of Use',
 
     'intro' => 'This Agreement governs your use of the Petrol Integrity System as an Administrator. Read it in full. You are being asked to accept it because an Administrator can create accounts, configure equipment, alter prices and tax rates, approve corrections to locked records, and see every figure the System produces. Those powers carry obligations, and this Agreement sets them out. If you do not accept, you will not be able to proceed.',

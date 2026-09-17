@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEditRequestRequest;
 use App\Http\Requests\UpdateEditRequestRequest;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Schema;
 
 class EditRequestController extends Controller
 {
+    use FiltersByStation;
+
     /**
      * List Edit Requests
      */
@@ -32,6 +35,16 @@ class EditRequestController extends Controller
         if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
+
+        // An edit request has no station of its own. The member of staff who
+        // raised it does, and that is the station it belongs to.
+        $query->when(
+            $this->requestedStationId($request),
+            fn ($q, $stationId) => $q->whereHas(
+                'user',
+                fn ($u) => $u->where('station_id', $stationId)
+            )
+        );
 
         return EditRequestResource::collection($query->latest()->paginate(20));
     }

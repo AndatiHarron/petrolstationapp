@@ -170,6 +170,29 @@ test('declining is recorded and ends the session', function () {
     unset($token);
 });
 
+test('the terms carry the distributor contact, so a refusal can be explained', function () {
+    actingAs(User::role('admin')->firstOrFail());
+
+    // Sent with the terms and not only on decline: someone who declines while
+    // offline still has to be told who to contact.
+    $data = getJson('/api/v1/agreement')->assertOk()->json('data');
+
+    expect($data['distributor']['name'])->not->toBeEmpty()
+        ->and($data['distributor']['contact'])->not->toBeEmpty()
+        ->and($data['decline_title'])->not->toBeEmpty()
+        ->and($data['decline_message'])->toContain('distributor');
+});
+
+test('declining answers with the wording to show and who to contact', function () {
+    actingAs(User::role('admin')->firstOrFail());
+
+    postJson('/api/v1/agreement/decline')
+        ->assertOk()
+        ->assertJsonPath('title', config('agreement.decline_title'))
+        ->assertJsonPath('message', config('agreement.decline_message'))
+        ->assertJsonPath('data.distributor.contact', config('agreement.distributor.contact'));
+});
+
 test('declining does not open the system', function () {
     actingAs(User::role('admin')->firstOrFail());
 

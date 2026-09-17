@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Resources\UserResource;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    use FiltersByStation;
+
     public function index(Request $request)
     {
         Gate::authorize('viewAny', User::class);
@@ -28,6 +31,11 @@ class UserController extends Controller
                     'roles',
                     fn ($roles) => $roles->where('name', 'super-admin')
                 )
+            )
+            // An administrator narrowing the staff list to one station.
+            ->when(
+                $this->requestedStationId($request),
+                fn ($query, $stationId) => $query->where('station_id', $stationId)
             )
             ->latest()
             ->paginate(20);

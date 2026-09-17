@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectCreditSettlementRequest;
 use App\Http\Requests\StoreSupplierSettlementRequest;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Gate;
  */
 class SupplierSettlementController extends Controller
 {
+    use FiltersByStation;
+
     /** @var list<string> */
     private const RELATIONS = [
         'supplier:id,name,current_balance',
@@ -41,6 +44,11 @@ class SupplierSettlementController extends Controller
             ->when(
                 $request->filled('supplier_id'),
                 fn (Builder $query) => $query->where('supplier_id', $request->input('supplier_id'))
+            )
+            // An administrator narrowing the company view to one station.
+            ->when(
+                $this->requestedStationId($request),
+                fn (Builder $query, string $stationId) => $query->where('station_id', $stationId)
             )
             // A manager sees their own station, not the whole company.
             ->when(

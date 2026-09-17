@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectCreditSettlementRequest;
 use App\Http\Requests\StoreCreditSettlementRequest;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Gate;
  */
 class CreditSettlementController extends Controller
 {
+    use FiltersByStation;
+
     public function index(Request $request)
     {
         Gate::authorize('viewAny', CreditSettlement::class);
@@ -33,6 +36,11 @@ class CreditSettlementController extends Controller
             ->when(
                 $request->filled('customer_id'),
                 fn (Builder $query) => $query->where('customer_id', $request->input('customer_id'))
+            )
+            // An administrator narrowing the company view to one station.
+            ->when(
+                $this->requestedStationId($request),
+                fn (Builder $query, string $stationId) => $query->where('station_id', $stationId)
             )
             // A manager sees their station's settlements, not the whole company's.
             ->when(

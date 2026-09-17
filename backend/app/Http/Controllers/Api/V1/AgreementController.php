@@ -27,6 +27,12 @@ class AgreementController extends Controller
                 'sections' => config('agreement.sections'),
                 'applies_to_me' => AgreementAcceptance::appliesTo($user),
                 'accepted' => AgreementAcceptance::currentlyAcceptedBy($user),
+                // Sent with the terms, not on decline: the client has to be
+                // able to tell someone who it is they should contact even if
+                // the decline request itself fails.
+                'distributor' => config('agreement.distributor'),
+                'decline_title' => config('agreement.decline_title'),
+                'decline_message' => config('agreement.decline_message'),
             ],
         ]);
     }
@@ -111,8 +117,10 @@ class AgreementController extends Controller
                 'version' => config('agreement.version'),
                 'accepted' => false,
                 'signed_out' => true,
+                'distributor' => config('agreement.distributor'),
             ],
-            'message' => 'You have declined the Administrator Agreement and have been signed out.',
+            'title' => config('agreement.decline_title'),
+            'message' => config('agreement.decline_message'),
         ]);
     }
 

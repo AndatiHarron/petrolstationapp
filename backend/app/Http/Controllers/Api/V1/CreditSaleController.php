@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCreditSaleRequest;
 use App\Http\Resources\CreditSaleResource;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Gate;
 
 class CreditSaleController extends Controller
 {
+    use FiltersByStation;
+
     /**
      * Display a paginated list of credit sales.
      */
@@ -26,6 +29,16 @@ class CreditSaleController extends Controller
                 $q->where('station_id', $user->station_id);
             });
         }
+
+        // A credit sale carries no station of its own; the shift it was rung
+        // up on does.
+        $query->when(
+            $this->requestedStationId($request),
+            fn ($q, $stationId) => $q->whereHas(
+                'shift',
+                fn ($shift) => $shift->where('station_id', $stationId)
+            )
+        );
 
         return CreditSaleResource::collection($query->paginate(20));
     }

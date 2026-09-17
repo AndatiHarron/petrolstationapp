@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LockShiftRequest;
 use App\Http\Resources\ClosingShiftResource;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ShiftController extends Controller
 {
+    use FiltersByStation;
+
     public function __construct(protected ShiftReconciliationService $reconciliationService) {}
 
     /**
@@ -34,6 +37,12 @@ class ShiftController extends Controller
         if (Auth::user()->hasRole('manager') && Auth::user()->station_id) {
             $query->where('station_id', Auth::user()->station_id);
         }
+
+        // An administrator narrowing the company view to one station.
+        $query->when(
+            $this->requestedStationId($request),
+            fn ($q, $stationId) => $q->where('station_id', $stationId)
+        );
 
         $shifts = $query->latest()->paginate();
 
