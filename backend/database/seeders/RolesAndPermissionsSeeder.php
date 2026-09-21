@@ -28,12 +28,21 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage_users',
             'view_reports',
             'lock_shifts',
+            // The books show margins, supplier terms and every customer's
+            // balance — the commercial picture of the business, not the
+            // operational detail a shift needs. It stays with the owner.
+            'view_ledger',
+            'manage_tax_rates',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
+        // `manager` is the stored name the authorization rules check, and the
+        // app displays it as "Supervisor" — the name the proposal uses. The
+        // alias is resolved on the User model rather than by a second role, so
+        // there is exactly one set of permissions to reason about.
         $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $managerRole = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
         $superAdminRole = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);

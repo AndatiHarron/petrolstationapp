@@ -40,7 +40,14 @@ class LockShiftRequest extends FormRequest
 
             'payments' => 'required|array',
             'payments.cash' => 'nullable|numeric|min:0',
-            'payments.mpesa' => 'nullable|numeric|min:0',
+
+            // M-Pesa arrives one of two ways, because stations work both ways:
+            // a single till total for the shift, or the individual
+            // transactions with their codes. Both are accepted.
+            'payments.mpesa' => 'nullable',
+            'payments.mpesa_reference' => 'nullable|string|max:64',
+            'payments.mpesa.*.amount' => 'required_with:payments.mpesa.*|numeric|min:0',
+            'payments.mpesa.*.reference_code' => 'nullable|string|max:64',
 
             'payments.credit' => 'nullable|array',
             'payments.credit.*.customer_id' => 'required|exists:customers,id',

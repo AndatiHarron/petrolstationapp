@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\LedgerEntry;
+use App\Policies\LedgerPolicy;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -28,5 +31,10 @@ class AppServiceProvider extends ServiceProvider
         if ($this->app->environment('production')) {
             URL::forceScheme('https');
         }
+
+        // Registered by hand: policy auto-discovery pairs App\Models\X with
+        // App\Policies\XPolicy, and the ledger's policy covers the whole module
+        // rather than one model of that name.
+        Gate::policy(LedgerEntry::class, LedgerPolicy::class);
     }
 }

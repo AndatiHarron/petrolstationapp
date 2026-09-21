@@ -29,12 +29,21 @@ class DipReading extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'dip_mm' => 'float',
+        'volume_liters' => 'float',
+        'opening_volume_liters' => 'float',
+        'expected_volume_liters' => 'float',
+        'variance_liters' => 'float',
+    ];
+
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->logOnly([
                 'dip_mm',
                 'volume_liters',
+                'variance_liters',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()

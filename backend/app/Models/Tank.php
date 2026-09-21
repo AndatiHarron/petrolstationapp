@@ -47,7 +47,14 @@ class Tank extends Model
         'calibration_chart' => 'array',
         'capacity_liters' => 'decimal:2',
         'current_volume' => 'decimal:2',
+        'average_cost_per_liter' => 'float',
     ];
+
+    /** What the fuel currently in this tank is worth, at moving average cost. */
+    public function stockValue(): float
+    {
+        return round((float) $this->current_volume * (float) $this->average_cost_per_liter, 2);
+    }
 
     public function updateDipFromCurrentVolume(): void
     {

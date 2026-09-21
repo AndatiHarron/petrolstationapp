@@ -74,8 +74,24 @@ trait ApprovableSettlement
                 'balance_after' => $after,
             ]);
 
-            return $fresh->refresh();
+            $fresh->refresh();
+
+            // Whatever else this kind of settlement has to do once the money is
+            // confirmed — applying it to specific invoices, posting it to the
+            // ledger — happens here, inside the same transaction as the balance
+            // it just moved.
+            $fresh->afterApproval();
+
+            return $fresh;
         });
+    }
+
+    /**
+     * Hook for the using model. Nothing by default.
+     */
+    protected function afterApproval(): void
+    {
+        //
     }
 
     /**

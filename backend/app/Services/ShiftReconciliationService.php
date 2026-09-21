@@ -15,7 +15,10 @@ use Throwable;
 
 class ShiftReconciliationService
 {
-    public function __construct(protected TaxService $taxService) {}
+    public function __construct(
+        protected TaxService $taxService,
+        protected LedgerService $ledgerService,
+    ) {}
 
     /**
      * @param  bool  $isApprovedCorrection  Set when an admin-approved edit request
@@ -29,7 +32,7 @@ class ShiftReconciliationService
      */
     public function reconcile(Shift $shift, array $meterData, array $dipData, array $payments, bool $isApprovedCorrection = false)
     {
-        return DB::transaction(function () use ($shift, $meterData, $dipData, $payments, $isApprovedCorrection) {
+        $shift = DB::transaction(function () use ($shift, $meterData, $dipData, $payments, $isApprovedCorrection) {
             // Process Meter Readings (Calculate Expected Cash)
             $financials = $this->processMeters($shift, $meterData, $isApprovedCorrection);
 
@@ -54,6 +57,28 @@ class ShiftReconciliationService
 
             return $shift;
         });
+
+        // Posted after the transaction commits, and never allowed to fail the
+        // close. The operational record is what the station depends on minute to
+        // minute; the ledger is the accounting view of it, and a bookkeeping
+        // problem must not be the reason a supervisor cannot go home.
+        $this->postToLedger($shift);
+
+        return $shift;
+    }
+
+    /**
+     * Mirror a reconciled shift into the general ledger.
+     */
+    protected function postToLedger(Shift $shift): void
+    {
+        try {
+            $this->ledgerService->postShiftSale($shift->fresh([
+                'payments', 'creditSales.customer', 'dipReadings.tank',
+            ]));
+        } catch (Throwable $exception) {
+            report($exception);
+        }
     }
 
     protected function processMeters(Shift $shift, array $meters, bool $isApprovedCorrection = false)
@@ -223,16 +248,19 @@ class ShiftReconciliationService
                 ? $this->calculateTankVolume($tank, $dip['dip_mm'])
                 : null;
 
-            DipReading::create([
-                'id' => (string) Str::uuid(),
-                'organization_id' => $shift->organization_id,
-                'shift_id' => $shift->id,
-                'tank_id' => $tank->id,
-                'dip_mm' => $dip['dip_mm'],
-                'volume_liters' => $currentVolume,
-            ]);
+            $openingVolume = $this->resolveOpeningVolume($shift, $tank);
 
             if (! $canConvert) {
+                DipReading::create([
+                    'id' => (string) Str::uuid(),
+                    'organization_id' => $shift->organization_id,
+                    'shift_id' => $shift->id,
+                    'tank_id' => $tank->id,
+                    'dip_mm' => $dip['dip_mm'],
+                    'volume_liters' => null,
+                    'opening_volume_liters' => $openingVolume,
+                ]);
+
                 // The depth is still worth keeping as the raw observation.
                 $tank->update(['current_dip_mm' => $dip['dip_mm']]);
 
@@ -240,14 +268,31 @@ class ShiftReconciliationService
             }
 
             $soldFromTank = $salesByTank[$tank->id] ?? 0;
-            $expectedVolume = $tank->current_volume - $soldFromTank;
+            $expectedVolume = $openingVolume - $soldFromTank;
+            $variance = $currentVolume - $expectedVolume;
+
+            DipReading::create([
+                'id' => (string) Str::uuid(),
+                'organization_id' => $shift->organization_id,
+                'shift_id' => $shift->id,
+                'tank_id' => $tank->id,
+                'dip_mm' => $dip['dip_mm'],
+                'volume_liters' => $currentVolume,
+                // Kept so the arithmetic can be re-read later, and so a
+                // correction re-runs against the baseline this shift actually
+                // opened on rather than against wherever the tank has since got
+                // to.
+                'opening_volume_liters' => $openingVolume,
+                'expected_volume_liters' => $expectedVolume,
+                'variance_liters' => $variance,
+            ]);
 
             $tank->update([
                 'current_volume' => $currentVolume,
                 'current_dip_mm' => $dip['dip_mm'],
             ]);
 
-            $netVariance += $currentVolume - $expectedVolume;
+            $netVariance += $variance;
         }
 
         return [
@@ -255,23 +300,81 @@ class ShiftReconciliationService
         ];
     }
 
+    /**
+     * The book stock this shift opened on.
+     *
+     * On a first close that is simply what is in the tank, which at that moment
+     * still holds the opening figure plus anything delivered during the shift.
+     *
+     * On a correction it must not be: by then the tank has already been moved to
+     * its closing volume by the original close, so reading it again would
+     * compute the variance against the wrong baseline — and every approved
+     * correction would invent a stock loss roughly the size of the shift's own
+     * sales. The figure recorded the first time is the one that stays true, so
+     * the earlier reading is consulted first, including a soft-deleted one,
+     * since a correction deletes the old readings before writing new ones.
+     */
+    protected function resolveOpeningVolume(Shift $shift, Tank $tank): float
+    {
+        $previous = DipReading::withTrashed()
+            ->where('shift_id', $shift->id)
+            ->where('tank_id', $tank->id)
+            ->whereNotNull('opening_volume_liters')
+            ->orderBy('created_at')
+            ->first();
+
+        if ($previous) {
+            return (float) $previous->opening_volume_liters;
+        }
+
+        return (float) $tank->current_volume;
+    }
+
+    /**
+     * Record what was collected, and how.
+     *
+     * M-Pesa arrives one of two ways, because stations work both ways: a single
+     * till total for the shift, or the individual transactions with their codes.
+     * Both are accepted and both are stored as payment rows, so the reference is
+     * on the record rather than in someone's notebook — which is what makes an
+     * M-Pesa figure checkable against the statement later.
+     */
     protected function savePayments(Shift $shift, array $payments)
     {
         $total = 0;
 
-        $shift->payments()->delete();
-        $shift->creditSales()->delete();
+        // Soft deletes now, so the figures a correction replaced are still
+        // readable rather than gone.
+        //
+        // Deleted one at a time, deliberately. `$relation->delete()` compiles to
+        // a single UPDATE and fires no model events — so the hook that takes a
+        // credit sale back off the customer's balance never ran, and every
+        // approved correction added the shift's credit sales to that customer's
+        // debt all over again.
+        $shift->payments()->get()->each->delete();
+        $shift->creditSales()->get()->each->delete();
 
-        foreach (['cash', 'mpesa'] as $method) {
-            if (isset($payments[$method]) && is_numeric($payments[$method]) && $payments[$method] > 0) {
-                $shift->payments()->create([
-                    'organization_id' => $shift->organization_id,
-                    'method' => $method,
-                    'amount' => $payments[$method],
-                ]);
+        $cash = $this->amountOf($payments['cash'] ?? 0);
 
-                $total += $payments[$method];
-            }
+        if ($cash > 0) {
+            $shift->payments()->create([
+                'organization_id' => $shift->organization_id,
+                'method' => 'cash',
+                'amount' => $cash,
+            ]);
+
+            $total += $cash;
+        }
+
+        foreach ($this->normaliseMpesa($payments) as $entry) {
+            $shift->payments()->create([
+                'organization_id' => $shift->organization_id,
+                'method' => 'mpesa',
+                'amount' => $entry['amount'],
+                'reference_code' => $entry['reference_code'],
+            ]);
+
+            $total += $entry['amount'];
         }
 
         if (isset($payments['credit']) && is_array($payments['credit'])) {
@@ -303,6 +406,75 @@ class ShiftReconciliationService
         }
 
         return $total;
+    }
+
+    /**
+     * The M-Pesa side of a shift's takings, as a list of {amount, reference}.
+     *
+     * @return list<array{amount: float, reference_code: string|null}>
+     */
+    protected function normaliseMpesa(array $payments): array
+    {
+        $raw = $payments['mpesa'] ?? 0;
+
+        // A list of individual transactions, each with its own code.
+        if (is_array($raw)) {
+            $entries = [];
+
+            foreach ($raw as $transaction) {
+                $amount = $this->amountOf($transaction['amount'] ?? $transaction);
+
+                if ($amount <= 0) {
+                    continue;
+                }
+
+                $entries[] = [
+                    'amount' => $amount,
+                    'reference_code' => $this->referenceOf($transaction),
+                ];
+            }
+
+            return $entries;
+        }
+
+        // A single till total, with the till or batch reference beside it.
+        $amount = $this->amountOf($raw);
+
+        if ($amount <= 0) {
+            return [];
+        }
+
+        return [[
+            'amount' => $amount,
+            'reference_code' => $payments['mpesa_reference']
+                ?? $payments['mpesa_reference_code']
+                ?? null,
+        ]];
+    }
+
+    private function amountOf(mixed $value): float
+    {
+        if (is_array($value)) {
+            $value = $value['amount'] ?? 0;
+        }
+
+        return is_numeric($value) ? (float) $value : 0.0;
+    }
+
+    private function referenceOf(mixed $transaction): ?string
+    {
+        if (! is_array($transaction)) {
+            return null;
+        }
+
+        $reference = $transaction['reference_code']
+            ?? $transaction['reference']
+            ?? $transaction['code']
+            ?? null;
+
+        $reference = is_string($reference) ? trim($reference) : null;
+
+        return $reference !== '' ? $reference : null;
     }
 
     private function calculateTankVolume(Tank $tank, float $mm): float

@@ -23,7 +23,7 @@ test('the roles seeder can run twice', function () {
 
     expect(Role::where('guard_name', 'web')->pluck('name')->sort()->values()->all())
         ->toBe(['admin', 'manager', 'super-admin'])
-        ->and(Permission::count())->toBe(6);
+        ->and(Permission::count())->toBe(8);
 });
 
 test('a manager keeps only the two permissions it should have', function () {

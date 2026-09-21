@@ -44,7 +44,12 @@ class ClosingShiftResource extends JsonResource
 
             return [
                 'tank' => $tank,
-                'opening_volume' => $shiftDip ? $shiftDip->opening_volume : ($tank->current_volume ?? 0),
+                // `opening_volume_liters` is the column; the old name read as
+                // null on every dip that had one, so a re-opened shift showed
+                // its tanks as starting from empty.
+                'opening_volume' => $shiftDip
+                    ? ($shiftDip->opening_volume_liters ?? $tank->current_volume ?? 0)
+                    : ($tank->current_volume ?? 0),
             ];
         });
     }

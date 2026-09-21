@@ -9,6 +9,8 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Lifting;
 use App\Models\Shift;
+use App\Services\DebtService;
+use App\Services\LedgerService;
 use App\Services\ReportBuilder;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,7 +25,7 @@ class ReportController extends Controller
      *
      * Outstanding customer credit, bucketed by how long it has been owed.
      */
-    public function debtAging(ReportFilterRequest $request)
+    public function debtAging(ReportFilterRequest $request, DebtService $debtService)
     {
         $asOf = $request->endDate();
 
@@ -33,53 +35,30 @@ class ReportController extends Controller
             ->orderBy('name')
             ->get();
 
-        $report = $customers->map(function (Customer $customer) use ($request, $asOf): array {
-            $sales = CreditSale::query()
-                ->where('customer_id', $customer->id)
-                ->where('created_at', '<=', $asOf)
-                ->when(
-                    $request->stationId(),
-                    fn (Builder $query, string $stationId) => $query->whereHas(
-                        'shift',
-                        fn (Builder $shift) => $shift->where('station_id', $stationId)
-                    )
-                )
-                ->orderByDesc('created_at')
-                ->get();
-
-            $buckets = ['0-30' => 0.0, '31-60' => 0.0, '61-90' => 0.0, '90+' => 0.0];
-
-            // The balance is consumed oldest-last: the most recent sales are
-            // treated as the still-unpaid portion.
-            $remainingBalance = (float) $customer->current_balance;
-
-            foreach ($sales as $sale) {
-                if ($remainingBalance <= 0) {
-                    break;
-                }
-
-                $amountToCategorize = min($remainingBalance, (float) $sale->amount);
-                $ageInDays = $sale->created_at->diffInDays($asOf);
-
-                $bucket = match (true) {
-                    $ageInDays <= 30 => '0-30',
-                    $ageInDays <= 60 => '31-60',
-                    $ageInDays <= 90 => '61-90',
-                    default => '90+',
-                };
-
-                $buckets[$bucket] += $amountToCategorize;
-                $remainingBalance -= $amountToCategorize;
-            }
+        // Each invoice is aged by its own date and by how much of it is still
+        // unpaid, which the settlement allocations record directly. The report
+        // used to infer this from the balance alone, walking sales newest-first
+        // — so a customer who pays steadily had genuinely old debt reported as
+        // fresh, which is the one thing an aging report must not do.
+        $report = $customers->map(function (Customer $customer) use ($request, $asOf, $debtService): array {
+            $aging = $debtService->agingFor($customer, $asOf, $request->stationId());
 
             return [
                 'customer_id' => $customer->id,
                 'customer_name' => $customer->name,
-                'total_debt' => (float) $customer->current_balance,
+                'total_debt' => $aging['total'],
+                'balance_on_account' => (float) $customer->current_balance,
                 'credit_limit' => (float) $customer->credit_limit,
-                'buckets' => $buckets,
+                'oldest_days' => $aging['oldest_days'],
+                'buckets' => $aging['buckets'],
+                // Owed, but not traceable to an open invoice — a brought-forward
+                // opening balance, or a discrepancy worth someone looking at.
+                'unallocated' => $aging['unallocated'],
+                'invoices' => $aging['invoices'],
             ];
-        })->values();
+        })
+            ->filter(fn (array $row): bool => $row['total_debt'] > 0)
+            ->values();
 
         return response()->json([
             'data' => $report,
@@ -93,7 +72,7 @@ class ReportController extends Controller
     /**
      * Profit & Loss Report
      */
-    public function pl(ReportFilterRequest $request)
+    public function pl(ReportFilterRequest $request, LedgerService $ledger)
     {
         $start = $request->startDate();
         $end = $request->endDate();
@@ -111,15 +90,50 @@ class ReportController extends Controller
             ->when($stationId, fn (Builder $query, string $id) => $query->where('station_id', $id));
 
         $sales = (float) $shifts->clone()->sum('total_expected_cash');
-        $costs = (float) $liftings->clone()->sum('total_cost');
+        $purchases = (float) $liftings->clone()->sum('total_cost');
         $taxes = (float) $shifts->clone()->sum('total_tax_collected');
+
+        // Cost of sales comes from the ledger, where it is the moving-average
+        // cost of the litres actually sold. Counting deliveries instead only
+        // reads right for a period that opens and closes at the same tank level,
+        // which no real month does — a month that ran the tanks down looked
+        // wildly profitable and the month that refilled them looked like a loss.
+        $balances = collect($ledger->trialBalance(
+            Auth::user()->organization_id,
+            $start,
+            $end,
+            $stationId,
+        )['accounts'])->keyBy('code');
+
+        $costOfSales = (float) ($balances['COGS']['balance'] ?? 0);
+        $stockVariance = (float) ($balances['STOCK_VARIANCE']['balance'] ?? 0);
+        $cashVariance = (float) ($balances['CASH_VARIANCE']['balance'] ?? 0);
+
+        // Until a tank has had a costed delivery there is no average to work
+        // from, so fall back to the old basis rather than reporting no cost
+        // at all and overstating the profit.
+        $costsAreLedgerBacked = $costOfSales > 0;
+        $costs = $costsAreLedgerBacked ? $costOfSales : $purchases;
+
+        $netSales = round($sales - $taxes, 2);
+        $grossProfit = round($netSales - $costs, 2);
 
         return response()->json([
             'data' => [
                 'sales' => round($sales, 2),
+                'net_sales' => $netSales,
                 'costs' => round($costs, 2),
+                'cost_of_sales' => round($costOfSales, 2),
+                'purchases' => round($purchases, 2),
                 'taxes' => round($taxes, 2),
+                'gross_profit' => $grossProfit,
+                'stock_variance_value' => round($stockVariance, 2),
+                'cash_variance_value' => round($cashVariance, 2),
+                // Annex A's formula, kept exactly: sales less cost of sales
+                // less the tax liability.
                 'net_profit' => round($sales - $costs - $taxes, 2),
+                'operating_profit' => round($grossProfit - $stockVariance - $cashVariance, 2),
+                'basis' => $costsAreLedgerBacked ? 'ledger' : 'purchases',
                 'shift_count' => $shifts->clone()->count(),
                 'lifting_count' => $liftings->clone()->count(),
             ],

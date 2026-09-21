@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
@@ -66,8 +67,31 @@ class CreditSettlement extends Model
         return $this->belongsTo(User::class, 'approved_by_user_id');
     }
 
+    public function allocations(): HasMany
+    {
+        return $this->hasMany(CreditAllocation::class, 'credit_settlement_id');
+    }
+
     protected function balanceHolder(): Model
     {
         return $this->customer;
+    }
+
+    /**
+     * Once the money is confirmed, apply it to the customer's oldest unpaid
+     * invoices and post it to the ledger.
+     *
+     * The allocation is what lets the aging report say how old a debt is rather
+     * than inferring it from a single balance figure.
+     */
+    protected function afterApproval(): void
+    {
+        app(\App\Services\DebtService::class)->allocateSettlement($this);
+
+        try {
+            app(\App\Services\LedgerService::class)->postCreditSettlement($this);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
     }
 }

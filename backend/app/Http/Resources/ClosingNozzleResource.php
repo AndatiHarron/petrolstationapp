@@ -20,6 +20,13 @@ class ClosingNozzleResource extends JsonResource
             'product_name' => $this->resource['nozzle']->tank->product->name ?? 'Fuel',
             'opening_reading' => (float) $this->resource['opening_reading'],
             'digits' => $this->resource['nozzle']->digits,
+
+            // Sent so the app can work out what a set of readings is worth
+            // before it submits them. A supervisor who can see the expected
+            // takings beside the cash in the drawer catches a keying error on
+            // the forecourt, rather than an admin finding it the next day.
+            'price_per_liter' => (float) ($this->resource['nozzle']->tank->product->current_price ?? 0),
+            'vat_rate' => (float) ($this->resource['nozzle']->tank->product->vat_rate ?? 0),
         ];
     }
 }

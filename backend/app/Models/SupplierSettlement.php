@@ -50,6 +50,19 @@ class SupplierSettlement extends Model
         return $this->supplier;
     }
 
+    /**
+     * Post the payment to the ledger once it is approved: the payable comes
+     * down, the cash or M-Pesa balance goes with it.
+     */
+    protected function afterApproval(): void
+    {
+        try {
+            app(\App\Services\LedgerService::class)->postSupplierSettlement($this);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
+    }
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);

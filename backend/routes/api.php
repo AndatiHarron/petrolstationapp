@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\CreditSaleController;
 use App\Http\Controllers\Api\V1\CreditSettlementController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\EditRequestController;
+use App\Http\Controllers\Api\V1\LedgerController;
 use App\Http\Controllers\Api\V1\LiftingController;
 use App\Http\Controllers\Api\V1\NozzleController;
 use App\Http\Controllers\Api\V1\OrganizationController;
@@ -59,7 +60,12 @@ Route::post('/login', function (Request $request) {
     return response()->json(['message' => 'Invalid credentials.'], 401);
 });
 
-Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted'])->prefix('v1')->group(function () {
+// `idempotent` is what makes the offline queue safe. A device that loses
+// connectivity holds its writes and sends them when it comes back, and it cannot
+// tell a request that failed from one that succeeded with the response lost — so
+// it retries. The middleware replays the original response instead of doing the
+// work twice. Requests without an Idempotency-Key header are unaffected.
+Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted', 'idempotent'])->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
         return new UserResource($request->user());
     });
@@ -115,6 +121,15 @@ Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted'])
 
     // Creditors (Suppliers)
     Route::apiResource('creditors', CreditorController::class);
+
+    // The general ledger. Read-only: entries are posted by the events that
+    // cause them, never by hand.
+    Route::prefix('ledger')->group(function () {
+        Route::get('/accounts', [LedgerController::class, 'accounts']);
+        Route::get('/trial-balance', [LedgerController::class, 'trialBalance']);
+        Route::get('/entries', [LedgerController::class, 'entries']);
+        Route::get('/accounts/{code}', [LedgerController::class, 'account']);
+    });
 
     Route::prefix('reports')->group(function () {
         Route::get('/debt-aging', [ReportController::class, 'debtAging']);
