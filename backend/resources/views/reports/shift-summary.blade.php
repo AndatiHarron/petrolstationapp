@@ -150,7 +150,7 @@
 <table style="width: 48%; float: right;">
     <thead>
     <tr>
-        <th colspan="3">Credit Sales (Debtors)</th>
+        <th colspan="3">Debtors</th>
     </tr>
     <tr>
         <th style="font-size: 10px;">Customer</th>
@@ -166,7 +166,7 @@
             <td style="font-size: 10px;" class="text-right">{{ number_format($sale->amount, 0) }}</td>
         </tr>
     @empty
-        <tr><td colspan="3" class="text-center">No Credit Sales</td></tr>
+        <tr><td colspan="3" class="text-center">No debtors</td></tr>
     @endforelse
     </tbody>
 </table>

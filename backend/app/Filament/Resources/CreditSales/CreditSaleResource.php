@@ -28,7 +28,13 @@ class CreditSaleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
     protected static string|null|\UnitEnum $navigationGroup = 'Finance';
-    protected static ?string $navigationLabel = 'Credit Ledger';
+    protected static ?string $navigationLabel = 'Debtors';
+
+    // The record itself stays a credit sale in the database; these are only
+    // what a person reads.
+    protected static ?string $modelLabel = 'debtor';
+
+    protected static ?string $pluralModelLabel = 'debtors';
 
     public static function canCreate(): bool {
         return false;

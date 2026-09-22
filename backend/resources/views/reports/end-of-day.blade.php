@@ -97,7 +97,7 @@
     </table>
 
     @if (count($report['credit_sales']) > 0)
-        <h2>Credit sales ({{ count($report['credit_sales']) }})</h2>
+        <h2>Debtors ({{ count($report['credit_sales']) }})</h2>
         <table class="data">
             <thead>
                 <tr><th>Customer</th><th>Vehicle</th><th class="num">Amount</th></tr>

@@ -216,7 +216,7 @@ class ShiftResource extends Resource
                                     ->numeric()->default(0)->prefix('KES'),
 
                                 Repeater::make('credit_breakdown')
-                                    ->label('Credit Sales Breakdown')
+                                    ->label('Debtors Breakdown')
                                     ->schema([
                                         Select::make('customer_id')
                                             ->label('Customer')
