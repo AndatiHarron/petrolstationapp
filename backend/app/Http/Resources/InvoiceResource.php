@@ -22,7 +22,7 @@ class InvoiceResource extends JsonResource
             'customer_id' => $this->customer_id,
             'shift_id' => $this->shift_id,
             'download_url' => route('invoices.download', $this->id),
-            'created_at' => $this->created_at?->toDateTimeString(),
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }

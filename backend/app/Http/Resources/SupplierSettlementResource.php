@@ -28,9 +28,9 @@ class SupplierSettlementResource extends JsonResource
             'balance_before' => $this->balance_before !== null ? (float) $this->balance_before : null,
             'balance_after' => $this->balance_after !== null ? (float) $this->balance_after : null,
             'rejection_reason' => $this->rejection_reason,
-            'recorded_at' => $this->created_at?->toDateTimeString(),
-            'approved_at' => $this->approved_at?->toDateTimeString(),
-            'rejected_at' => $this->rejected_at?->toDateTimeString(),
+            'recorded_at' => $this->created_at?->toIso8601String(),
+            'approved_at' => $this->approved_at?->toIso8601String(),
+            'rejected_at' => $this->rejected_at?->toIso8601String(),
         ];
     }
 }

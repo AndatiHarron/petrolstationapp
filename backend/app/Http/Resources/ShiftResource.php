@@ -18,7 +18,7 @@ class ShiftResource extends JsonResource
             'id' => $this->id,
             'shift_number' => $this->shift_number,
             'station_name' => $this->station->name,
-            'started_at' => $this->started_at->toDateTimeString(),
+            'started_at' => $this->started_at->toIso8601String(),
             'status' => $this->status,
             'variance_alert' => $this->cash_variance < 0 || $this->stock_variance_liters < 0,
             'financials' => [
