@@ -15,7 +15,9 @@ use App\Http\Controllers\Api\V1\OrganizationController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\ShiftController;
+use App\Http\Controllers\Api\V1\ShiftScheduleController;
 use App\Http\Controllers\Api\V1\StationController;
+use App\Http\Controllers\Api\V1\SupportRequestController;
 use App\Http\Controllers\Api\V1\SupplierSettlementController;
 use App\Http\Controllers\Api\V1\TankController;
 use App\Http\Controllers\Api\V1\UserController;
@@ -65,6 +67,11 @@ Route::post('/login', function (Request $request) {
 // tell a request that failed from one that succeeded with the response lost — so
 // it retries. The middleware replays the original response instead of doing the
 // work twice. Requests without an Idempotency-Key header are unaffected.
+// Reachable without a session — somebody who cannot sign in is exactly who
+// needs it. Throttled tightly because it emails the platform owners.
+Route::post('/v1/support-requests', [SupportRequestController::class, 'store'])
+    ->middleware('throttle:5,10');
+
 Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted', 'idempotent'])->prefix('v1')->group(function () {
     Route::get('/user', function (Request $request) {
         return new UserResource($request->user());
@@ -94,6 +101,15 @@ Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted', 
     Route::apiResource('edit-requests', EditRequestController::class)->only(['index', 'store', 'show', 'update']);
     Route::apiResource('liftings', LiftingController::class);
     Route::apiResource('stations', StationController::class);
+
+    // The shifts a station runs. Per station, because stations do not agree on
+    // how many they work or when.
+    Route::get('/stations/{station}/shift-schedules', [ShiftScheduleController::class, 'index']);
+    Route::post('/stations/{station}/shift-schedules', [ShiftScheduleController::class, 'store']);
+    Route::put('/stations/{station}/shift-schedules/{shiftSchedule}', [ShiftScheduleController::class, 'update']);
+    Route::delete('/stations/{station}/shift-schedules/{shiftSchedule}', [ShiftScheduleController::class, 'destroy']);
+
+    Route::get('/support-requests', [SupportRequestController::class, 'index']);
     Route::apiResource('tanks', TankController::class);
     Route::apiResource('products', ProductController::class);
     Route::apiResource('nozzles', NozzleController::class);

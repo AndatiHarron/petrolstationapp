@@ -12,7 +12,9 @@ use App\Http\Resources\ShiftResource;
 use App\Models\Invoice;
 use App\Models\Nozzle;
 use App\Models\Shift;
+use App\Models\Station;
 use App\Services\ShiftReconciliationService;
+use App\Services\ShiftScheduleService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -110,11 +112,22 @@ class ShiftController extends Controller
             ], 422);
         }
 
+        // Which of the station's shifts this is, and when it is due to end.
+        //
+        // Resolved once, here, and stored — rather than worked out from the
+        // pattern whenever it is needed. An admin may edit the pattern later,
+        // and a shift has to be judged against the hours it was actually opened
+        // under, not the hours the station keeps now.
+        $station = Station::find($stationId);
+        $scheduled = app(ShiftScheduleService::class)->resolve($station);
+
         $shift = Shift::create([
             'station_id' => $stationId,
             'started_by_user_id' => Auth::id(),
             'started_at' => now(),
             'status' => 'OPEN',
+            'shift_schedule_id' => $scheduled['schedule']?->id,
+            'scheduled_end_at' => $scheduled['ends_at'],
         ]);
 
         $shift->load(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
@@ -153,6 +166,18 @@ class ShiftController extends Controller
     {
         if ($shift->started_by_user_id != Auth::id()) {
             abort(403, 'Unauthorized action.');
+        }
+
+        // Before anything is uploaded or written: a shift that is not due to
+        // end yet cannot be closed by the person working it. Checked here so a
+        // refusal costs nothing and leaves no photographs behind.
+        try {
+            app(ShiftScheduleService::class)->assertMayClose($shift, Auth::user());
+        } catch (ShiftReconciliationException $e) {
+            return response()->json([
+                'error' => 'shift_not_due',
+                'message' => $e->getMessage(),
+            ], 422);
         }
 
         // Photos are stored before reconciliation runs, so anything already

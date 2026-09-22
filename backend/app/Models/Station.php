@@ -21,6 +21,12 @@ class Station extends Model
 
     protected $guarded = [];
 
+    /** The shifts this station runs, in the order they are worked. */
+    public function shiftSchedules(): HasMany
+    {
+        return $this->hasMany(ShiftSchedule::class)->orderBy('position');
+    }
+
     public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);

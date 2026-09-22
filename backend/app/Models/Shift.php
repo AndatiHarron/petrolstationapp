@@ -90,6 +90,7 @@ class Shift extends Model
         'stock_variance_liters' => 'float',
         'started_at' => 'datetime',
         'locked_at' => 'datetime',
+        'scheduled_end_at' => 'datetime',
     ];
 
     public function organization(): BelongsTo
@@ -110,6 +111,12 @@ class Shift extends Model
     public function station(): BelongsTo
     {
         return $this->belongsTo(Station::class);
+    }
+
+    /** The station's shift pattern this one was opened under, where there is one. */
+    public function schedule(): BelongsTo
+    {
+        return $this->belongsTo(ShiftSchedule::class, 'shift_schedule_id');
     }
 
     /** The attendant who opened the shift. */
