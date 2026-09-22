@@ -68,9 +68,10 @@ test('an opening reading that disagrees with the last close is refused', functio
         'closing_reading' => $nozzle->current_reading + 300,
     ]);
 
-    $response->assertStatus(500);
-    expect($response->json('error'))->toContain('INTEGRITY ERROR')
-        ->and($response->json('error'))->toContain('last shift');
+    // A refusal, not a fault: the supervisor can re-read the pump and retry.
+    $response->assertStatus(422);
+    expect($response->json('message'))->toContain('last shift closed it on')
+        ->and($response->json('error'))->toBe('shift_not_reconciled');
 
     // Nothing was recorded, and the nozzle did not move.
     expect(Shift::where('status', 'LOCKED')->count())->toBe(0);
@@ -180,8 +181,8 @@ test('a refused close leaves no orphaned photo in storage', function () {
         'evidence' => Illuminate\Http\UploadedFile::fake()->image('rejected.jpg'),
     ]);
 
-    $response->assertStatus(500);
-    expect($response->json('error'))->toContain('INTEGRITY ERROR');
+    $response->assertStatus(422);
+    expect($response->json('message'))->toContain('last shift closed it on');
 
     expect(Storage::disk('evidence-store')->files('meter-evidence'))->toBe($before);
 });

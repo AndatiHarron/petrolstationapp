@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Concerns\FiltersByStation;
+use App\Exceptions\ShiftReconciliationException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LockShiftRequest;
 use App\Http\Resources\ClosingShiftResource;
@@ -234,14 +235,29 @@ class ShiftController extends Controller
 
             return new ShiftResource($updatedShift);
 
-        } catch (\Exception $e) {
+        } catch (ShiftReconciliationException $e) {
             // The shift stays open, so the photos belong to nothing.
             $this->discardUploads($uploadedPaths);
 
-            Log::error('Shift Lock Error: '.$e->getMessage());
+            // A rule refused this, and the person at the pump can act on it.
+            // 422 rather than 500, and the reason under `message`, which is the
+            // key the clients read — it used to be sent as `error` beside a 500,
+            // so the supervisor saw a bare status code and a button that looked
+            // like it did nothing.
+            Log::info('Shift close refused: '.$e->getMessage());
 
             return response()->json([
-                'error' => $e->getMessage(),
+                'error' => 'shift_not_reconciled',
+                'message' => $e->getMessage(),
+            ], 422);
+        } catch (\Throwable $e) {
+            $this->discardUploads($uploadedPaths);
+
+            Log::error('Shift Lock Error: '.$e->getMessage(), ['exception' => $e]);
+
+            return response()->json([
+                'error' => 'shift_lock_failed',
+                'message' => 'The shift could not be closed because of an unexpected error. Nothing was saved — try again.',
             ], 500);
         }
     }

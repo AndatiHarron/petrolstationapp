@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\ShiftReconciliationException;
 use App\Models\CreditSale;
 use App\Models\DipReading;
 use App\Models\MeterReading;
@@ -101,8 +102,8 @@ class ShiftReconciliationService
                 $threshold = $maxLimit * 0.9;
 
                 if ($opening < $threshold) {
-                    throw new \Exception(
-                        "Error on Nozzle [{$nozzle->name}]: Closing reading ({$closing}) cannot be less than Opening reading ({$opening}). check for typos."
+                    throw new ShiftReconciliationException(
+                        "Nozzle {$nozzle->name}: the closing reading ({$closing}) is lower than the opening reading ({$opening}). Re-check the figure on the pump."
                     );
                 }
 
@@ -139,7 +140,9 @@ class ShiftReconciliationService
                         ->exists();
 
                     if ($is_duplicate) {
-                        throw new \Exception("INTEGRITY ERROR: The photo for {$nozzle->name} has been used in a previous shift. Please take a new photo.");
+                        throw new ShiftReconciliationException(
+                            "The photo for {$nozzle->name} was already used on an earlier shift. Take a new one."
+                        );
                     }
                 }
             }
@@ -218,10 +221,9 @@ class ShiftReconciliationService
         // A tenth of a litre of slack, because the figure arrives as a decimal
         // string and an exact float comparison would reject equal values.
         if (abs($submitted - $stored) > 0.1) {
-            throw new \Exception(
-                "INTEGRITY ERROR on Nozzle [{$nozzle->name}]: the opening reading entered ({$submitted}) "
-                ."does not match the {$stored} this nozzle closed on at the end of the last shift. "
-                .'Re-check the figure on the pump; if the pump really reads differently, an admin must '
+            throw new ShiftReconciliationException(
+                "Nozzle {$nozzle->name} opened on {$submitted}, but the last shift closed it on {$stored}. "
+                .'Re-check the figure on the pump. If the pump really reads differently, an admin has to '
                 .'correct the nozzle before this shift can be closed.'
             );
         }
