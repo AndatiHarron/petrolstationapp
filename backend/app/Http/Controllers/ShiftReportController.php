@@ -4,12 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Shift;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 
 class ShiftReportController extends Controller
 {
-    public function download(Shift $shift) {
-        if($shift->organization_id !== auth()->user()->organization_id) {
+    public function download(Shift $shift)
+    {
+        if ($shift->organization_id !== auth()->user()->organization_id) {
             abort(403);
         }
 

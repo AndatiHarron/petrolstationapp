@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Exceptions\ShiftReconciliationException;
+use App\Http\Controllers\Concerns\FiltersByStation;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LockShiftRequest;
 use App\Http\Resources\ClosingShiftResource;
@@ -57,10 +57,30 @@ class ShiftController extends Controller
      */
     public function current(Request $request)
     {
+        $relations = ['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer'];
+
         $shift = Shift::where('started_by_user_id', Auth::id())
             ->where('status', 'OPEN')
-            ->with(['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer'])
+            ->with($relations)
             ->first();
+
+        // A shift the system opened when its hours began has nobody on it yet.
+        // The supervisor of that station asking what they are working is the
+        // person working it, so it becomes theirs here — a shift with readings
+        // but no name against it is worth less than no shift at all.
+        if (! $shift && Auth::user()->hasRole('manager') && Auth::user()->station_id) {
+            $unclaimed = Shift::where('station_id', Auth::user()->station_id)
+                ->where('status', Shift::STATUS_OPEN)
+                ->whereNull('started_by_user_id')
+                ->with($relations)
+                ->first();
+
+            if ($unclaimed) {
+                $unclaimed->forceFill(['started_by_user_id' => Auth::id()])->save();
+
+                $shift = $unclaimed;
+            }
+        }
 
         if (! $shift) {
             return response()->json([
@@ -151,6 +171,23 @@ class ShiftController extends Controller
             ], 422);
         }
 
+        // Its hours have already begun and the system opened it. Starting a
+        // shift here means taking that one, not opening a second: two shifts
+        // over the same hours would each claim the same litres.
+        $unclaimed = Shift::where('station_id', $stationId)
+            ->where('status', Shift::STATUS_OPEN)
+            ->whereNull('started_by_user_id')
+            ->orderBy('started_at')
+            ->first();
+
+        if ($unclaimed) {
+            $unclaimed->forceFill(['started_by_user_id' => Auth::id()])->save();
+
+            $unclaimed->load(['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
+
+            return new ShiftResource($unclaimed);
+        }
+
         $hasNozzles = Nozzle::where('station_id', $stationId)->exists();
 
         if (! $hasNozzles) {
@@ -217,7 +254,12 @@ class ShiftController extends Controller
         // place, so anyone at the station — or an admin — can supply the
         // readings it is waiting for.
         $isAwaitingReadings = $shift->status === Shift::STATUS_PENDING_READINGS;
-        $mayFinishForAnother = $isAwaitingReadings
+
+        // A shift the system opened and nobody took belongs to the station
+        // rather than to a person, so the same allowance applies.
+        $isUnclaimed = $shift->started_by_user_id === null;
+
+        $mayFinishForAnother = ($isAwaitingReadings || $isUnclaimed)
             && (Auth::user()->hasAnyRole(['admin', 'super-admin'])
                 || Auth::user()->station_id === $shift->station_id);
 

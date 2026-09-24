@@ -27,9 +27,8 @@ class StoreCustomerRequest extends FormRequest
             'email' => [
                 'required',
                 'email',
-                Rule::unique('customers')->where(fn ($query) =>
-                $query->where('organization_id', \Auth::user()->organization_id)
-                )
+                Rule::unique('customers')->where(fn ($query) => $query->where('organization_id', \Auth::user()->organization_id)
+                ),
             ],
             'phone' => 'nullable|string|max:20',
             'tax_pin' => 'nullable|string|max:50',

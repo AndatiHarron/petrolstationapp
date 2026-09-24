@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 class GeneratePostmanRoleData extends Command
 {
     protected $signature = 'postman:generate-roles {count=50}';
+
     protected $description = 'Generate CSV data with fresh Admin and Manager ecosystems for Postman';
 
     public function handle()
@@ -31,7 +32,7 @@ class GeneratePostmanRoleData extends Command
             'product_id',          // The product in that tank
             'new_customer_email',  // Unique email for testing Customer creation
             'new_invoice_number',  // Unique invoice for Lifting creation
-            'random_volume'        // Random volume for payloads
+            'random_volume',        // Random volume for payloads
         ]);
 
         $bar = $this->output->createProgressBar($count);
@@ -46,7 +47,7 @@ class GeneratePostmanRoleData extends Command
             $station = Station::factory()->create(['organization_id' => $org->id]);
             $tank = Tank::factory()->create([
                 'organization_id' => $org->id,
-                'station_id' => $station->id
+                'station_id' => $station->id,
             ]);
 
             // C. Decide Role (Admin vs Manager)
@@ -57,16 +58,16 @@ class GeneratePostmanRoleData extends Command
                 $user = User::factory()->create([
                     'organization_id' => $org->id,
                     'station_id' => $station->id,
-                    'email' => "manager_{$i}_" . Str::random(5) . "@test.com",
-                    'password' => Hash::make('password')
+                    'email' => "manager_{$i}_".Str::random(5).'@test.com',
+                    'password' => Hash::make('password'),
                 ]);
                 $user->assignRole('manager');
             } else {
                 // Admin: Belongs to Org, can access the station
                 $user = User::factory()->create([
                     'organization_id' => $org->id,
-                    'email' => "admin_{$i}_" . Str::random(5) . "@test.com",
-                    'password' => Hash::make('password')
+                    'email' => "admin_{$i}_".Str::random(5).'@test.com',
+                    'password' => Hash::make('password'),
                 ]);
                 $user->assignRole('admin');
             }
@@ -79,9 +80,9 @@ class GeneratePostmanRoleData extends Command
                 $station->id,          // Guaranteed valid for this user
                 $tank->id,             // Guaranteed valid for this station
                 $tank->product_id,     // Valid product
-                "cust_{$i}_" . Str::random(5) . "@example.com",
-                'INV-' . strtoupper(Str::random(8)),
-                rand(500, 5000)
+                "cust_{$i}_".Str::random(5).'@example.com',
+                'INV-'.strtoupper(Str::random(8)),
+                rand(500, 5000),
             ]);
 
             $bar->advance();

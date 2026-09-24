@@ -5,8 +5,6 @@ namespace App\Filament\Resources\CreditSales;
 use App\Filament\Resources\CreditSales\Pages\CreateCreditSale;
 use App\Filament\Resources\CreditSales\Pages\EditCreditSale;
 use App\Filament\Resources\CreditSales\Pages\ListCreditSales;
-use App\Filament\Resources\CreditSales\Schemas\CreditSaleForm;
-use App\Filament\Resources\CreditSales\Tables\CreditSalesTable;
 use App\Models\CreditSale;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;
@@ -27,7 +25,9 @@ class CreditSaleResource extends Resource
     protected static ?string $model = CreditSale::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBookOpen;
+
     protected static string|null|\UnitEnum $navigationGroup = 'Finance';
+
     protected static ?string $navigationLabel = 'Debtors';
 
     // The record itself stays a credit sale in the database; these are only
@@ -36,7 +36,8 @@ class CreditSaleResource extends Resource
 
     protected static ?string $pluralModelLabel = 'debtors';
 
-    public static function canCreate(): bool {
+    public static function canCreate(): bool
+    {
         return false;
     }
 
@@ -55,7 +56,7 @@ class CreditSaleResource extends Resource
                 ->disabled(),
 
             Textarea::make('notes')
-                ->disabled()
+                ->disabled(),
         ]);
     }
 
@@ -86,20 +87,20 @@ class CreditSaleResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->filters([
                 SelectFilter::make('customer')
-                ->relationship('customer', 'name')
-                ->searchable()
-                ->preload(),
+                    ->relationship('customer', 'name')
+                    ->searchable()
+                    ->preload(),
 
                 Filter::make('created_at')
-                ->schema([
-                    DatePicker::make('from'),
-                    DatePicker::make('until'),
-                ])
-                ->query(function ($query, array $data) {
-                    return $query
-                        ->when($data['from'], fn ($query) => $query->whereDate('created_at', '>=', $data['from']))
-                        ->when($data['until'], fn ($query) => $query->whereDate('created_at', '<=', $data['until']));
-                })
+                    ->schema([
+                        DatePicker::make('from'),
+                        DatePicker::make('until'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        return $query
+                            ->when($data['from'], fn ($query) => $query->whereDate('created_at', '>=', $data['from']))
+                            ->when($data['until'], fn ($query) => $query->whereDate('created_at', '<=', $data['until']));
+                    }),
             ]);
     }
 
@@ -114,8 +115,8 @@ class CreditSaleResource extends Resource
     {
         return [
             'index' => ListCreditSales::route('/'),
-//            'create' => CreateCreditSale::route('/create'),
-//            'edit' => EditCreditSale::route('/{record}/edit'),
+            //            'create' => CreateCreditSale::route('/create'),
+            //            'edit' => EditCreditSale::route('/{record}/edit'),
         ];
     }
 }

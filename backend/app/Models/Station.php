@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Station extends Model
 {
     use BelongsToOrganization;
-    use HasUuids;
     use HasFactory;
+    use HasUuids;
 
     public $incrementing = false;
 
@@ -32,7 +32,8 @@ class Station extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function liftings(): HasMany {
+    public function liftings(): HasMany
+    {
         return $this->hasMany(Lifting::class);
     }
 
@@ -41,11 +42,13 @@ class Station extends Model
         return $this->hasMany(Nozzle::class);
     }
 
-    public function tanks(): HasMany {
+    public function tanks(): HasMany
+    {
         return $this->hasMany(Tank::class);
     }
 
-    public function shifts(): HasMany {
+    public function shifts(): HasMany
+    {
         return $this->hasMany(Shift::class);
     }
 }

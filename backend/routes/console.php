@@ -30,3 +30,14 @@ Schedule::command('shifts:close-due')
     ->onOneServer()
     ->withoutOverlapping()
     ->description('End shifts past their scheduled close, awaiting readings');
+
+// The other half: a shift whose hours have begun and which nobody opened. The
+// shifts an admin sets out are the shifts the station runs, so the system opens
+// them rather than waiting to be told, and the supervisor takes the one already
+// running. Starting by hand still works, and remains the only way at a station
+// with no pattern set.
+Schedule::command('shifts:open-due')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping()
+    ->description("Open each station's scheduled shift when its hours begin");

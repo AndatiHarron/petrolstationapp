@@ -7,8 +7,8 @@ use App\Models\Shift;
 use App\Models\ShiftSchedule;
 use App\Models\Station;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Carbon;
 
 /**
  * Which scheduled shift is running, and whether it may be closed yet.
@@ -23,7 +23,7 @@ class ShiftScheduleService
      * the feature is opt-in per station, and a station mid-setup must still be
      * able to work.
      *
-     * @return array{schedule: ShiftSchedule|null, ends_at: Carbon|null}
+     * @return array{schedule: ShiftSchedule|null, starts_at: Carbon|null, ends_at: Carbon|null}
      */
     public function resolve(Station $station, ?CarbonInterface $moment = null): array
     {
@@ -37,14 +37,18 @@ class ShiftScheduleService
             ->get();
 
         foreach ($schedules as $schedule) {
-            $endsAt = $schedule->endFor($moment, $timezone);
+            $window = $schedule->windowFor($moment, $timezone);
 
-            if ($endsAt !== null) {
-                return ['schedule' => $schedule, 'ends_at' => $endsAt];
+            if ($window !== null) {
+                return [
+                    'schedule' => $schedule,
+                    'starts_at' => $window['starts_at'],
+                    'ends_at' => $window['ends_at'],
+                ];
             }
         }
 
-        return ['schedule' => null, 'ends_at' => null];
+        return ['schedule' => null, 'starts_at' => null, 'ends_at' => null];
     }
 
     /**

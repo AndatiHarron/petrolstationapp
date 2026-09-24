@@ -7,7 +7,6 @@ use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 
 class ProductController extends Controller
@@ -71,7 +70,7 @@ class ProductController extends Controller
         if ($product->tanks()->exists()) {
             return response()->json([
                 'message' => 'Cannot delete product associated with active tanks.',
-                'errors' => ['id' => ['This product is in use by one or more tanks.']]
+                'errors' => ['id' => ['This product is in use by one or more tanks.']],
             ], 422);
         }
 

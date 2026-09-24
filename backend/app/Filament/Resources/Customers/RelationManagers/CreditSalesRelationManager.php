@@ -2,14 +2,6 @@
 
 namespace App\Filament\Resources\Customers\RelationManagers;
 
-use Filament\Actions\AssociateAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -25,15 +17,15 @@ class CreditSalesRelationManager extends RelationManager
         return true;
     }
 
-//    public function form(Schema $schema): Schema
-//    {
-//        return $schema
-//            ->components([
-//                TextInput::make('amount')
-//                    ->required()
-//                    ->maxLength(255),
-//            ]);
-//    }
+    //    public function form(Schema $schema): Schema
+    //    {
+    //        return $schema
+    //            ->components([
+    //                TextInput::make('amount')
+    //                    ->required()
+    //                    ->maxLength(255),
+    //            ]);
+    //    }
 
     public function table(Table $table): Table
     {
@@ -46,19 +38,19 @@ class CreditSalesRelationManager extends RelationManager
                     ->sortable(),
 
                 TextColumn::make('amount')
-                ->money('KES')
-                ->weight('bold'),
+                    ->money('KES')
+                    ->weight('bold'),
 
                 TextColumn::make('vehicle_reg')
-                ->label('Vehicle Registration'),
+                    ->label('Vehicle Registration'),
 
                 TextColumn::make('shift.status')
-                ->badge()
-                ->color(fn (string $state): string => match ($state) {
-                    'LOCKED' => 'warning',
-                    'APPROVED' => 'success',
-                    default => 'gray'
-                })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'LOCKED' => 'warning',
+                        'APPROVED' => 'success',
+                        default => 'gray'
+                    }),
             ])
             ->headerActions([]);
     }

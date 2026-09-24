@@ -24,7 +24,6 @@ class GeneratePostmanData extends Command
     /**
      * Execute the console command.
      */
-
     public function handle()
     {
         $count = $this->argument('count');
@@ -32,6 +31,7 @@ class GeneratePostmanData extends Command
 
         if ($stations->isEmpty()) {
             $this->error('No stations found. Run seeders first.');
+
             return;
         }
 
@@ -48,7 +48,7 @@ class GeneratePostmanData extends Command
             'volume_liters',
             'buying_price_per_liter',
             'total_cost',
-            'tax_paid'
+            'tax_paid',
         ]);
 
         $bar = $this->output->createProgressBar($count);
@@ -57,7 +57,9 @@ class GeneratePostmanData extends Command
             // 2. Logic: Pick a random station that actually HAS tanks
             $station = $stations->where('tanks', '!=', [])->random();
 
-            if (!$station->tanks->count()) continue;
+            if (! $station->tanks->count()) {
+                continue;
+            }
 
             // 3. Logic: Pick a valid Tank for that Station
             $tank = $station->tanks->random();
@@ -69,11 +71,11 @@ class GeneratePostmanData extends Command
                 $station->id,
                 $tank->id,
                 now()->subDays(rand(0, 30))->format('Y-m-d'),
-                'INV-' . strtoupper(uniqid()),
+                'INV-'.strtoupper(uniqid()),
                 $volume,
                 $price,
                 $volume * $price, // Total Cost calculation
-                rand(0, 500)      // Tax
+                rand(0, 500),      // Tax
             ]);
 
             $bar->advance();

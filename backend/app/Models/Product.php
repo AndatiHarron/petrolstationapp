@@ -14,8 +14,8 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Product extends Model
 {
     use BelongsToOrganization;
-    use HasUuids;
     use HasFactory;
+    use HasUuids;
     use LogsActivity;
 
     public $incrementing = false;
@@ -36,7 +36,8 @@ class Product extends Model
         return $this->belongsTo(Organization::class);
     }
 
-    public function tanks(): HasMany {
+    public function tanks(): HasMany
+    {
         return $this->hasMany(Tank::class);
     }
 }

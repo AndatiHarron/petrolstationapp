@@ -376,7 +376,7 @@ class ReportController extends Controller
 
     private function builder(): ReportBuilder
     {
-        return new ReportBuilder();
+        return new ReportBuilder;
     }
 
     private function periodLabel(ReportFilterRequest $request): string

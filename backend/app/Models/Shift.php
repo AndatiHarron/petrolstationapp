@@ -102,6 +102,7 @@ class Shift extends Model
         'started_at' => 'datetime',
         'locked_at' => 'datetime',
         'auto_closed_at' => 'datetime',
+        'auto_started_at' => 'datetime',
         'scheduled_end_at' => 'datetime',
     ];
 

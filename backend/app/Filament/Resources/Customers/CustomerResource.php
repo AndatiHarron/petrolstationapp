@@ -6,8 +6,6 @@ use App\Filament\Resources\Customers\Pages\CreateCustomer;
 use App\Filament\Resources\Customers\Pages\EditCustomer;
 use App\Filament\Resources\Customers\Pages\ListCustomers;
 use App\Filament\Resources\Customers\RelationManagers\CreditSalesRelationManager;
-use App\Filament\Resources\Customers\Schemas\CustomerForm;
-use App\Filament\Resources\Customers\Tables\CustomersTable;
 use App\Models\Customer;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -79,25 +77,25 @@ class CustomerResource extends Resource
                     ->money('KES')
                     ->sortable()
                     ->weight('bold')
-                    ->color(fn(string $state): string => $state >  0 ? 'danger' : ($state < 0 ? 'success' : 'gray')),
+                    ->color(fn (string $state): string => $state > 0 ? 'danger' : ($state < 0 ? 'success' : 'gray')),
 
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Filter::make('has_debt')
-                ->query(fn ($query) => $query->where('current_balance', '>', 0))
-                ->label('Has Debt')
+                    ->query(fn ($query) => $query->where('current_balance', '>', 0))
+                    ->label('Has Debt'),
             ])
             ->recordActions([
                 EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                ])
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 

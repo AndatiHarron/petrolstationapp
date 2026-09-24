@@ -101,8 +101,6 @@ class User extends Authenticatable implements FilamentUser
 
     /**
      * Resolve an alias to the role actually held.
-     *
-     * @param  mixed  $roles
      */
     protected static function canonicalRole(mixed $roles): mixed
     {

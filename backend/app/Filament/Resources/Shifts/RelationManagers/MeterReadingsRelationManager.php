@@ -43,13 +43,13 @@ class MeterReadingsRelationManager extends RelationManager
                 // a hardcoded local disk — which showed broken images as soon
                 // as evidence moved to object storage.
                 ImageColumn::make('evidence_url')
-                ->label('Proof')
-                ->circular(),
+                    ->label('Proof')
+                    ->circular(),
 
                 TextColumn::make('opening_reading'),
                 TextColumn::make('closing_reading'),
                 TextColumn::make('volume_sold')->label('Liters'),
-                TextColumn::make('total_value')->money('KES')
+                TextColumn::make('total_value')->money('KES'),
             ])
             ->filters([
                 //

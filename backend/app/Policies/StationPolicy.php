@@ -2,10 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\Station;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Auth\Access\Response;
 
 class StationPolicy
 {
@@ -16,7 +14,7 @@ class StationPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['super-admin','admin']);
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 
     /**
@@ -24,7 +22,7 @@ class StationPolicy
      */
     public function view(User $user, $model): bool
     {
-        return $user->hasAnyRole(['super-admin','admin']);
+        return $user->hasAnyRole(['super-admin', 'admin']);
     }
 
     /**

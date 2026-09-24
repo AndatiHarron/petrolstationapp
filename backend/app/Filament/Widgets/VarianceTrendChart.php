@@ -4,15 +4,16 @@ namespace App\Filament\Widgets;
 
 use App\Models\Shift;
 use Filament\Widgets\ChartWidget;
+use Flowframe\Trend\Trend;
 use Flowframe\Trend\TrendValue;
 use Illuminate\Support\Facades\Auth;
-use Flowframe\Trend\Trend;
 
 class VarianceTrendChart extends ChartWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int|string|array $columnSpan = 'full';
 
     protected ?string $heading = 'Cash Variance Trend (Last 7 days)';
+
     protected static ?int $sort = 2;
 
     public static function canView(): bool

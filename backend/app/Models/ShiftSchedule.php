@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use App\Traits\BelongsToOrganization;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
-use Carbon\CarbonInterface;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -72,13 +72,31 @@ class ShiftSchedule extends Model
      */
     public function endFor(CarbonInterface $moment, string $timezone): ?Carbon
     {
+        return $this->windowFor($moment, $timezone)['ends_at'] ?? null;
+    }
+
+    /**
+     * The occurrence of this shift that contains `$moment`, as real instants.
+     *
+     * Returns null when `$moment` falls outside this schedule's hours. The
+     * start matters as much as the end now that a shift can open on its own:
+     * one that does is dated to the hour it was meant to begin, not to whenever
+     * the scheduler happened to run.
+     *
+     * @return array{starts_at: Carbon, ends_at: Carbon}|null
+     */
+    public function windowFor(CarbonInterface $moment, string $timezone): ?array
+    {
         $local = Carbon::parse($moment)->setTimezone($timezone);
 
         foreach ($this->windowsAround($local) as [$start, $end]) {
             // Half-open: a moment exactly on the end belongs to the next shift,
             // or a handover at 14:00 would match both.
             if ($local->greaterThanOrEqualTo($start) && $local->lessThan($end)) {
-                return $end->copy()->utc();
+                return [
+                    'starts_at' => $start->copy()->utc(),
+                    'ends_at' => $end->copy()->utc(),
+                ];
             }
         }
 

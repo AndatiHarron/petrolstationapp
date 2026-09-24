@@ -26,6 +26,10 @@ class ShiftResource extends JsonResource
             // owing the figures nobody was there to take.
             'awaiting_readings' => $this->status === \App\Models\Shift::STATUS_PENDING_READINGS,
             'auto_closed_at' => $this->auto_closed_at?->toIso8601String(),
+            // Opened because its hours began rather than because somebody
+            // said so, and not yet taken by anyone.
+            'auto_started_at' => $this->auto_started_at?->toIso8601String(),
+            'unclaimed' => $this->started_by_user_id === null,
             'schedule_name' => $this->schedule?->name,
             'status' => $this->status,
             'variance_alert' => $this->cash_variance < 0 || $this->stock_variance_liters < 0,
