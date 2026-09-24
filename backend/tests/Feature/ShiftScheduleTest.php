@@ -220,6 +220,71 @@ test('a shift with no scheduled end can be closed whenever', function () {
     postJson("/api/v1/shifts/{$shift->id}/lock", closingPayload())->assertOk();
 });
 
+test('the rule reaches a shift that was already open when the pattern was set', function () {
+    // Every open shift on the day this feature arrives looks like this: no
+    // scheduled end, because there was no pattern when it started. Without
+    // resolving one at close time the rule would appear not to work at all.
+    $shift = Shift::factory()->create([
+        'organization_id' => $this->station->organization_id,
+        'station_id' => $this->station->id,
+        'started_by_user_id' => $this->manager->id,
+        'status' => 'OPEN',
+        'started_at' => now()->setTimezone('Africa/Nairobi')->setTime(7, 0)->utc(),
+        'scheduled_end_at' => null,
+    ]);
+
+    makeSchedule(['name' => 'Morning', 'starts_at' => '06:00', 'ends_at' => '14:00']);
+
+    // Now is 08:00 in Nairobi — well inside a shift that ends at 14:00.
+    Carbon::setTestNow(Carbon::now()->setTimezone('Africa/Nairobi')->setTime(8, 0)->utc());
+
+    actingAs($this->manager);
+    $response = postJson("/api/v1/shifts/{$shift->id}/lock", closingPayload());
+
+    $response->assertStatus(422);
+    expect($response->json('error'))->toBe('shift_not_due');
+
+    // And the resolved end is written back, so it is settled from here on.
+    expect($shift->fresh()->scheduled_end_at)->not->toBeNull();
+
+    Carbon::setTestNow();
+});
+
+test('a stale shift left open all day can still be closed', function () {
+    // Resolved against when it opened, not when it is being closed — or a
+    // shift forgotten since the morning would be judged against the evening
+    // window and could never be closed at all.
+    $shift = Shift::factory()->create([
+        'organization_id' => $this->station->organization_id,
+        'station_id' => $this->station->id,
+        'started_by_user_id' => $this->manager->id,
+        'status' => 'OPEN',
+        'started_at' => now()->setTimezone('Africa/Nairobi')->setTime(7, 0)->utc(),
+        'scheduled_end_at' => null,
+    ]);
+
+    makeSchedule(['name' => 'Morning', 'starts_at' => '06:00', 'ends_at' => '14:00']);
+    makeSchedule(['name' => 'Evening', 'starts_at' => '14:00', 'ends_at' => '22:00', 'position' => 1]);
+
+    // 20:00 — long past the morning shift it belongs to.
+    Carbon::setTestNow(Carbon::now()->setTimezone('Africa/Nairobi')->setTime(20, 0)->utc());
+
+    actingAs($this->manager);
+    postJson("/api/v1/shifts/{$shift->id}/lock", closingPayload())->assertOk();
+
+    Carbon::setTestNow();
+});
+
+test('the app is told which shift is being worked', function () {
+    makeSchedule(['name' => 'Morning', 'starts_at' => '00:00', 'ends_at' => '23:59']);
+
+    actingAs($this->manager);
+    $started = postJson('/api/v1/shifts/start')->assertSuccessful();
+
+    expect($started->json('data.schedule_name'))->toBe('Morning')
+        ->and($started->json('data.scheduled_end_at'))->not->toBeNull();
+});
+
 // ── Asking for help from the sign-in screen ───────────────────────────
 
 test('anyone stuck at sign-in can ask for help, and the owners are told', function () {

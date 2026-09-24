@@ -35,7 +35,7 @@ class ShiftController extends Controller
     {
         Gate::authorize('viewAny', Shift::class);
 
-        $query = Shift::with(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
+        $query = Shift::with(['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
 
         if (Auth::user()->hasRole('manager') && Auth::user()->station_id) {
             $query->where('station_id', Auth::user()->station_id);
@@ -59,7 +59,7 @@ class ShiftController extends Controller
     {
         $shift = Shift::where('started_by_user_id', Auth::id())
             ->where('status', 'OPEN')
-            ->with(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer'])
+            ->with(['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer'])
             ->first();
 
         if (! $shift) {
@@ -90,7 +90,7 @@ class ShiftController extends Controller
             ->first();
 
         if ($existing) {
-            $existing->load(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
+            $existing->load(['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
 
             return new ShiftResource($existing);
         }
@@ -130,7 +130,7 @@ class ShiftController extends Controller
             'scheduled_end_at' => $scheduled['ends_at'],
         ]);
 
-        $shift->load(['station', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
+        $shift->load(['station', 'schedule', 'meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
 
         return new ShiftResource($shift);
     }
@@ -256,7 +256,7 @@ class ShiftController extends Controller
                 $payments
             );
 
-            $updatedShift->load(['meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer']);
+            $updatedShift->load(['meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer', 'schedule']);
 
             return new ShiftResource($updatedShift);
 
@@ -294,7 +294,7 @@ class ShiftController extends Controller
     {
         Gate::authorize('view', $shift);
 
-        $shift->load(['meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer', 'station']);
+        $shift->load(['meterReadings.nozzle', 'dipReadings.tank', 'payments', 'creditSales.customer', 'station', 'schedule']);
 
         return new ShiftResource($shift);
     }

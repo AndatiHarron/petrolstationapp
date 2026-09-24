@@ -48,16 +48,59 @@ class ShiftScheduleService
     }
 
     /**
+     * When a shift is due to end.
+     *
+     * Normally this was settled when the shift opened. It will not have been
+     * for a shift that was already running when the admin first set the
+     * station's pattern — and that is every open shift on the day the feature
+     * arrives, so without this the rule would appear not to work at all until
+     * the next shift started.
+     *
+     * Resolved against the moment the shift *opened*, not the moment it is
+     * being closed. A stale shift left open since the morning would otherwise
+     * be judged against whichever window the evening falls in and could not be
+     * closed at all.
+     */
+    public function scheduledEnd(Shift $shift): ?Carbon
+    {
+        if ($shift->scheduled_end_at) {
+            return Carbon::parse($shift->scheduled_end_at);
+        }
+
+        $station = $shift->station;
+
+        if (! $station) {
+            return null;
+        }
+
+        $resolved = $this->resolve($station, Carbon::parse($shift->started_at));
+
+        if ($resolved['ends_at'] === null) {
+            return null;
+        }
+
+        // Written back, so the shift and every later reading of it agree, and
+        // the work is not repeated on each request.
+        $shift->forceFill([
+            'shift_schedule_id' => $resolved['schedule']?->id,
+            'scheduled_end_at' => $resolved['ends_at'],
+        ])->saveQuietly();
+
+        return $resolved['ends_at'];
+    }
+
+    /**
      * The earliest a shift may be closed.
      */
     public function earliestClose(Shift $shift): ?Carbon
     {
-        if (! $shift->scheduled_end_at) {
+        $endsAt = $this->scheduledEnd($shift);
+
+        if (! $endsAt) {
             return null;
         }
 
-        return Carbon::parse($shift->scheduled_end_at)
-            ->subMinutes(ShiftSchedule::EARLY_CLOSE_GRACE_MINUTES);
+        return $endsAt->copy()->subMinutes(ShiftSchedule::EARLY_CLOSE_GRACE_MINUTES);
     }
 
     /**
@@ -89,7 +132,7 @@ class ShiftScheduleService
         $station = $shift->station;
         $timezone = $station?->timezone ?: config('app.timezone', 'UTC');
 
-        $closesAt = Carbon::parse($shift->scheduled_end_at)->setTimezone($timezone)->format('H:i');
+        $closesAt = $this->scheduledEnd($shift)?->setTimezone($timezone)->format('H:i') ?? '';
         $opensAt = $earliest->copy()->setTimezone($timezone)->format('H:i');
 
         throw new ShiftReconciliationException(
