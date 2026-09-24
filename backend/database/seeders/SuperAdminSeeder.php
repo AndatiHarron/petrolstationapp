@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -20,14 +19,6 @@ class SuperAdminSeeder extends Seeder
         $configuredPassword = config('services.super_admin.password');
         $rawPassword = $configuredPassword ?? Str::random(16);
 
-        $org = Organization::firstOrCreate(
-            ['name' => 'Octane Hq'],
-            [
-                'slug' => 'octane-hq',
-                'status' => 'active',
-            ]
-        );
-
         $role = Role::firstOrCreate([
             'name' => 'super-admin',
             'guard_name' => 'web',
@@ -41,10 +32,16 @@ class SuperAdminSeeder extends Seeder
         // system with a value from an old environment variable.
         $user = $existing ?? new User(['email' => $email]);
 
+        // A platform administrator belongs to no organization: they are above
+        // every tenant, not a member of one. There used to be an "Octane Hq"
+        // organization created here purely to have something to point at, and
+        // it turned up in the panel as a tenant like any other. An existing
+        // account's organization is left alone rather than nulled, so this
+        // running again never quietly moves somebody.
         $user->fill([
             'name' => $existing?->name ?? 'System Administrator',
-            'organization_id' => $org->id,
-            'station_id' => null,
+            'organization_id' => $existing?->organization_id,
+            'station_id' => $existing?->station_id,
             'email_verified_at' => $existing?->email_verified_at ?? now(),
         ]);
 
