@@ -22,6 +22,10 @@ class ShiftResource extends JsonResource
             // Null where the station has not set a shift pattern, which
             // the app reads as "no scheduled end" rather than as missing.
             'scheduled_end_at' => $this->scheduled_end_at?->toIso8601String(),
+            // Closed by the system rather than by a person, and still
+            // owing the figures nobody was there to take.
+            'awaiting_readings' => $this->status === \App\Models\Shift::STATUS_PENDING_READINGS,
+            'auto_closed_at' => $this->auto_closed_at?->toIso8601String(),
             'schedule_name' => $this->schedule?->name,
             'status' => $this->status,
             'variance_alert' => $this->cash_variance < 0 || $this->stock_variance_liters < 0,

@@ -21,6 +21,17 @@ class Shift extends Model
 
     public const STATUS_OPEN = 'OPEN';
 
+    /**
+     * Ended at its scheduled time with no readings taken.
+     *
+     * Not OPEN, because the hours it covers are over and nothing more should
+     * be sold against it. Not LOCKED, because nothing has been reconciled —
+     * there are no meters, no dips and no takings, and none of them may be
+     * guessed. It is a shift waiting for the figures somebody still has to
+     * enter.
+     */
+    public const STATUS_PENDING_READINGS = 'PENDING_READINGS';
+
     public const STATUS_LOCKED = 'LOCKED';
 
     public const STATUS_APPROVED = 'APPROVED';
@@ -90,6 +101,7 @@ class Shift extends Model
         'stock_variance_liters' => 'float',
         'started_at' => 'datetime',
         'locked_at' => 'datetime',
+        'auto_closed_at' => 'datetime',
         'scheduled_end_at' => 'datetime',
     ];
 

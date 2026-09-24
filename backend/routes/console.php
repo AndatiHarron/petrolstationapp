@@ -20,3 +20,13 @@ Schedule::command('backup:run')
     ->onOneServer()
     ->withoutOverlapping()
     ->description('Snapshot the database to object storage');
+
+// A shift whose hours are over but which nobody closed. Checked every five
+// minutes rather than every minute: the grace period inside the command is
+// fifteen, so a finer cadence would only add wake-ups without closing anything
+// sooner.
+Schedule::command('shifts:close-due')
+    ->everyFiveMinutes()
+    ->onOneServer()
+    ->withoutOverlapping()
+    ->description('End shifts past their scheduled close, awaiting readings');

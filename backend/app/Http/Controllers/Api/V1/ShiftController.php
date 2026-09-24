@@ -72,6 +72,30 @@ class ShiftController extends Controller
     }
 
     /**
+     * Shifts that ended without their readings.
+     *
+     * A supervisor sees their own station's; an admin sees every station they
+     * oversee, because the supervisor who left one behind may not be back for
+     * days and somebody has to be able to finish it.
+     */
+    public function awaitingReadings(Request $request)
+    {
+        $query = Shift::where('status', Shift::STATUS_PENDING_READINGS)
+            ->with(['station', 'schedule', 'startedBy:id,name']);
+
+        if (Auth::user()->hasRole('manager') && Auth::user()->station_id) {
+            $query->where('station_id', Auth::user()->station_id);
+        }
+
+        $query->when(
+            $this->requestedStationId($request),
+            fn ($q, $stationId) => $q->where('station_id', $stationId)
+        );
+
+        return ShiftResource::collection($query->orderBy('started_at')->get());
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -102,6 +126,29 @@ class ShiftController extends Controller
             return response()->json([
                 'message' => 'User is not assigned to a station.',
             ], 400);
+        }
+
+        // A shift that ended without readings has to be finished before
+        // another starts.
+        //
+        // Not an arbitrary rule: every shift opens on the reading the last one
+        // closed with, and a shift with no closing reading has not moved the
+        // nozzle. Starting the next one anyway would open it on a figure the
+        // previous shift is still going to change, and the chain the whole
+        // system rests on would be broken from that point on.
+        $awaiting = Shift::where('station_id', $stationId)
+            ->where('status', Shift::STATUS_PENDING_READINGS)
+            ->orderBy('started_at')
+            ->first();
+
+        if ($awaiting) {
+            return response()->json([
+                'error' => 'shift_awaiting_readings',
+                'message' => "Shift {$awaiting->shift_number} ended without its readings. "
+                    .'Enter them before starting a new shift — every shift opens on the reading '
+                    .'the last one closed with.',
+                'shift_id' => $awaiting->id,
+            ], 422);
         }
 
         $hasNozzles = Nozzle::where('station_id', $stationId)->exists();
@@ -164,7 +211,17 @@ class ShiftController extends Controller
      */
     public function lock(LockShiftRequest $request, Shift $shift)
     {
-        if ($shift->started_by_user_id != Auth::id()) {
+        // Normally only the person who opened a shift closes it. A shift the
+        // system closed for them is the exception: whoever opened it may well
+        // have gone home, which is why it was closed automatically in the first
+        // place, so anyone at the station — or an admin — can supply the
+        // readings it is waiting for.
+        $isAwaitingReadings = $shift->status === Shift::STATUS_PENDING_READINGS;
+        $mayFinishForAnother = $isAwaitingReadings
+            && (Auth::user()->hasAnyRole(['admin', 'super-admin'])
+                || Auth::user()->station_id === $shift->station_id);
+
+        if ($shift->started_by_user_id != Auth::id() && ! $mayFinishForAnother) {
             abort(403, 'Unauthorized action.');
         }
 

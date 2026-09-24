@@ -85,6 +85,9 @@ Route::middleware(['auth:sanctum', 'organization.active', 'agreement.accepted', 
 
     Route::get('/shifts', [ShiftController::class, 'index']);
     Route::get('/shifts/current', [ShiftController::class, 'current']);
+    // Declared before /shifts/{shift}, or the literal path is swallowed by
+    // the wildcard and read as a shift id.
+    Route::get('/shifts/awaiting-readings', [ShiftController::class, 'awaitingReadings']);
     Route::get('/shifts/{shift}', [ShiftController::class, 'show']);
     Route::post('/shifts/start', [ShiftController::class, 'store']);
     Route::post('/shifts/{shift}/lock', [ShiftController::class, 'lock']);
